@@ -2,27 +2,9 @@
 
 This is a blockly based IDE for iCOMpadre.
 
-## usage
+## deployment
 
 Copy the web folder onto the SD card of iCOMpadre. Thats it.
-
-
-## datasheets and manuals
-
-### Blockly
-
-* Getting started https://developers.google.com/blockly/guides/get-started/web
-* Block Factory: https://blockly-demo.appspot.com/static/demos/blockfactory/index.html
-
-### File Saving
-
-* File saving is done via https://github.com/eligrey/FileSaver.js/tree/master/src
-
-### others
-
-* Debugging of the webapp can be done with the python builtin webserver `/web$ python -m SimpleHTTPServer 8000`
-* HF Bandplan: https://oevsv.at/funkbetrieb/amateurfunkfrequenzen/hf-referat/
-
 
 
 # Developing programs
@@ -96,6 +78,59 @@ Returns the voltage which is present on the selected pin.
 ### voltage
 
 This is a convinience block, just to make programs look better and easier to understand. It translates a given number and a voltage postfix to its base unit [V]. 
+
+
+# developing 
+
+## file structure
+
+The IDE is held minimalistic, because it will be served from a microcontroller. The file structure looks like this
+
+````
+web/
+├── addon.js
+├── base.js
+├── blockly
+│   ├── blockly_compressed.js
+│   ├── blocks_compressed.js
+│   ├── en.js
+│   ├── lua_compressed.js
+│   └── sprites.png
+├── favicon.ico
+├── filesaver.js
+├── img
+│   ├── export.svg
+│   ├── open.svg
+│   └── run.svg
+├── index.html
+└── radio.js
+````
+
+* index.html is the starting point of the application. It sets up the workspace and loads blockly.
+* the blockly subdirectory contains a minimal version of blockly with an english translation. It is necessary to be able to compile the scripts to lua.
+* filesaver.js is the library which allows the users to download data to their harddrive
+* img is the directory with all the images needed by the application. Currently it is needed to store the icons which are desplayed top right.
+* *.js files store the blocks which are representing the main functionality of iCOMpadre-studio
+	- base.js contains the blocks which represent the low-level functions provided by the lua engine of iCOMpadre.
+	- radio.js should represent the radio(s) features.
+	- addon.js represent special features for addon boards.
+
+
+## datasheets and manuals
+
+### Blockly
+
+* Getting started https://developers.google.com/blockly/guides/get-started/web
+* Block Factory: https://blockly-demo.appspot.com/static/demos/blockfactory/index.html
+
+### File Saving
+
+* File saving is done via https://github.com/eligrey/FileSaver.js/tree/master/src
+
+### others
+
+* Debugging of the webapp can be done with the python builtin webserver `/web$ python -m SimpleHTTPServer 8000`
+* HF Bandplan: https://oevsv.at/funkbetrieb/amateurfunkfrequenzen/hf-referat/
 
 
 
