@@ -75,7 +75,7 @@
                  
                 <span class="action" id="fileDropZone" title="Load a sketch from disk"><label for="file-input" accept=".json"><img id="open" src="img/open.svg"></label><input type="file" id="file-input" onchange="openFile(event)"/></span>
                 <span class="action" title="Save the current sketch to disk"><img id="export" src="img/export.svg"></span>
-                <span class="action" id="fileDropZone" title="Switch back to run mode and run the sketch"><img id="run" src="img/run.svg"></span>
+                <span class="action" id="fileDropZone" title="Switch back to run mode and run the sketch" onclick="saveWorkspace()"><img id="run" src="img/run.svg"></span>
             </div>            
     </td>
 
@@ -156,10 +156,8 @@
     
     // global utility functions to be used throughout the following scripts
     utilityfunctions = 
-    {
-     
+    {   
         // pretty prints a lua array
-        
         "pretty" : [ "function pretty(tbl) {",
                      "  hex = {}",
                      "  for i, name in ipairs(tbl) do",
@@ -242,7 +240,36 @@
     window.addEventListener('resize', onresize, false);
     onresize();
 
-     // ----------------import program or workspace --------------------
+    // Load the latest
+
+    function loadFromServer()
+    {
+      fetch('../icompadre.json')
+        .then(
+          function(response) {
+            if (response.status !== 200) {
+              console.log('Looks like there was a problem. Status Code: ' +
+                response.status);
+              return;
+            }
+
+            // Examine the text in the response
+            response.json().then(function(data) 
+            {
+              Blockly.serialization.workspaces.load(data, icompadreWorkspace);
+            });
+          }
+        )
+        .catch(function(err) {
+          console.log('Fetch Error :-S', err);
+        });
+
+      
+    }
+
+    loadFromServer()
+    
+    // ----------------import program or workspace --------------------
      function showFileInWorkspace(aFile)
      {
         var reader = new FileReader();
@@ -293,24 +320,60 @@
     });
 
     // ------------- UI Functions -----------------
-    function exportLua() 
+    // generate a blob for the lua file
+    function getLuaBlob()
     {
-        var luaScript = Blockly.Lua.workspaceToCode(icompadreWorkspace);
-        var blob = new Blob([luaScript], {
-            type: "application/x-lua"
-        });
-        saveAs(blob, "icompadre.lua");
+      var luaScript = Blockly.Lua.workspaceToCode(icompadreWorkspace);
+      var blob = new Blob([luaScript], {
+          type: "application/x-lua"
+      });
+
+      return blob;
     }
 
+    // generate a blob for the sketch
+    function getSketchBlob()
+    {
+      var sketch = Blockly.serialization.workspaces.save(icompadreWorkspace);
+      var sketchString = JSON.stringify(sketch);
+      var blob = new Blob([sketchString], {
+          type: "application/json"
+      });
+
+      return blob;
+    }
+
+    // Export lua to Disk
+    function exportLua() 
+    {
+        saveAs(getLuaBlob(), "main.lua");
+    }
+
+    // Export sketch to Disk
     function exportSketch() 
     {
-        var sketch = Blockly.serialization.workspaces.save(icompadreWorkspace);
-        var sketchString = JSON.stringify(sketch);
-        var blob = new Blob([sketchString], {
-            type: "application/json"
-        });
-        saveAs(blob, "icompadre.json");
+        saveAs(getSketchBlob(), "icompadre.json");
     }
+
+
+    // Uploads a file to the microcontroller
+    async function storeFile(filename, content)
+    {
+      let formData = new FormData(); 
+      formData.append('blob', content, "/" + filename)
+      await fetch('/edit', {
+        method: "POST", 
+        body: formData
+      }); 
+    }
+
+    // Uploads the sketch and the lua file to the microcontroller
+    async function saveWorkspace() 
+    {
+      storeFile("main.lua", getLuaBlob());
+      storeFile("icompadre.json", getSketchBlob());
+    }
+
   </script>
   </body>
 </body>
