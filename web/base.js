@@ -255,7 +255,7 @@ Blockly.Blocks['readdata'] = {
 };
 Blockly.Lua['readdata'] = function(block) {
     var value_command = Blockly.Lua.valueToCode(block, 'commandsequence', Blockly.Lua.ORDER_ATOMIC);
-    var code = 'readResultOf(sendCommand(' + value_command + '))';
+    var code = 'readResultOfCommand(sendCommand(' + value_command + '))';
     return [code, Blockly.Lua.ORDER_NONE];
 };
 properties.push({"kind": "block",  "type": "readdata"})
