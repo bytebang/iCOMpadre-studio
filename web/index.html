@@ -203,6 +203,8 @@
     <!-- actions provided by the addon board -->
     <script src="addon.js"></script>
     <script>
+
+
     //---------------- Rendering of the workspace code -------------------
 
     var blocklyArea = document.getElementById('blocklyArea');
@@ -240,11 +242,10 @@
     window.addEventListener('resize', onresize, false);
     onresize();
 
-    // Load the latest
-
-    function loadFromServer()
+    // Load the latest project from the server
+    function openLastProjectFromServer()
     {
-      fetch('../icompadre.json')
+      fetch('/icompadre.json')
         .then(
           function(response) {
             if (response.status !== 200) {
@@ -262,11 +263,8 @@
         .catch(function(err) {
           // console.log('Fetch Error :-S', err);
         });
-
-      
     }
-
-    loadFromServer()
+    openLastProjectFromServer();
     
     // ----------------import program or workspace --------------------
      function showFileInWorkspace(aFile)
@@ -358,19 +356,17 @@
     // Uploads a file to the microcontroller
     async function storeFile(filename, content)
     {
-      let formData = new FormData(); 
-      formData.append('blob', content, "/" + filename)
-      await fetch('/edit', {
-        method: "POST", 
-        body: formData
+      await fetch(filename, {
+        method: "PUT", 
+        body: content
       }); 
     }
 
     // Uploads the sketch and the lua file to the microcontroller
     async function saveWorkspace() 
     {
-      storeFile("main.lua", getLuaBlob());
-      storeFile("icompadre.json", getSketchBlob());
+      storeFile("/main.lua", getLuaBlob());
+      storeFile("/icompadre.json", getSketchBlob());
     }
 
   </script>
