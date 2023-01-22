@@ -2,65 +2,13 @@
 <html>
 <head>
   <meta charset="utf-8">
-  <title>iCOMpadre</title>
+  <title>Loading iCOMpadre ...</title>
   <script src="./blockly/blockly_compressed.js"></script>
   <script src="./blockly/blocks_compressed.js"></script>
   <script src="./blockly/en.js"></script>
   <script src="./blockly/lua_compressed.js"></script>
   <script src="./filesaver.js"></script>
-  <style>
-    html, body {
-      height: 100%;
-      margin: 0;
-    }
-    body {
-      background-color: #fff;
-      font-family: sans-serif;
-      overflow: hidden;
-    }
-    h1 {
-      font-weight: normal;
-      font-size: 140%;
-    }
-    table {
-      height: 100%;
-      width: 100%;
-    }
-    #blocklyArea {
-      height: 99%;
-    }
-
-    .header
-    {
-        min-height: 15%;
-        display: table-cell;
-        vertical-align: middle;
-        float:none;
-
-    }
-
-    .branding
-    {
-        float:left;
-    }
-
-    .action{
-        margin-left: 10px;
-        float:right;
-        margin-right: 10px;
-        border-radius: 10px;
-        border: 2px dashed #4b2869;
-    }
-
-    .action img{
-      width: 50px;
-    }
-    
-    #file-input {
-      display: none;
-    }
-
-  </style>
+  <link rel="stylesheet" href="./studio.css">
 </head>
 <body>
   <table>
@@ -85,309 +33,310 @@
       </td>
     </tr>
   </table>
-
   <div id="blocklyDiv" style="position: absolute"></div>
+</body>
 
-  <script>
+<script>
    
-    // -------------- The toolbar -----------------
-    var toolbox = {
-            "kind": "categoryToolbox",
-            "contents": [
-            {
-                "kind": "category", "name": "Logic",
-                "contents": [
-                    {"kind": "block",  "type": "logic_compare"},
-                    {"kind": "block",  "type": "logic_operation"},
-                    {"kind": "block",  "type": "logic_boolean"},
-                    {"kind": "block",  "type": "logic_negate"},
-                ]
-            },
-            {"kind": "category", "name": "Control",
-                "contents": [
-                    {"kind": "BLOCK",  "type": "controls_if"},
-                    {"kind": "BLOCK",  "type": "logic_ternary"},
-                    {"kind": "BLOCK",  "type": "controls_forEach"},
-                    {"kind": "BLOCK",  "type": "controls_flow_statements"},
-                ]
-            },
-            {"kind": "category",  "name": "Math",
-                "contents": [
-                    {"kind": "BLOCK",  "type": "math_number"},
-                    {"kind": "BLOCK",  "type": "math_arithmetic"},
-                    {"kind": "BLOCK",  "type": "math_constrain"},
-                    {"kind": "BLOCK",  "type": "math_modulo"},
-                    {"kind": "BLOCK",  "type": "math_on_list"},
-                    {"kind": "BLOCK",  "type": "math_number_property"},
-                    {"kind": "BLOCK",  "type": "math_constant"},
-                    {"kind": "BLOCK",  "type": "math_single"},
-                ]
-            },
-            {"kind": "category",  "name": "Lists",
-                "contents": [
-                    {"kind": "BLOCK",  "type": "lists_create_with"},
-                    {"kind": "BLOCK",  "type": "lists_length"},
-                    {"kind": "BLOCK",  "type": "lists_isEmpty"},
-                    {"kind": "BLOCK",  "type": "lists_indexOf"},
-                    {"kind": "BLOCK",  "type": "lists_getIndex"},
-                    {"kind": "BLOCK",  "type": "lists_setIndex"},
-                    {"kind": "BLOCK",  "type": "lists_getSublist"},
-                    {"kind": "BLOCK",  "type": "lists_split"},
-                ]
-            },
-            {"kind": "category",  "name": "Text",
-                "contents": [
-                    {"kind": "BLOCK",  "type": "text"},
-                    {"kind": "BLOCK",  "type": "text_multiline"},
-                    {"kind": "BLOCK",  "type": "text_join"},
-                    {"kind": "BLOCK",  "type": "text_append"},
-                    {"kind": "BLOCK",  "type": "text_length"},
-                    {"kind": "BLOCK",  "type": "text_isEmpty"},
-                    {"kind": "BLOCK",  "type": "text_indexOf"},
-                    {"kind": "BLOCK",  "type": "text_count"},
-                    {"kind": "BLOCK",  "type": "text_replace"},
-                    {"kind": "BLOCK",  "type": "text_reverse"},
-                ]
-            },
-            {"kind": "category",  "name": "Variables",  "custom": "VARIABLE"},
-            {"kind": "category",  "name": "Functions",  "custom": "PROCEDURE"},
-        ]
-    }
-    
-    // global utility functions to be used throughout the following scripts
-    utilityfunctions = 
-    {   
-        // pretty prints a lua array
-        "pretty" : [ "function pretty(tbl)",
-                     "  hex = {}",
-                     "  for i, name in ipairs(tbl) do",
-                     "    hex[i] = string.format('0x%02x ', name)",
-                     "  end",
-                     "  return '{' .. table.concat(hex, ',') .. '}'",
-                     "end"],
-     
-        // maps a range of values onto another range
-        "map": [    "function map(x, in_min, in_max, out_min, out_max) ",
-                    "  return out_min + (x - in_min)*(out_max - out_min)/(in_max - in_min)",
-                    "end"],
-        
-        // generates a number from multiplebytes that represent a bcd number
-    	  "bcdAsNumber": [ 'function bcdAsNumber(tbl) ',
-                        "  value = ''",
-                        "  for i, name in ipairs(tbl) do",
-                        "    value = value .. string.format('%02x', name)",
-                        "  end",
-                        "  return tonumber(value);",
-                        "end" ],
-    }
+  // -------------- The toolbar -----------------
+  var toolbox = {
+          "kind": "categoryToolbox",
+          "contents": [
+          {
+              "kind": "category", "name": "Logic",
+              "contents": [
+                  {"kind": "block",  "type": "logic_compare"},
+                  {"kind": "block",  "type": "logic_operation"},
+                  {"kind": "block",  "type": "logic_boolean"},
+                  {"kind": "block",  "type": "logic_negate"},
+              ]
+          },
+          {"kind": "category", "name": "Control",
+              "contents": [
+                  {"kind": "BLOCK",  "type": "controls_if"},
+                  {"kind": "BLOCK",  "type": "logic_ternary"},
+                  {"kind": "BLOCK",  "type": "controls_forEach"},
+                  {"kind": "BLOCK",  "type": "controls_flow_statements"},
+              ]
+          },
+          {"kind": "category",  "name": "Math",
+              "contents": [
+                  {"kind": "BLOCK",  "type": "math_number"},
+                  {"kind": "BLOCK",  "type": "math_arithmetic"},
+                  {"kind": "BLOCK",  "type": "math_constrain"},
+                  {"kind": "BLOCK",  "type": "math_modulo"},
+                  {"kind": "BLOCK",  "type": "math_on_list"},
+                  {"kind": "BLOCK",  "type": "math_number_property"},
+                  {"kind": "BLOCK",  "type": "math_constant"},
+                  {"kind": "BLOCK",  "type": "math_single"},
+              ]
+          },
+          {"kind": "category",  "name": "Lists",
+              "contents": [
+                  {"kind": "BLOCK",  "type": "lists_create_with"},
+                  {"kind": "BLOCK",  "type": "lists_length"},
+                  {"kind": "BLOCK",  "type": "lists_isEmpty"},
+                  {"kind": "BLOCK",  "type": "lists_indexOf"},
+                  {"kind": "BLOCK",  "type": "lists_getIndex"},
+                  {"kind": "BLOCK",  "type": "lists_setIndex"},
+                  {"kind": "BLOCK",  "type": "lists_getSublist"},
+                  {"kind": "BLOCK",  "type": "lists_split"},
+              ]
+          },
+          {"kind": "category",  "name": "Text",
+              "contents": [
+                  {"kind": "BLOCK",  "type": "text"},
+                  {"kind": "BLOCK",  "type": "text_multiline"},
+                  {"kind": "BLOCK",  "type": "text_join"},
+                  {"kind": "BLOCK",  "type": "text_append"},
+                  {"kind": "BLOCK",  "type": "text_length"},
+                  {"kind": "BLOCK",  "type": "text_isEmpty"},
+                  {"kind": "BLOCK",  "type": "text_indexOf"},
+                  {"kind": "BLOCK",  "type": "text_count"},
+                  {"kind": "BLOCK",  "type": "text_replace"},
+                  {"kind": "BLOCK",  "type": "text_reverse"},
+              ]
+          },
+          {"kind": "category",  "name": "Variables",  "custom": "VARIABLE"},
+          {"kind": "category",  "name": "Functions",  "custom": "PROCEDURE"},
+      ]
+  }
+  
+  // global utility functions to be used throughout the following scripts
+  utilityfunctions = 
+  {   
+      // pretty prints a lua array
+      "pretty" : [ "function pretty(tbl)",
+                   "  hex = {}",
+                   "  for i, name in ipairs(tbl) do",
+                   "    hex[i] = string.format('0x%02x ', name)",
+                   "  end",
+                   "  return '{' .. table.concat(hex, ',') .. '}'",
+                   "end"],
+   
+      // maps a range of values onto another range
+      "map": [    "function map(x, in_min, in_max, out_min, out_max) ",
+                  "  return out_min + (x - in_min)*(out_max - out_min)/(in_max - in_min)",
+                  "end"],
+      
+      // generates a number from multiplebytes that represent a bcd number
+      "bcdAsNumber": [ 'function bcdAsNumber(tbl) ',
+                      "  value = ''",
+                      "  for i, name in ipairs(tbl) do",
+                      "    value = value .. string.format('%02x', name)",
+                      "  end",
+                      "  return tonumber(value);",
+                      "end" ],
+  }
 
-    // registers the function on the lua code code generator
-    // after this call you can use the function in your code
-    function use(funcnames)
-    {   
-    	if(Array.isArray(funcnames))
-    	{
-		// register functions     
-    		funcnames.forEach((funcname) => Blockly.Lua.provideFunction_(funcname, utilityfunctions[funcname]));
-    	}
-    	else
-    	{
-    		return Blockly.Lua.provideFunction_(funcnames, utilityfunctions[funcnames]);
-    	}
-    }
-    </script>
-    
-    <!-- actions for the radio -->
-    <script src="base.js"></script>
-
-    <!-- actions provided by the addon board -->
-    <script src="addon.js"></script>
-    <script>
-
-
-    //---------------- Rendering of the workspace code -------------------
-
-    var blocklyArea = document.getElementById('blocklyArea');
-    var blocklyDiv = document.getElementById('blocklyDiv');
-    var icompadreWorkspace = Blockly.inject(blocklyDiv,
-        {media: './blockly/',
-         sounds: false, 
-         toolbox: toolbox,
-         grid:
-         {spacing: 20,
-          length: 3,
-          colour: '#ccc',
-          snap: true}});
-
-
-    var onresize = function(e) {
-      // Compute the absolute coordinates and dimensions of blocklyArea.
-      var element = blocklyArea;
-      var x = 0;
-      var y = 0;
-      do {
-        x += element.offsetLeft;
-        y += element.offsetTop;
-        element = element.offsetParent;
-      } while (element);
-      // Position blocklyDiv over blocklyArea.
-      blocklyDiv.style.left = x + 'px';
-      blocklyDiv.style.top = y + 'px';
-      blocklyDiv.style.width = blocklyArea.offsetWidth + 'px';
-      blocklyDiv.style.height = blocklyArea.offsetHeight + 'px';
-      Blockly.svgResize(icompadreWorkspace);
-
-      console.log('resize');
-    };
-    window.addEventListener('resize', onresize, false);
-    onresize();
-
-    // Load the latest project from the server
-    function openLastProjectFromServer()
+  // registers the function on the lua code code generator
+  // after this call you can use the function in your code
+  function use(funcnames)
+  {   
+    // register functions 
+    if(Array.isArray(funcnames))
     {
-      fetch('/icompadre.json')
-        .then(
-          function(response) {
-            if (response.status !== 200) {
-              console.log('No previous workspace file found. Status ' + response.status);
-              return;
-            }
+      funcnames.forEach((funcname) => Blockly.Lua.provideFunction_(funcname, utilityfunctions[funcname]));
+    }
+    else
+    {
+      return Blockly.Lua.provideFunction_(funcnames, utilityfunctions[funcnames]);
+    }
+  }
+  </script>
+  
+  <!-- actions for the radio -->
+  <script src="base.js"></script>
 
-            // Examine the text in the response
-            response.json().then(function(data) 
-            {
-              Blockly.serialization.workspaces.load(data, icompadreWorkspace);
-            });
+  <!-- actions provided by the addon board -->
+  <script src="addon.js"></script>
+  <script>
+
+
+  //---------------- Rendering of the workspace code -------------------
+
+  var blocklyArea = document.getElementById('blocklyArea');
+  var blocklyDiv = document.getElementById('blocklyDiv');
+  var icompadreWorkspace = Blockly.inject(blocklyDiv,
+      {media: './blockly/',
+       sounds: false, 
+       toolbox: toolbox,
+       grid:
+       {spacing: 20,
+        length: 3,
+        colour: '#ccc',
+        snap: true}});
+
+
+  var onresize = function(e) {
+    // Compute the absolute coordinates and dimensions of blocklyArea.
+    var element = blocklyArea;
+    var x = 0;
+    var y = 0;
+    do {
+      x += element.offsetLeft;
+      y += element.offsetTop;
+      element = element.offsetParent;
+    } while (element);
+
+    // Position blocklyDiv over blocklyArea.
+    blocklyDiv.style.left = x + 'px';
+    blocklyDiv.style.top = y + 'px';
+    blocklyDiv.style.width = blocklyArea.offsetWidth + 'px';
+    blocklyDiv.style.height = blocklyArea.offsetHeight + 'px';
+    Blockly.svgResize(icompadreWorkspace);
+  }();
+
+  window.addEventListener('resize', onresize, false);
+
+  // Load the latest project from the server
+  function openLastProjectFromServer()
+  {
+    fetch('/icompadre.json')
+      .then(
+        function(response) {
+          if (response.status !== 200) {
+            console.log('No previous workspace file found. Status ' + response.status);
+            return;
           }
-        )
-        .catch(function(err) {
-          // console.log('Fetch Error :-S', err);
-        });
-    }
-    openLastProjectFromServer();
-    
-    // ----------------import program or workspace --------------------
-     function showFileInWorkspace(aFile)
-     {
-        var reader = new FileReader();
-        reader.onload = function(loadedEvent) 
-        {
-            // result contains loaded file.
-            console.log(loadedEvent.target.result);
-            Blockly.serialization.workspaces.load(JSON.parse(loadedEvent.target.result), icompadreWorkspace);
+
+          // Examine the text in the response
+          response.json().then(function(data) 
+          {
+            Blockly.serialization.workspaces.load(data, icompadreWorkspace);
+          });
         }
-        reader.readAsText(aFile);
-     }
-     
-     // Triggered when the user clicks the upload buttin
-     function openFile(event) 
-     {
-        showFileInWorkspace(event.target.files[0])
-     }
-     
-     // Triggered when the user drops onto the upload button
-     function drop(evt) 
-     {
-        evt.stopPropagation();
-        evt.preventDefault();
+      )
+      .catch(function(err) {
+        // console.log('Fetch Error :-S', err);
+      });
+  }
+  openLastProjectFromServer();
+  
+  // ----------------import program or workspace --------------------
+   function showFileInWorkspace(aFile)
+   {
+      var reader = new FileReader();
+      reader.onload = function(loadedEvent) 
+      {
+          // result contains loaded file.
+          console.log(loadedEvent.target.result);
+          Blockly.serialization.workspaces.load(JSON.parse(loadedEvent.target.result), icompadreWorkspace);
+      }
+      reader.readAsText(aFile);
+   }
+   
+   // Triggered when the user clicks the upload buttin
+   function openFile(event) 
+   {
+      showFileInWorkspace(event.target.files[0])
+   }
+   
+   // Triggered when the user drops onto the upload button
+   function drop(evt) 
+   {
+      evt.stopPropagation();
+      evt.preventDefault();
 
-        showFileInWorkspace(event.dataTransfer.files[0])
-     }
+      showFileInWorkspace(event.dataTransfer.files[0])
+   }
 
-    function dragOver(evt) 
-    {
-        evt.stopPropagation();
-        evt.preventDefault();
-        evt.dataTransfer.dropEffect = 'copy';
-    }
+  function dragOver(evt) 
+  {
+      evt.stopPropagation();
+      evt.preventDefault();
+      evt.dataTransfer.dropEffect = 'copy';
+  }
 
-    var dropZone = document.getElementById("fileDropZone");
-    dropZone.addEventListener("dragover", dragOver, false);
-    dropZone.addEventListener("drop"    , drop    , false);
+  var dropZone = document.getElementById("fileDropZone");
+  dropZone.addEventListener("dragover", dragOver, false);
+  dropZone.addEventListener("drop"    , drop    , false);
 
-    // -----------------export workspace--------------------
-    document.getElementById("export").addEventListener("click", function() {
-        if (window.event.ctrlKey) {
-            exportLua();
-        }
-        else
-        {
-            exportSketch();
-        }
+  // -----------------export workspace--------------------
+  document.getElementById("export").addEventListener("click", function() {
+      if (window.event.ctrlKey) {
+          exportLua();
+      }
+      else
+      {
+          exportSketch();
+      }
+  });
+
+  // ------------- UI Functions -----------------
+  // Blinks an element one  
+  function blink(elementid, color) 
+  {
+      var element = document.getElementById(elementid);
+      element.style.transition = "background-color 0.2s ease";
+      element.style.backgroundColor = color;
+
+      setTimeout(function() {
+            element.style.transition = "background-color 0.2s ease";
+            element.style.backgroundColor = "";
+      }, 200);
+  }
+  // generate a blob for the lua file
+  function getLuaBlob()
+  {
+    var luaScript = Blockly.Lua.workspaceToCode(icompadreWorkspace);
+    var blob = new Blob([luaScript], {
+        type: "application/x-lua"
     });
 
-    // ------------- UI Functions -----------------
-    // Blinks an element one  
-    function blink(elementid, color) 
-    {
-        var element = document.getElementById(elementid);
-        element.style.transition = "background-color 0.2s ease";
-        element.style.backgroundColor = color;
+    return blob;
+  }
 
-        setTimeout(function() {
-              element.style.transition = "background-color 0.2s ease";
-              element.style.backgroundColor = "";
-        }, 200);
-    }
-    // generate a blob for the lua file
-    function getLuaBlob()
-    {
-      var luaScript = Blockly.Lua.workspaceToCode(icompadreWorkspace);
-      var blob = new Blob([luaScript], {
-          type: "application/x-lua"
-      });
+  // generate a blob for the sketch
+  function getSketchBlob()
+  {
+    var sketch = Blockly.serialization.workspaces.save(icompadreWorkspace);
+    var sketchString = JSON.stringify(sketch);
+    var blob = new Blob([sketchString], {
+        type: "application/json"
+    });
 
-      return blob;
-    }
+    return blob;
+  }
 
-    // generate a blob for the sketch
-    function getSketchBlob()
-    {
-      var sketch = Blockly.serialization.workspaces.save(icompadreWorkspace);
-      var sketchString = JSON.stringify(sketch);
-      var blob = new Blob([sketchString], {
-          type: "application/json"
-      });
+  // Export lua to Disk
+  function exportLua() 
+  {
+      saveAs(getLuaBlob(), "main.lua");
+  }
 
-      return blob;
-    }
-
-    // Export lua to Disk
-    function exportLua() 
-    {
-        saveAs(getLuaBlob(), "main.lua");
-    }
-
-    // Export sketch to Disk
-    function exportSketch() 
-    {
-        saveAs(getSketchBlob(), "icompadre.json");
-    }
+  // Export sketch to Disk
+  function exportSketch() 
+  {
+      saveAs(getSketchBlob(), "icompadre.json");
+  }
 
 
-    // Uploads a file to the microcontroller
-    async function storeFile(filename, content)
-    {
-      await fetch(filename, {
-        method: "PUT", 
-        body: content
-      }).then(function (response) {
-        if (response.ok) {
-          blink("saveButton", "#90ee90"); // light green
-        } else {
-          blink("saveButton", "#ffcccb"); // light red
-        }
-      }); 
-    }
+  // Uploads a file to the microcontroller
+  async function storeFile(filename, content)
+  {
+    await fetch(filename, {
+      method: "PUT", 
+      body: content
+    }).then(function (response) {
+      if (response.ok) {
+        blink("saveButton", "#90ee90"); // light green
+      } else {
+        blink("saveButton", "#ffcccb"); // light red
+      }
+    }); 
+  }
 
-    // Uploads the sketch and the lua file to the microcontroller
-    async function saveWorkspace() 
-    {
-      storeFile("/main.lua", getLuaBlob());
-      storeFile("/icompadre.json", getSketchBlob());
-    }
+  // Uploads the sketch and the lua file to the microcontroller
+  async function saveWorkspace() 
+  {
+    storeFile("/main.lua", getLuaBlob());
+    storeFile("/icompadre.json", getSketchBlob());
+  }
 
-  </script>
-  </body>
-</body>
+  window.onload = function() 
+  {
+    document.title = "iCOMpadre";
+  };
+</script>
 </html>
