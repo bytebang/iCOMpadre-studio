@@ -355,7 +355,6 @@ Blockly.Lua['millis'] = function(block)
 properties.push({"kind": "block",  "type": "millis"})
 
 //-------------------------------------------------------------------
-
 Blockly.Blocks['touchvalue'] = {
     init: function() {
         this.jsonInit({
@@ -377,11 +376,44 @@ Blockly.Blocks['touchvalue'] = {
 Blockly.Lua['touchvalue'] = function(block) 
 {
     var desiredPin = Blockly.Lua.nameDB_.getName(block.getFieldValue('pinname'), Blockly.Names.NameType.VARIABLE);
-    var code = 'readAnalogInput(' + desiredPin + ')';
+    var code = 'readTouchInput(' + desiredPin + ')';
     return [code, Blockly.Lua.ORDER_RELATIONAL];
 };
 
 actions.push({"kind": "block",  "type": "touchvalue"})
+
+//-------------------------------------------------------------------
+Blockly.Blocks['isTouched'] = {
+    init: function() {
+        this.jsonInit({
+            "message0": "Is %1 %2 ?",
+            "args0": [
+                {   "type": "field_dropdown",
+                    "name": "pinname",
+                    "options": [["PIN C","PIN_C"],["PIN D","PIN_D"],["PIN E","PIN_E"],
+                                ["PIN F","PIN_F"],["PIN G","PIN_G"],["PIN H","PIN_H"]]
+                },      
+                {   "type": "field_dropdown",
+                    "name": "threshold",
+                    "options": [["touched","< 30"],["released",">= 30"]]
+                },                     
+            ],
+            "colour": 230,
+            });
+            this.setOutput(true, "Boolean");
+            this.setTooltip("Retruns true if a pin has been touched");
+        }
+    };
+
+Blockly.Lua['isTouched'] = function(block) 
+{
+    var desiredPin = Blockly.Lua.nameDB_.getName(block.getFieldValue('pinname'), Blockly.Names.NameType.VARIABLE);
+    var threshold =  block.getFieldValue('threshold');
+    var code = '(readTouchInput(' + desiredPin + ') ' + threshold + ')';
+    return [code, Blockly.Lua.ORDER_RELATIONAL];
+};
+
+actions.push({"kind": "block",  "type": "isTouched"})
 
 /* **************************************************************** */
 /*                          HELPERS                                 */
