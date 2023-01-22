@@ -335,6 +335,24 @@ Blockly.Lua['readdigitalinput'] = function(block) {
 
 properties.push({"kind": "block",  "type": "readdigitalinput"})
 
+//-------------------------------------------------------------------
+Blockly.Blocks['millis'] = 
+{
+    init: function() {
+        this.appendDummyInput().appendField("milliseconds since start");
+        this.setOutput(true, "Number");
+        this.setColour(230);
+        this.setTooltip("returns the milliseconds since the device was started. Rolls over after ~57 days");
+        this.setHelpUrl("");
+    }
+};
+
+Blockly.Lua['millis'] = function(block) 
+{
+    var code = 'millis()';
+    return [code, Blockly.Lua.ORDER_NONE];
+};
+properties.push({"kind": "block",  "type": "millis"})
 /* **************************************************************** */
 /*                          HELPERS                                 */
 /* **************************************************************** */
