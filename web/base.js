@@ -239,6 +239,39 @@ Blockly.Lua['executeluachunk'] = function(block)
 };
 
 actions.push({"kind": "block",  "type": "executeluachunk"})
+
+//-------------------------------------------------------------------
+
+Blockly.Blocks['configserial'] = {
+    init: function() {
+        this.jsonInit({
+            "message0": "Set serial speed to  %1,8,N,1",
+            "args0": [
+                {   "type": "field_dropdown",
+                    "name": "speed",
+                    "options": [["110","110"],["300","300"],["600","600"],["1200","1200"],
+                                ["2400","2400"],["4800","4800"],["9600","9600"],
+                                ["14400","14400"],["19200","19200"],["38400","38400"],
+                                ["57600","57600"],["115200","115200"]]
+                },          
+            ],
+            "colour": 230,
+            "previousStatement": null,
+            "nextStatement": null,
+            });
+            var thisBlock = this;
+            this.setTooltip("Sets the speed of the serial port");
+        }
+    };
+
+Blockly.Lua['configserial'] = function(block) 
+{
+    var value_speed = block.getFieldValue('speed');
+    var code = 'configSerial(' + value_speed + ')\n';
+    return code;
+};
+
+actions.push({"kind": "block",  "type": "configserial"})
 /* **************************************************************** */
 /*                          PROPERTIES                              */
 /* **************************************************************** */
