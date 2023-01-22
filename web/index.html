@@ -69,13 +69,13 @@
             <div id="header">
                 <span class="branding">
                     <span style="font-size: larger"><span style="font-weight: bold;"><span style="color: red;">i</span>COM</span>padre</span><br>
-                    The swiss army knife of iCOM radios !<br>
+                    The swiss army knife for iCOM radios !<br>
                     <span style="color:lightgray">by OE6GUE</span>
                 </span>
                  
                 <span class="action" id="fileDropZone" title="Load a sketch from disk"><label for="file-input" accept=".json"><img id="open" src="img/open.svg"></label><input type="file" id="file-input" onchange="openFile(event)"/></span>
                 <span class="action" title="Save the current sketch to disk"><img id="export" src="img/export.svg"></span>
-                <span class="action" title="Save the current sketch on the SD card" onclick="saveWorkspace()"><img id="save" src="img/save.svg"></span>
+                <span id="saveButton" class="action" title="Save the current sketch on the SD card" onclick="saveWorkspace()"><img id="save" src="img/save.svg"></span>
             </div>            
     </td>
 
@@ -172,13 +172,13 @@
                     "end"],
         
         // generates a number from multiplebytes that represent a bcd number
-    	"bcdAsNumber": [ 'function bcdAsNumber(tbl) ',
-		         "  value = ''",
-		         "  for i, name in ipairs(tbl) do",
-		         "    value = value .. string.format('%02x', name)",
-		         "  end",
-		         "  return tonumber(value);",
-		         "end" ],
+    	  "bcdAsNumber": [ 'function bcdAsNumber(tbl) ',
+                        "  value = ''",
+                        "  for i, name in ipairs(tbl) do",
+                        "    value = value .. string.format('%02x', name)",
+                        "  end",
+                        "  return tonumber(value);",
+                        "end" ],
     }
 
     // registers the function on the lua code code generator
@@ -317,6 +317,18 @@
     });
 
     // ------------- UI Functions -----------------
+    // Blinks an element one  
+    function blink(elementid, color) 
+    {
+        var element = document.getElementById(elementid);
+        element.style.transition = "background-color 0.2s ease";
+        element.style.backgroundColor = color;
+
+        setTimeout(function() {
+              element.style.transition = "background-color 0.2s ease";
+              element.style.backgroundColor = "";
+        }, 200);
+    }
     // generate a blob for the lua file
     function getLuaBlob()
     {
@@ -359,6 +371,12 @@
       await fetch(filename, {
         method: "PUT", 
         body: content
+      }).then(function (response) {
+        if (response.ok) {
+          blink("saveButton", "#90ee90"); // light green
+        } else {
+          blink("saveButton", "#ffcccb"); // light red
+        }
       }); 
     }
 
