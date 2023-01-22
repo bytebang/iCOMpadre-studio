@@ -353,6 +353,36 @@ Blockly.Lua['millis'] = function(block)
     return [code, Blockly.Lua.ORDER_NONE];
 };
 properties.push({"kind": "block",  "type": "millis"})
+
+//-------------------------------------------------------------------
+
+Blockly.Blocks['touchvalue'] = {
+    init: function() {
+        this.jsonInit({
+            "message0": "Touch value of %1",
+            "args0": [
+                {   "type": "field_dropdown",
+                    "name": "pinname",
+                    "options": [["PIN C","PIN_C"],["PIN D","PIN_D"],["PIN E","PIN_E"],
+                                ["PIN F","PIN_F"],["PIN G","PIN_G"],["PIN H","PIN_H"]]
+                },          
+            ],
+            "colour": 230,
+            });
+            this.setOutput(true, "Number");
+            this.setTooltip("Reads the touch value of a pin");
+        }
+    };
+
+Blockly.Lua['touchvalue'] = function(block) 
+{
+    var desiredPin = Blockly.Lua.nameDB_.getName(block.getFieldValue('pinname'), Blockly.Names.NameType.VARIABLE);
+    var code = 'readAnalogInput(' + desiredPin + ')';
+    return [code, Blockly.Lua.ORDER_RELATIONAL];
+};
+
+actions.push({"kind": "block",  "type": "touchvalue"})
+
 /* **************************************************************** */
 /*                          HELPERS                                 */
 /* **************************************************************** */
