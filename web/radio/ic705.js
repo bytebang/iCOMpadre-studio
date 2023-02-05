@@ -56,8 +56,8 @@ helpers.push({"kind": "block",  "type": "test"})
 // Finally add the blocks to the toolbox
 //-------------------------------------------------------------------
 attribution = {
-    "kind": "category",  "name": "Addon",
-    "contents": []
+  "kind": "category",  "name": "IC-705",
+  "contents": []
 };
 
 // Add all the events

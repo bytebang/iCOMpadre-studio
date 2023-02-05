@@ -380,7 +380,7 @@ Blockly.Lua['touchvalue'] = function(block)
     return [code, Blockly.Lua.ORDER_RELATIONAL];
 };
 
-actions.push({"kind": "block",  "type": "touchvalue"})
+properties.push({"kind": "block",  "type": "touchvalue"})
 
 //-------------------------------------------------------------------
 Blockly.Blocks['isTouched'] = {
@@ -413,7 +413,7 @@ Blockly.Lua['isTouched'] = function(block)
     return [code, Blockly.Lua.ORDER_RELATIONAL];
 };
 
-actions.push({"kind": "block",  "type": "isTouched"})
+properties.push({"kind": "block",  "type": "isTouched"})
 
 /* **************************************************************** */
 /*                          HELPERS                                 */
