@@ -1,9 +1,16 @@
+// Create a main 
+contribution = {
+  "kind": "category",  "name": "IC-705",
+  "contents": []
+};
+
 // Insert menu contributions in these arrays
 // they will be added to the menu at the end 
 events = [];
 actions = [];
 properties = [];
 helpers = [];
+
 
 /* **************************************************************** */
 /*                          EVENTS                                  */
@@ -55,26 +62,22 @@ helpers.push({"kind": "block",  "type": "test"})
 //-------------------------------------------------------------------
 // Finally add the blocks to the toolbox
 //-------------------------------------------------------------------
-attribution = {
-  "kind": "category",  "name": "IC-705",
-  "contents": []
-};
 
 // Add all the events
-attribution.contents.push({"kind": "label", "text" : "Events" });
-events.forEach((event) => attribution.contents.push(event));
+contribution.contents.push({"kind": "label", "text" : "Events" });
+events.forEach((event) => contribution.contents.push(event));
 
 // Add all the actions
-attribution.contents.push({"kind": "label", "text" : "Actions" });
-actions.forEach((action) => attribution.contents.push(action));
+contribution.contents.push({"kind": "label", "text" : "Actions" });
+actions.forEach((action) => contribution.contents.push(action));
 
 // Add all the properties
-attribution.contents.push({"kind": "label", "text" : "Properties" });
-properties.forEach((property) => attribution.contents.push(action));
+contribution.contents.push({"kind": "label", "text" : "Properties" });
+properties.forEach((property) => contribution.contents.push(action));
 
 // Add all the helpers
-attribution.contents.push({"kind": "label", "text" : "Helpers" });
-helpers.forEach((helper) => attribution.contents.push(helper));
+contribution.contents.push({"kind": "label", "text" : "Helpers" });
+helpers.forEach((helper) => contribution.contents.push(helper));
 
 // Add the things within this file to the toolbox
-toolbox.contents.push(attribution);
+toolbox.contents.push(contribution);

@@ -1,3 +1,9 @@
+// Describe the contribution
+contribution = {
+    "kind": "category",  "name": "iCOMpadre",
+    "contents": []
+};
+
 // Insert menu contributions in these arrays
 // they will be added to the menu at the end 
 events = [];
@@ -542,27 +548,23 @@ end
 //-------------------------------------------------------------------
 // Finally add the blocks to the toolbox
 //-------------------------------------------------------------------
-attribution = {
-    "kind": "category",  "name": "iCOMpadre",
-    "contents": []
-};
 
 // Add all the events
-attribution.contents.push({"kind": "label", "text" : "Events" });
-events.forEach((event) => attribution.contents.push(event));
+contribution.contents.push({"kind": "label", "text" : "Events" });
+events.forEach((event) => contribution.contents.push(event));
 
 // Add all the actions
-attribution.contents.push({"kind": "label", "text" : "Actions" });
-attribution.contents.push({"kind": "block",  "type": "text_print"});
-actions.forEach((action) => attribution.contents.push(action));
+contribution.contents.push({"kind": "label", "text" : "Actions" });
+contribution.contents.push({"kind": "block",  "type": "text_print"});
+actions.forEach((action) => contribution.contents.push(action));
 
 // Add all the properties
-attribution.contents.push({"kind": "label", "text" : "Properties" });
-properties.forEach((property) => attribution.contents.push(property));
+contribution.contents.push({"kind": "label", "text" : "Properties" });
+properties.forEach((property) => contribution.contents.push(property));
 
 // Add all the helpers
-attribution.contents.push({"kind": "label", "text" : "Helpers" });
-helpers.forEach((helper) => attribution.contents.push(helper));
+contribution.contents.push({"kind": "label", "text" : "Helpers" });
+helpers.forEach((helper) => contribution.contents.push(helper));
 
 // Add the things within this file to the toolbox
-toolbox.contents.push(attribution);
+toolbox.contents.push(contribution);
