@@ -60,29 +60,55 @@ Blockly.Lua['periodically'] = function(block) {
 events.push({"kind": "block",  "type": "periodically"})
 
 //-------------------------------------------------------------------
-Blockly.Blocks['onserialdata'] = {
+Blockly.Blocks['onserialline'] = {
     init: function() {
         this.appendDummyInput()
             .setAlign(Blockly.ALIGN_RIGHT)
-            .appendField(new Blockly.FieldVariable("data"), "Data");
+            .appendField(new Blockly.FieldVariable("line"), "Line");
         this.appendStatementInput("actions")
             .setCheck(null)
-            .appendField("OnSerialData");
+            .appendField("OnSerialLine");
         this.setColour(0);
-    this.setTooltip("This is triggered when a user enters a command on the serial interface. The content of the line is in the variable data");
+    this.setTooltip("This is triggered when a user enters a command on the serial interface. The content of the line is in the variable line");
     this.setHelpUrl("");
     }
 };
 
-Blockly.Lua['onserialdata'] = function(block) {
-    var variable_data = Blockly.Lua.nameDB_.getName(block.getFieldValue('Data'), Blockly.Names.NameType.VARIABLE);
+Blockly.Lua['onserialline'] = function(block) {
+    var variable_line = Blockly.Lua.nameDB_.getName(block.getFieldValue('Line'), Blockly.Names.NameType.VARIABLE);
     var statements_actions = Blockly.Lua.statementToCode(block, 'actions');
-    var code = 'function onSerialData(' + variable_data + ')\n';
+    var code = 'function onSerialLine(' + variable_line + ')\n';
     code = code + statements_actions;
     code = code + 'end';
     return code;
 };
-events.push({"kind": "block",  "type": "onserialdata"})
+events.push({"kind": "block",  "type": "onserialline"})
+
+//-------------------------------------------------------------------
+Blockly.Blocks['onserialbyte'] = {
+    init: function() {
+        this.appendDummyInput()
+            .setAlign(Blockly.ALIGN_RIGHT)
+            .appendField(new Blockly.FieldVariable("byte"), "Byte");
+        this.appendStatementInput("actions")
+            .setCheck(null)
+            .appendField("OnSerialByte");
+        this.setColour(0);
+    this.setTooltip("This is triggered each time a byte arrives on the serial interface. The content of the line is in the variable char as number value");
+    this.setHelpUrl("");
+    }
+};
+
+Blockly.Lua['onserialbyte'] = function(block) {
+    var variable_data = Blockly.Lua.nameDB_.getName(block.getFieldValue('Byte'), Blockly.Names.NameType.VARIABLE);
+    var statements_actions = Blockly.Lua.statementToCode(block, 'actions');
+    var code = 'function onSerialByte(' + variable_data + ')\n';
+    code = code + statements_actions;
+    code = code + 'end';
+    return code;
+};
+events.push({"kind": "block",  "type": "onserialbyte"})
+
 //-------------------------------------------------------------------
 // events.push({"kind": "block",  "type": "onserialline"})
 
@@ -535,6 +561,32 @@ Blockly.Lua['mapnumber'] = function(block) {
 };
 
 helpers.push({"kind": "block",  "type": "mapnumber"})
+
+
+
+//-------------------------------------------------------------------
+Blockly.Blocks['asChar'] = {
+    init: function() {
+      this.appendValueInput("inByte")
+          .setCheck("Number")
+          .appendField("char of");
+      this.setOutput(true, "String");
+      this.setColour(230);
+   this.setTooltip("Converts the number to a character");
+   this.setHelpUrl("");
+    }
+  };
+  
+  Blockly.Lua['asChar'] = function(block) {
+    
+    var inbyte = Blockly.Lua.valueToCode(block, 'inByte', Blockly.Lua.ORDER_ATOMIC);
+    // Generate the function call for this block.
+    var code = 'string.char(' + inbyte + ')'; 
+    return [code, Blockly.Lua.ORDER_ATOMIC];
+  };
+  
+  helpers.push({"kind": "block",  "type": "asChar"})
+
 
 //-------------------------------------------------------------------
 
