@@ -51,6 +51,34 @@ helpers.push({"kind": "block",  "type": "test"})
 /* **************************************************************** */
 /*                          PROPERTIES                              */
 /* **************************************************************** */
+Blockly.Blocks['ic705_getfrequency'] = {
+  init: function() {
+      this.jsonInit({
+          "message0": "current frequency in %1",
+          "args0": [
+              {   "type": "field_dropdown",
+                  "name": "unit",
+                  "options": [["Hz","1"],["kHz","1e3"],["MHz","1e6"]]
+              },          
+          ],
+          "colour": 230,
+          });
+          this.setOutput(true, "Number");
+          this.setTooltip("Reads the current frequency of the radio");
+      }
+  };
+
+Blockly.Lua['ic705_getfrequency'] = function(block) 
+{
+  var desiredUnit = block.getFieldValue('unit');
+  use(['bcdAsNumber']);
+
+  var code = 'bcdAsNumber(readResultOfCommand(sendCommand({3})))/' + block.getFieldValue('unit');
+  return [code, Blockly.Lua.ORDER_ATOMIC];
+};
+
+properties.push({"kind": "block",  "type": "ic705_getfrequency"})
+
 
 //-------------------------------------------------------------------
 
@@ -73,7 +101,7 @@ actions.forEach((action) => contribution.contents.push(action));
 
 // Add all the properties
 contribution.contents.push({"kind": "label", "text" : "Properties" });
-properties.forEach((property) => contribution.contents.push(action));
+properties.forEach((property) => contribution.contents.push(property));
 
 // Add all the helpers
 contribution.contents.push({"kind": "label", "text" : "Helpers" });
