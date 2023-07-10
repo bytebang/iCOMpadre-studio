@@ -11,6 +11,18 @@
   <link rel="stylesheet" href="./studio.css">
 </head>
 <body>
+  <div id="codeModal" >
+    <div id="modalHeader" style="width: 100%; height: 15%;">
+      <span id="modelHelp" style="float:left"><b>Share your project with others !</b><br/>Copy the code below into the clipboard and share it, or pase code from others here</span>
+      <span>
+      <span class="action" id="codeCloseButton" title="Closes this window" onclick="closeSharingWindow()"><img id="close" src="img/close.svg"></span>
+      <span class="action" id="codeCopyButton" title="Copies the current code into the clipboard" onclick="copyCodeToClipboard()"><img id="copy" src="img/copy.svg"></span>
+      <span class="action" id="codeImportButton" title="Imports the current code int the workspace" onclick="importCodeIntoWorkspace()"><img id="import" src="img/import.svg"></span>
+      <span class="action" id="codePasteButton" title="Pasts the current clipboard content into the window" onclick="pasteCodeFromClipboard()"><img id="paste" src="img/paste.svg"></span>
+      </span>
+    </div>
+    <textarea id="codeArea" style="width: 100%; height: 85%;"></textarea>
+  </div>
   <table>
     <tr>
       <td>
@@ -20,9 +32,10 @@
             The swiss army knife for iCOM radios !<br>
             <span style="color:lightgray">by OE6GUE</span>
           </span>
+          <span class="action" id="shareButton" title="Opens a new whindow with the content of the corkspace" onclick="openSharingWindow()"><img id="save" src="img/share.svg"></span>
           <span class="action" id="fileDropZone" title="Load a sketch from disk"><label for="file-input" accept=".json"><img id="open" src="img/open.svg"></label><input type="file" id="file-input" onchange="openFile(event)"/></span>
           <span class="action" title="Save the current sketch to disk"><img id="export" src="img/export.svg"></span>
-          <span id="saveButton" class="action" title="Save the current sketch on the SD card" onclick="saveWorkspace()"><img id="save" src="img/save.svg"></span>
+          <span class="action" id="saveButton"  title="Save the current sketch on the SD card" onclick="saveWorkspace()"><img id="save" src="img/save.svg"></span>
         </div>            
       </td>
     </tr>
@@ -170,7 +183,7 @@
                        "     local bcdValue = nibble2 + nibble1 * 16 ",
                        "     table.insert(finalTable,  bcdValue)",
                        "   end",
-                       "   if(tblsize ~= mil) then",
+                       "   if(tblsize ~= nil) then",
                        "     while #finalTable < tblsize do",
                        "       table.insert(finalTable, 1, 0x00)",
                        "     end",
@@ -403,5 +416,66 @@
     {
       document.title = "iCOMpadre";
     };
+
+    // Opens the sharing window
+    function openSharingWindow() 
+    {
+      var sketch = Blockly.serialization.workspaces.save(icompadreWorkspace);
+      var sketchString = "";
+
+      if (window.event.ctrlKey) 
+      {
+        sketchString = Blockly.Lua.workspaceToCode(icompadreWorkspace);
+      }
+      else
+      {
+        sketchString = JSON.stringify(sketch);
+      }
+
+      document.getElementById('codeArea').value = sketchString;
+      document.getElementById('codeModal').style.display = 'block';
+    }
+
+    // Closes the sharing window
+    function closeSharingWindow() 
+    {
+      document.getElementById('codeModal').style.display = 'none';
+    }
+
+    // Loads code from the window
+    function importCodeIntoWorkspace() 
+    {
+      var currentSketch = Blockly.serialization.workspaces.save(icompadreWorkspace);
+      var newSketch = document.getElementById('codeArea').value;
+
+      try 
+      {
+        var newSketchObj = JSON.parse(newSketch); // No json - no import !
+        icompadreWorkspace.clear();
+        Blockly.serialization.workspaces.load(newSketchObj, icompadreWorkspace);
+      } 
+      catch (error) 
+      {
+        icompadreWorkspace.clear();
+        Blockly.serialization.workspaces.load(currentSketch, icompadreWorkspace);
+      }
+      document.getElementById('codeModal').style.display = 'none';
+    }
+
+    // Copies the current code into the clipboard
+    function copyCodeToClipboard() 
+    {
+      var theCode = document.getElementById('codeArea').value;
+      navigator.clipboard.writeText(theCode);
+    }
+
+    // Copies the current clipboard content into the code window
+    function pasteCodeFromClipboard() 
+    {
+        navigator.clipboard.readText().then(function(text) {
+          document.getElementById('codeArea').value = text;
+        });
+    }
+
   </script>
 </html>

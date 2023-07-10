@@ -45,6 +45,16 @@ html, body {
     width: 50px;
   }
   
+  #modalHeader .action {
+    width: 25px;
+    border-radius: 3px;
+    border: 1px dashed #4b2869 !important; 
+  }
+
+  #modalHeader .action img{
+    width: 25px;
+  }
+
   #file-input {
     display: none;
   }
@@ -60,4 +70,19 @@ html, body {
     height: 100%;
     background-color: rgba(255,255,255,0.8);
     z-index: 9999;
+  }
+
+  #codeModal {
+    display: none; 
+    z-index: 9999; 
+    width: 50%; 
+    height: 50%; 
+    overflow: auto; 
+    background: white; 
+    position: fixed; 
+    top: 25%; 
+    left: 25%; 
+    border: solid 1px black; 
+    padding: 15px;
+    overflow: hidden;
   }
