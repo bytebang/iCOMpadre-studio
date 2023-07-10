@@ -117,8 +117,8 @@ events.push({"kind": "block",  "type": "onserialbyte"})
 /* **************************************************************** */
 Blockly.Blocks['onchangeof'] = {
   init: function() {
-    this.appendDummyInput().appendField("On change of");
-    this.appendValueInput("expr").setCheck(null).setAlign(Blockly.ALIGN_RIGHT).appendField("watchedValue");
+    //this.appendDummyInput().appendField("On change of");
+    this.appendValueInput("expr").setCheck(null).setAlign(Blockly.ALIGN_RIGHT).appendField("On change of");
     this.appendStatementInput("statements").setCheck(["Boolean", "Number", "String"]);
     this.setPreviousStatement(true, null);
     this.setNextStatement(true, null);
