@@ -4,7 +4,7 @@ This is a blockly based IDE for iCOMpadre.
 
 ## deployment
 
-Copy the web folder onto the SD card of iCOMpadre. Thats it.
+Download this repository as zip and extract it onto the SD card of iCOMpadre. Thats it.
 
 
 # Developing programs
