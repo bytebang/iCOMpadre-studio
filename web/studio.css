@@ -55,6 +55,12 @@ html, body {
     width: 25px;
   }
 
+  #codeArea
+  {
+    font-family: monospace !important;
+    background-color: #ddd;
+  }
+
   #file-input {
     display: none;
   }

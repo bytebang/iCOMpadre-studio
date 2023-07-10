@@ -204,7 +204,7 @@ Blockly.Blocks['setdigitaloutput'] = {
         this.setPreviousStatement(true, null);
         this.setNextStatement(true, null);
         this.setColour(230);
-        this.setTooltip("Read the value of the given input in mV");
+        this.setTooltip("Sets the digital output to high (true) or low (false)");
         this.setHelpUrl("");
     }
 };
@@ -236,7 +236,7 @@ Blockly.Blocks['wait'] = {
             "helpUrl": ""
         });
         var thisBlock = this;
-        this.setTooltip("Voltage representation");
+        this.setTooltip("Waits for x milliseconds");
     }
 };
 
@@ -541,7 +541,7 @@ Blockly.Blocks['mapnumber'] = {
     this.setInputsInline(true);
     this.setOutput(true, null);
     this.setColour(230);
- this.setTooltip("");
+ this.setTooltip("Maps a number from one range into another (by linear intra/extrapolation).");
  this.setHelpUrl("");
   }
 };
@@ -587,15 +587,35 @@ Blockly.Blocks['asChar'] = {
   
   helpers.push({"kind": "block",  "type": "asChar"})
 
+  //-------------------------------------------------------------------
+  Blockly.Blocks['comment'] = {
+    init: function() {
+        this.jsonInit({
+            "type": "comment",
+            "message0": "Comment: %1",
+            "args0": [
+                {"type": "field_input",  "name": "theContent", "check": "String" }
+            ],
+            "inputsInline": false,
+            "previousStatement": null,
+            "nextStatement": null,
+            "colour": 120,
+            "helpUrl": ""
+        });
+        var thisBlock = this;
+        this.setTooltip("Does nothing, is just for commenting");
+    }
+  };
+  Blockly.Lua['comment'] = function(block) {
+      var theComment = block.getFieldValue('theContent');
+      return "-- " + theComment + "\n";
+  };
 
-//-------------------------------------------------------------------
+  helpers.push({"kind": "block",  "type": "comment"})
+  //-------------------------------------------------------------------
 
-// map     
-/*
-function map(x, in_min, in_max, out_min, out_max)
-    return out_min + (x - in_min)*(out_max - out_min)/(in_max - in_min)
-end
-*/
+  // map     
+
 
 //-------------------------------------------------------------------
 // Finally add the blocks to the toolbox

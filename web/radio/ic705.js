@@ -185,10 +185,10 @@ actions.push({"kind": "block", "type": "ic705_set_squelch_level"});
 /* **************************************************************** */
 /*                          PROPERTIES                              */
 /* **************************************************************** */
-Blockly.Blocks['ic705_getfrequency'] = {
+Blockly.Blocks['ic705_get_operating_frequency'] = {
   init: function() {
       this.jsonInit({
-          "message0": "current frequency in %1",
+          "message0": "operating frequency in %1",
           "args0": [
               {   "type": "field_dropdown",
                   "name": "unit",
@@ -202,7 +202,7 @@ Blockly.Blocks['ic705_getfrequency'] = {
       }
   };
 
-Blockly.Lua['ic705_getfrequency'] = function(block) 
+Blockly.Lua['ic705_get_operating_frequency'] = function(block) 
 {
   var desiredUnit = block.getFieldValue('unit');
   use(['frequencyAsNumber']);
@@ -210,7 +210,7 @@ Blockly.Lua['ic705_getfrequency'] = function(block)
   return [code, Blockly.Lua.ORDER_ATOMIC];
 };
 
-properties.push({"kind": "block",  "type": "ic705_getfrequency"})
+properties.push({"kind": "block",  "type": "ic705_get_operating_frequency"})
 
 //-------------------------------------------------------------------
 Blockly.Blocks['ic705_get_af_level'] = {
