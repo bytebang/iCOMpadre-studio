@@ -450,7 +450,31 @@ properties.push({"kind": "block",  "type": "isTouched"})
 /* **************************************************************** */
 /*                          HELPERS                                 */
 /* **************************************************************** */
+Blockly.Blocks['comment'] = {
+  init: function() {
+    this.jsonInit({
+        "type": "comment",
+        "message0": "Comment: %1",
+        "args0": [
+            {"type": "field_input",  "name": "theContent", "check": "String" }
+        ],
+        "inputsInline": false,
+        "previousStatement": null,
+        "nextStatement": null,
+        "colour": 120,
+        "helpUrl": ""
+    });
+    var thisBlock = this;
+    this.setTooltip("Does nothing, is just for commenting");
+  }
+};
+Blockly.Lua['comment'] = function(block) {
+    var theComment = block.getFieldValue('theContent');
+    return "-- " + theComment + "\n";
+};
 
+helpers.push({"kind": "block",  "type": "comment"})
+//-------------------------------------------------------------------
 Blockly.Blocks['voltagevalue'] = {
 init: function() {
     this.jsonInit({
@@ -588,31 +612,7 @@ Blockly.Blocks['asChar'] = {
   helpers.push({"kind": "block",  "type": "asChar"})
 
   //-------------------------------------------------------------------
-  Blockly.Blocks['comment'] = {
-    init: function() {
-        this.jsonInit({
-            "type": "comment",
-            "message0": "Comment: %1",
-            "args0": [
-                {"type": "field_input",  "name": "theContent", "check": "String" }
-            ],
-            "inputsInline": false,
-            "previousStatement": null,
-            "nextStatement": null,
-            "colour": 120,
-            "helpUrl": ""
-        });
-        var thisBlock = this;
-        this.setTooltip("Does nothing, is just for commenting");
-    }
-  };
-  Blockly.Lua['comment'] = function(block) {
-      var theComment = block.getFieldValue('theContent');
-      return "-- " + theComment + "\n";
-  };
-
-  helpers.push({"kind": "block",  "type": "comment"})
-  //-------------------------------------------------------------------
+  
 
   // map     
 
