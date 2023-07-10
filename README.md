@@ -88,7 +88,6 @@ The IDE is held minimalistic, because it will be served from a microcontroller. 
 
 ````
 web/
-├── addon.js
 ├── base.js
 ├── blockly
 │   ├── blockly_compressed.js
@@ -101,20 +100,23 @@ web/
 ├── img
 │   ├── export.svg
 │   ├── open.svg
-│   └── run.svg
+│   └── ... some other images
 ├── index.html
-└── radio.js
+├── studio.css
+├── addons
+│   └── ... addon files
+└── radio
+    ├── ic705.js
+    └── ... some other images
 ````
 
-* index.html is the starting point of the application. It sets up the workspace and loads blockly.
+* index.html is the starting point of the application. It sets up the workspace and loads blockly. It alsouses the studio.css for display.
 * the blockly subdirectory contains a minimal version of blockly with an english translation. It is necessary to be able to compile the scripts to lua.
 * filesaver.js is the library which allows the users to download data to their harddrive
 * img is the directory with all the images needed by the application. Currently it is needed to store the icons which are desplayed top right.
-* *.js files store the blocks which are representing the main functionality of iCOMpadre-studio
-	- base.js contains the blocks which represent the low-level functions provided by the lua engine of iCOMpadre.
-	- radio.js should represent the radio(s) features.
-	- addon.js represent special features for addon boards.
-
+* base.js contains the blocks which represent the low-level functions provided by the lua engine of iCOMpadre.
+* the subdirectory radio contains radio specific extensions to the ecosystem. Every radio type should have its own file.
+* the subdirectory addons is reserved for future use of addon boards
 
 ## datasheets and manuals
 
@@ -132,6 +134,17 @@ web/
 * Debugging of the webapp can be done with the python builtin webserver `/web$ python -m SimpleHTTPServer 8000`
 * HF Bandplan: https://oevsv.at/funkbetrieb/amateurfunkfrequenzen/hf-referat/
 
+# license 
+
+This software is dual licensed:
+
+AGPLv3 for private use:
+- You may use, copy, modify, and distribute this software under the terms of the Affero General Public License Version 3 (AGPLv3). The AGPLv3 requires that modified code, when provided over a network, be released under the AGPLv3 as well. For more information, see the [AGPLv3 license file](./LICENSE-AGPLv3.txt).
+
+Proprietary license for commercial use:
+- A separate proprietary license is available for commercial use of this software. The proprietary license grants you additional rights and restrictions beyond the provisions of the AGPLv3. Please contact us for information on commercial licensing.
+
+If you use, copy, modify, or distribute this software, you must comply with the respective license terms. Please refer to the specific license files for more information.
 
 
 # fine print
