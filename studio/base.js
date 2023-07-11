@@ -612,7 +612,35 @@ Blockly.Blocks['asChar'] = {
   helpers.push({"kind": "block",  "type": "asChar"})
 
   //-------------------------------------------------------------------
+Blockly.Blocks['asByte'] = {
+  init: function() {
+    this.jsonInit({
+        "type": "asByte",
+        "message0": "byte of character %1",
+        "args0": [
+            {"type": "field_input",  "name": "inChar", "check": "String" }
+        ],
+        "output": "Number",
+        "inputsInline": false,
+        "colour": 120,
+        "helpUrl": ""
+    });
+    var thisBlock = this;
+    this.setTooltip("Converts the first character of the given string to a numeric byte value");
+  }
+    
+};
   
+Blockly.Lua['asByte'] = function(block) {
+    
+    var inchar = block.getFieldValue('inChar');
+    // Generate the function call for this block.
+    var code = 'string.byte("' + inchar + '")'; 
+    return [code, Blockly.Lua.ORDER_ATOMIC];
+};
+  
+helpers.push({"kind": "block",  "type": "asByte"})
+//-------------------------------------------------------------------  
 
   // map     
 
