@@ -5,7 +5,7 @@ This is a blockly based IDE for iCOMpadre.
 ## deployment
 
 Download this repository as zip and extract it onto the SD card of iCOMpadre. Thats it.
-If you just want to test it then you can test the : [latest version of iCOMpadre Studio](https://tinyurl.com/icompadre-studio) here.
+If you just want to test it then you can test the : [latest version of iCOMpadre Studio](https://tinyurl.com/iCOMpadreStudio-latest) here.
 
 # Developing programs
 
