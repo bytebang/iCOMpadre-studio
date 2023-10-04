@@ -12,6 +12,27 @@ properties = [];
 helpers = [];
 
 
+// Zusätzliche Hilfsfunktion in Lua:
+
+utilityfunctions['getOperatingModeString'] = [
+  'function getOperatingModeString(responseTable)',
+  '  local reponseByte = string.format("0x%02x", responseTable[1])',
+  '  local modeMap = {',
+  '    ["0x00"] = \'LSB\',',
+  '    ["0x01"] = \'USB\',',
+  '    ["0x02"] = \'AM\',',
+  '    ["0x03"] = \'CW\',',
+  '    ["0x04"] = \'RTTY\',',
+  '    ["0x05"] = \'FM\',',
+  '    ["0x06"] = \'WFM\',',
+  '    ["0x07"] = \'CW-R\',',
+  '    ["0x08"] = \'RTTY-R\',',
+  '    ["0x17"] = \'DV\'',
+  "  }",
+  '  return modeMap[reponseByte] or "Unknown"',
+  "end"
+];
+
 /* **************************************************************** */
 /*                          EVENTS                                  */
 /* **************************************************************** */
@@ -39,7 +60,7 @@ Blockly.Lua['test'] = function(block) {
   var inarray = Blockly.Lua.valueToCode(block, 'inputarray', Blockly.Lua.ORDER_ATOMIC);
   
     use(['pretty', 'map']);
-    // Generate the function call for this block.
+
     var code = 'pretty(' + inarray + ')';
     return [code, Blockly.Lua.ORDER_FUNCTION_CALL];
 };
@@ -133,6 +154,46 @@ Blockly.Lua['ic705_set_frequency'] = function(block) {
 };
 
 actions.push({"kind": "block", "type": "ic705_set_frequency"});
+//-------------------------------------------------------------------
+
+Blockly.Blocks['ic705_set_operating_mode'] = {
+  init: function() {
+    this.jsonInit({
+      "message0": "Set Operating Mode to %1",
+      "args0": [
+        {
+          "type": "field_dropdown",
+          "name": "MODE",
+          "options": [
+            ["LSB", "0x00"],
+            ["USB", "0x01"],
+            ["AM", "0x02"],
+            ["CW", "0x03"],
+            ["RTTY", "0x04"],
+            ["FM", "0x05"],
+            ["WFM", "0x06"],
+            ["CW-R", "0x07"],
+            ["RTTY-R", "0x08"],
+            ["DV", "0x17"]
+          ]
+        }
+      ],
+      "inputsInline": true,
+      "previousStatement": null,
+      "nextStatement": null,
+      "colour": 350,
+      "tooltip": "Sets the operating mode of the radio"
+    });
+  }
+};
+
+Blockly.Lua['ic705_set_operating_mode'] = function(block) {
+  var mode = block.getFieldValue('MODE');
+  var code = 'sendCommand({0x06}, ' + mode + ')'; 
+  return code + ';\n';
+};
+
+actions.push({"kind": "block", "type": "ic705_set_operating_mode"});
 //-------------------------------------------------------------------
 
 Blockly.Blocks['ic705_set_rf_gain'] = {
@@ -294,6 +355,90 @@ Blockly.Lua['ic705_set_tuning_step'] = function(block) {
 actions.push({"kind": "block", "type": "ic705_set_tuning_step"});
 //-------------------------------------------------------------------
 
+Blockly.Blocks['ic705_select_vfo_a'] = {
+  init: function() {
+    this.jsonInit({
+      "message0": "Select VFO A",
+      "inputsInline": true,
+      "previousStatement": null,
+      "nextStatement": null,
+      "colour": 310,
+      "tooltip": "Selects VFO A on the radio"
+    });
+  }
+};
+
+Blockly.Lua['ic705_select_vfo_a'] = function(block) {
+  var code = 'sendCommand({0x07, 0x00})'; 
+  return code + ';\n';
+};
+
+actions.push({"kind": "block", "type": "ic705_select_vfo_a"});
+
+//-------------------------------------------------------------------
+Blockly.Blocks['ic705_select_vfo_b'] = {
+  init: function() {
+    this.jsonInit({
+      "message0": "Select VFO B",
+      "inputsInline": true,
+      "previousStatement": null,
+      "nextStatement": null,
+      "colour": 320,
+      "tooltip": "Selects VFO B on the radio"
+    });
+  }
+};
+
+Blockly.Lua['ic705_select_vfo_b'] = function(block) {
+  var code = 'sendCommand({0x07, 0x01})'; 
+  return code + ';\n';
+};
+
+
+actions.push({"kind": "block", "type": "ic705_select_vfo_b"});
+//-------------------------------------------------------------------
+
+Blockly.Blocks['ic705_equalize_vfo'] = {
+  init: function() {
+    this.jsonInit({
+      "message0": "Equalize VFO A and VFO B",
+      "inputsInline": true,
+      "previousStatement": null,
+      "nextStatement": null,
+      "colour": 330,
+      "tooltip": "Equalizes the settings of VFO A and VFO B"
+    });
+  }
+};
+
+Blockly.Lua['ic705_equalize_vfo'] = function(block) {
+  var code = 'sendCommand({0x07, 0xA0})'; 
+  return code + ';\n';
+};
+actions.push({"kind": "block", "type": "ic705_equalize_vfo"});
+//-------------------------------------------------------------------
+
+Blockly.Blocks['ic705_exchange_vfo'] = {
+  init: function() {
+    this.jsonInit({
+      "message0": "Exchange VFO A and VFO B",
+      "inputsInline": true,
+      "previousStatement": null,
+      "nextStatement": null,
+      "colour": 340,
+      "tooltip": "Exchanges the frequencies and settings of VFO A and VFO B"
+    });
+  }
+};
+
+Blockly.Lua['ic705_exchange_vfo'] = function(block) {
+  var code = 'sendCommand({0x07, 0xB0})'; 
+  return code + ';\n';
+};
+
+actions.push({"kind": "block", "type": "ic705_exchange_vfo"});
+//-------------------------------------------------------------------
+
 Blockly.Blocks['ic705_set_lcd_brightness'] = {
   init: function() {
     this.jsonInit({
@@ -412,6 +557,26 @@ Blockly.Lua['ic705_get_operating_frequency'] = function(block)
 };
 
 properties.push({"kind": "block",  "type": "ic705_get_operating_frequency"})
+//-------------------------------------------------------------------
+
+Blockly.Blocks['ic705_get_operating_mode'] = {
+  init: function() {
+    this.jsonInit({
+      "message0": "Get Operating Mode",
+      "output": "String",
+      "colour": 360,
+      "tooltip": "Gets the current operating mode of the radio"
+    });
+  }
+};
+
+Blockly.Lua['ic705_get_operating_mode'] = function(block) {
+  use("getOperatingModeString");
+  var code = 'getOperatingModeString(readResultOfCommand(sendCommand({0x04})))';  
+  return [code, Blockly.Lua.ORDER_ATOMIC];
+};
+
+properties.push({"kind": "block", "type": "ic705_get_operating_mode"});
 
 //-------------------------------------------------------------------
 Blockly.Blocks['ic705_get_af_level'] = {
