@@ -2,6 +2,7 @@ import http.server
 import socketserver
 import sys
 import os
+import time
 
 # Simple version checker
 if not sys.version_info.major == 3 and sys.version_info.minor >= 6:
@@ -24,6 +25,7 @@ class MyHttpRequestHandler(http.server.SimpleHTTPRequestHandler):
             self.wfile.write(reply_body.encode('utf-8'))
 
     def do_GET(self):
+        time.sleep(0.2)
         if self.path == '/web':
             self.path = 'index.html'
         return http.server.SimpleHTTPRequestHandler.do_GET(self)
