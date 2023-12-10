@@ -37,10 +37,23 @@
         margin: 0 5px; /* Abstand zwischen den Balken */
     }
 
+    @keyframes zoomin {
+      0% {
+          transform: scale(1);
+          opacity: 1;
+      }
+      100% {
+          transform: scale(3);
+          opacity: 0.1;
+      }
+    }
+
+    .zoomin-animation {
+        animation: zoomin 2s ease-in-out forwards;
+    }
   </style>
 </head>
-<body>
-
+<body id="branding">
   <div id="progress-container">
     <div id="loadingFileName">loading ...</div>
     <svg width="50" height="200" viewBox="0 0 100 200" xmlns="http://www.w3.org/2000/svg" style="float: left; margin-right: 10px;">
@@ -61,7 +74,7 @@
   </div>
 
   
-  <di class="branding">
+  <div>
     <span style="font-size: large"><span style="font-weight: bold;"><span style="color: red;">i</span>COM</span>padre</span><br>
     The swiss army knife for iCOM radios !<br>
   </div>
@@ -118,9 +131,11 @@
         // Forward to studio if finished :)
         if(progress == 100)
         {
+          var branding = document.getElementById('branding');
+          branding.classList.add('zoomin-animation');
           setTimeout(() => {
             window.location.href = './studio/index.html'; 
-          }, 1000);
+          }, 2000);
         }
     }
 
