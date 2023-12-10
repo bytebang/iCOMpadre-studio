@@ -561,10 +561,10 @@ properties.push({"kind": "block",  "type": "ic705_get_operating_frequency"})
 Blockly.Blocks['ic705_get_operating_mode'] = {
   init: function() {
     this.jsonInit({
-      "message0": "Get Operating Mode",
+      "message0": "Operating Mode",
       "output": "String",
       "colour": 360,
-      "tooltip": "Gets the current operating mode of the radio"
+      "tooltip": "Gets the current operating mode of the radio as string"
     });
   }
 };
