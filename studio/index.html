@@ -408,8 +408,8 @@
     // Uploads the sketch and the lua file to the microcontroller
     async function saveWorkspace() 
     {
-      storeFile("./main.lua", getLuaBlob());
-      storeFile("./icompadre.json", getSketchBlob());
+      storeFile("/main.lua", getLuaBlob());
+      storeFile("/icompadre.json", getSketchBlob());
     }
 
     window.onload = function() 

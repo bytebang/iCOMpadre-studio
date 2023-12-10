@@ -12,8 +12,7 @@ properties = [];
 helpers = [];
 
 
-// Zusätzliche Hilfsfunktion in Lua:
-
+// Additional helping functions -> can be used with the use(...) function
 utilityfunctions['getOperatingModeString'] = [
   'function getOperatingModeString(responseTable)',
   '  local reponseByte = string.format("0x%02x", responseTable[1])',
