@@ -12,6 +12,7 @@
       height: 100vh;
       margin: 0;
       font-family: sans-serif;
+      overflow: hidden; /* Verhindert Scrollbars */
     }
       
     #progress-meter {
@@ -44,7 +45,7 @@
       }
       100% {
           transform: scale(3);
-          opacity: 0.1;
+          opacity: 0.0;
       }
     }
 
@@ -53,7 +54,7 @@
     }
   </style>
 </head>
-<body id="branding">
+<body>
   <div id="progress-container">
     <div id="loadingFileName">loading ...</div>
     <svg width="50" height="200" viewBox="0 0 100 200" xmlns="http://www.w3.org/2000/svg" style="float: left; margin-right: 10px;">
@@ -131,8 +132,7 @@
         // Forward to studio if finished :)
         if(progress == 100)
         {
-          var branding = document.getElementById('branding');
-          branding.classList.add('zoomin-animation');
+          document.body.classList.add('zoomin-animation');
           setTimeout(() => {
             window.location.href = './studio/index.html'; 
           }, 2000);
