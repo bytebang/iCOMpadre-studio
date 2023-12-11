@@ -10,7 +10,7 @@
   <script src="./filesaver.js"></script>
   <link rel="stylesheet" href="./studio.css">
 </head>
-<body>
+<body style="opacity:0">
   <div id="codeModal" >
     <div id="modalHeader" style="width: 100%; height: 15%;">
       <span id="modelHelp" style="float:left"><b>Share your project with others !</b><br/>Copy the code below into the clipboard and share it, or paste code from others here</span>
@@ -265,6 +265,7 @@
       Blockly.svgResize(icompadreWorkspace);
     };
     onresize();
+    document.body.classList.add('zoomin-animation');
     window.addEventListener('resize', onresize, false);
 
     // Load the latest project from the server
@@ -412,10 +413,7 @@
       storeFile("/icompadre.json", getSketchBlob());
     }
 
-    window.onload = function() 
-    {
-      document.title = "iCOMpadre";
-    };
+
 
     // Opens the sharing window
     function openSharingWindow() 
