@@ -2,13 +2,29 @@
 <html>
 <head>
   <meta charset="utf-8">
-  <title>Loading iCOMpadre ...</title>
+  <title>iCOMpadre Studio</title>
   <script src="./blockly/blockly_compressed.js"></script>
   <script src="./blockly/blocks_compressed.js"></script>
   <script src="./blockly/en.js"></script>
   <script src="./blockly/lua_compressed.js"></script>
   <script src="./filesaver.js"></script>
   <link rel="stylesheet" href="./studio.css">
+  <style>
+	@keyframes zoomin {
+      0% {
+          transform: scale(0.1);
+          opacity: 0.3;
+      }
+      100% {
+          transform: scale(1);
+          opacity: 1;
+      }
+    }
+
+    .zoomin-animation {
+        animation: zoomin 1.5s ease-in-out forwards;
+    }
+  </style>
 </head>
 <body style="opacity:0">
   <div id="codeModal" >
@@ -217,16 +233,13 @@
   }
   </script>
   
-  <!-- actions for the radio -->
+  <!-- actions for base functionality of the hardware -->
   <script src="base.js"></script>
 
   <!-- separator -->
-  <script>
-    toolbox.contents.push({"kind": "sep"});
-  </script>
-  
+  <script>toolbox.contents.push({"kind": "sep"});</script>
 
-  <!-- actions provided by the addon board -->
+  <!-- actions provided by the specific radio -->
   <script src="radio/ic705.js"></script>
 
 
