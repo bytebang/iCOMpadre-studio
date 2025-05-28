@@ -1,0 +1,494 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>iCOMpadre Studio</title>
+  <link rel="icon" href="favicon.png" type="image/png">
+  <script src="./blockly/blockly_compressed.js"></script>
+  <script src="./blockly/blocks_compressed.js"></script>
+  <script src="./blockly/en.js"></script>
+  <script src="./blockly/lua_compressed.js"></script>
+  <script src="./filesaver.js"></script>
+  <link rel="stylesheet" href="./studio.css">
+  <style>
+	@keyframes zoomin {
+      0% {
+          transform: scale(0.1);
+          opacity: 0.3;
+      }
+      100% {
+          transform: scale(1);
+          opacity: 1;
+      }
+    }
+
+    .zoomin-animation {
+        animation: zoomin 1.5s ease-in-out forwards;
+    }
+  </style>
+</head>
+<body style="opacity:0">
+  <div id="codeModal" >
+    <div id="modalHeader" style="width: 100%; height: 15%;">
+      <span id="modelHelp" style="float:left"><b>Share your project with others !</b><br/>Copy the code below into the clipboard and share it, or paste code from others here</span>
+      <span>
+      <span class="action" id="codeCloseButton" title="Closes this window" onclick="closeSharingWindow()"><img id="close" src="img/close.svg"></span>
+      <span class="action" id="codeCopyButton" title="Copies the current code into the clipboard" onclick="copyCodeToClipboard()"><img id="copy" src="img/copy.svg"></span>
+      <span class="action" id="codeImportButton" title="Imports the current code int the workspace" onclick="importCodeIntoWorkspace()"><img id="import" src="img/import.svg"></span>
+      <span class="action" id="codePasteButton" title="Pasts the current clipboard content into the window" onclick="pasteCodeFromClipboard()"><img id="paste" src="img/paste.svg"></span>
+      </span>
+    </div>
+    <textarea id="codeArea" style="width: 100%; height: 85%;"></textarea>
+  </div>
+  <table>
+    <tr>
+      <td>
+        <div id="header">
+          <span class="branding">
+            <span style="font-size: larger"><span style="font-weight: bold;"><span style="color: red;">i</span>COM</span>padre</span><br>
+            The swiss army knife for iCOM radios !<br>
+            <span style="color:lightgray">by OE6GUE</span>
+          </span>
+          <span class="action" id="shareButton" title="Opens a new whindow with the content of the corkspace" onclick="openSharingWindow()"><img id="save" src="img/share.svg"></span>
+          <span class="action" id="fileDropZone" title="Load a sketch from disk"><label for="file-input" accept=".json"><img id="open" src="img/open.svg"></label><input type="file" id="file-input" onchange="openFile(event)"/></span>
+          <span class="action" title="Save the current sketch to disk"><img id="export" src="img/export.svg"></span>
+          <span class="action" id="saveButton"  title="Save the current sketch on the SD card" onclick="saveWorkspace()"><img id="save" src="img/save.svg"></span>
+        </div>            
+      </td>
+    </tr>
+    <tr>
+      <td id="blocklyArea"></td>
+    </tr>
+  </table>
+  <div id="blocklyDiv" style="position: absolute"></div>
+</body>
+
+<script>
+   
+  // -------------- The toolbar -----------------
+  var toolbox = {
+          "kind": "categoryToolbox",
+          "contents": [
+          {
+              "kind": "category", "name": "Logic",
+              "contents": [
+                  {"kind": "block",  "type": "logic_compare"},
+                  {"kind": "block",  "type": "logic_operation"},
+                  {"kind": "block",  "type": "logic_boolean"},
+                  {"kind": "block",  "type": "logic_negate"},
+              ]
+          },
+          {"kind": "category", "name": "Control",
+              "contents": [
+                  {"kind": "BLOCK",  "type": "controls_if"},
+                  {"kind": "BLOCK",  "type": "logic_ternary"},
+                  {"kind": "BLOCK",  "type": "controls_forEach"},
+                  {"kind": "BLOCK",  "type": "controls_flow_statements"},
+              ]
+          },
+          {"kind": "category",  "name": "Math",
+              "contents": [
+                  {"kind": "BLOCK",  "type": "math_number"},
+                  {"kind": "BLOCK",  "type": "math_arithmetic"},
+                  {"kind": "BLOCK",  "type": "math_constrain"},
+                  {"kind": "BLOCK",  "type": "math_modulo"},
+                  {"kind": "BLOCK",  "type": "math_on_list"},
+                  {"kind": "BLOCK",  "type": "math_number_property"},
+                  {"kind": "BLOCK",  "type": "math_constant"},
+                  {"kind": "BLOCK",  "type": "math_single"},
+              ]
+          },
+          {"kind": "category",  "name": "Lists",
+              "contents": [
+                  {"kind": "BLOCK",  "type": "lists_create_with"},
+                  {"kind": "BLOCK",  "type": "lists_length"},
+                  {"kind": "BLOCK",  "type": "lists_isEmpty"},
+                  {"kind": "BLOCK",  "type": "lists_indexOf"},
+                  {"kind": "BLOCK",  "type": "lists_getIndex"},
+                  {"kind": "BLOCK",  "type": "lists_setIndex"},
+                  {"kind": "BLOCK",  "type": "lists_getSublist"},
+                  {"kind": "BLOCK",  "type": "lists_split"},
+              ]
+          },
+          {"kind": "category",  "name": "Text",
+              "contents": [
+                  {"kind": "BLOCK",  "type": "text"},
+                  {"kind": "BLOCK",  "type": "text_multiline"},
+                  {"kind": "BLOCK",  "type": "text_join"},
+                  {"kind": "BLOCK",  "type": "text_append"},
+                  {"kind": "BLOCK",  "type": "text_length"},
+                  {"kind": "BLOCK",  "type": "text_isEmpty"},
+                  {"kind": "BLOCK",  "type": "text_indexOf"},
+                  {"kind": "BLOCK",  "type": "text_count"},
+                  {"kind": "BLOCK",  "type": "text_replace"},
+                  {"kind": "BLOCK",  "type": "text_reverse"},
+              ]
+          },
+          {"kind": "category",  "name": "Variables",  "custom": "VARIABLE"},
+          {"kind": "category",  "name": "Functions",  "custom": "PROCEDURE"},
+      ]
+  }
+  
+  // global utility functions to be used throughout the following scripts
+  utilityfunctions = 
+  {   
+      // pretty prints a lua array
+      "pretty" : [ "function pretty(tbl)",
+                   "  hex = {}",
+                   "  for i, name in ipairs(tbl) do",
+                   "    hex[i] = string.format('0x%02x ', name)",
+                   "  end",
+                   "  return '{' .. table.concat(hex, ',') .. '}'",
+                   "end"],
+   
+      // maps a range of values onto another range
+      "map": [    "function map(x, in_min, in_max, out_min, out_max) ",
+                  "  return out_min + (x - in_min)*(out_max - out_min)/(in_max - in_min)",
+                  "end"],
+
+                            
+      // takes a frequency table and converts it to a number
+      "frequencyAsNumber": ["function frequencyAsNumber(tbl) ",
+                            "  value = ''",
+                            "  for i, name in ipairs(tbl) do",
+                            "    value = string.format('%02x', name) .. value",
+                            "  end",
+                            "  return tonumber(value);",
+                            "end" ],
+      
+      "frequencyToBcd": [ "function frequencyToBcd(freq, tblsize)",
+                          "   freq = math.floor(freq)",
+                          "   local bcdTable = {}",
+                          "   while freq > 0 do",
+                          "     local nibble = freq % 10",
+                          "      table.insert(bcdTable, 1, nibble)",
+                          "      freq = math.floor(freq / 10)",
+                          "    end",
+                          "    if #bcdTable % 2 == 1 then",
+                          "      table.insert(bcdTable, 1, 0)",
+                          "    end",
+                          "    local finalTable = {}",
+                          "    for i = 1, #bcdTable, 2 do",
+                          "      local nibble1 = bcdTable[i+1]",
+                          "      local nibble2 = bcdTable[i]",
+                          "      local bcdValue = nibble2 * 16 + nibble1",
+                          "      table.insert(finalTable, 1, bcdValue)",
+                          "    end",
+                          "    if tblsize ~= nil then",                      
+                          "      while #finalTable < tblsize do",
+                          "        table.insert(finalTable, 0x00)",
+                          "      end",
+                          "    end",
+                          "    return finalTable",
+                          "  end"],
+
+      "numberToBcd": [ "function numberToBcd(number, tblsize)",
+                       "   number = math.floor(number)",
+                       "   local bcdTable = {}",
+                       "   while number > 0 do",
+                       "     local nibble = number % 10",
+                       "     table.insert(bcdTable, 1, nibble)",
+                       "     number = math.floor(number / 10)",
+                       "   end",
+                       "   if #bcdTable % 2 == 1 then",
+                       "     table.insert(bcdTable, 1, 0)",
+                       "   end",
+                       "   local finalTable = {}",
+                       "   for i = 1, #bcdTable, 2 do",
+                       "     local nibble1 = bcdTable[i]",
+                       "     local nibble2 = bcdTable[i+1]",
+                       "     local bcdValue = nibble2 + nibble1 * 16 ",
+                       "     table.insert(finalTable,  bcdValue)",
+                       "   end",
+                       "   if(tblsize ~= nil) then",
+                       "     while #finalTable < tblsize do",
+                       "       table.insert(finalTable, 1, 0x00)",
+                       "     end",
+                       "   end",
+                       "   return finalTable",
+                       " end"],
+
+        "bcdToNumber": ["function bcdToNumber(tbl) ",
+                            "  value = ''",
+                            "  for i, name in ipairs(tbl) do",
+                            "    value = value .. string.format('%02x', name)",
+                            "  end",
+                            "  return tonumber(value);",
+                            "end" ],
+
+  }
+
+  // registers the function on the lua code code generator
+  // after this call you can use the function in your code
+  function use(funcnames)
+  {   
+    // register functions 
+    if(Array.isArray(funcnames))
+    {
+      funcnames.forEach((funcname) => Blockly.Lua.provideFunction_(funcname, utilityfunctions[funcname]));
+    }
+    else
+    {
+      return Blockly.Lua.provideFunction_(funcnames, utilityfunctions[funcnames]);
+    }
+  }
+  </script>
+  
+  <!-- actions for base functionality of the hardware -->
+  <script src="base.js"></script>
+
+  <!-- separator -->
+  <script>toolbox.contents.push({"kind": "sep"});</script>
+
+  <!-- actions provided by the specific radio -->
+  <script src="radio/ic705.js"></script>
+
+
+  <!------------------ Rendering of the workspace code ----------------- -->
+  <script>
+
+    var blocklyArea = document.getElementById('blocklyArea');
+    var blocklyDiv = document.getElementById('blocklyDiv');
+    var icompadreWorkspace = Blockly.inject(blocklyDiv,
+        {media: './blockly/',
+        sounds: false, 
+        toolbox: toolbox,
+        grid:
+        {spacing: 20,
+          length: 3,
+          colour: '#ccc',
+          snap: true}});
+
+
+    var onresize = function(e) {
+      // Compute the absolute coordinates and dimensions of blocklyArea.
+      var element = blocklyArea;
+      var x = 0;
+      var y = 0;
+      do {
+        x += element.offsetLeft;
+        y += element.offsetTop;
+        element = element.offsetParent;
+      } while (element);
+
+      // Position blocklyDiv over blocklyArea.
+      blocklyDiv.style.left = x + 'px';
+      blocklyDiv.style.top = y + 'px';
+      blocklyDiv.style.width = blocklyArea.offsetWidth + 'px';
+      blocklyDiv.style.height = blocklyArea.offsetHeight + 'px';
+      Blockly.svgResize(icompadreWorkspace);
+    };
+    onresize();
+    document.body.classList.add('zoomin-animation');
+    window.addEventListener('resize', onresize, false);
+
+    // Load the latest project from the server
+    function openLastProjectFromServer()
+    {
+      fetch('/icompadre.json')
+        .then(
+          function(response) {
+            if (response.status !== 200) {
+              console.log('No previous workspace file found. Status ' + response.status);
+              return;
+            }
+
+            // Examine the text in the response
+            response.json().then(function(data) 
+            {
+              Blockly.serialization.workspaces.load(data, icompadreWorkspace);
+            });
+          }
+        )
+        .catch(function(err) {
+          // console.log('Fetch Error :-S', err);
+        });
+    }
+    openLastProjectFromServer();
+    
+    // ----------------import program or workspace --------------------
+    function showFileInWorkspace(aFile)
+    {
+      var reader = new FileReader();
+      reader.onload = function(loadedEvent) 
+      {
+          // result contains loaded file.
+          console.log(loadedEvent.target.result);
+          Blockly.serialization.workspaces.load(JSON.parse(loadedEvent.target.result), icompadreWorkspace);
+      }
+      reader.readAsText(aFile);
+    }
+    
+    // Triggered when the user clicks the upload buttin
+    function openFile(event) 
+    {
+      showFileInWorkspace(event.target.files[0])
+    }
+    
+    // Triggered when the user drops onto the upload button
+    function drop(evt) 
+    {
+      evt.stopPropagation();
+      evt.preventDefault();
+
+      showFileInWorkspace(event.dataTransfer.files[0])
+    }
+
+    function dragOver(evt) 
+    {
+        evt.stopPropagation();
+        evt.preventDefault();
+        evt.dataTransfer.dropEffect = 'copy';
+    }
+
+    var dropZone = document.getElementById("fileDropZone");
+    dropZone.addEventListener("dragover", dragOver, false);
+    dropZone.addEventListener("drop"    , drop    , false);
+
+    // -----------------export workspace--------------------
+    document.getElementById("export").addEventListener("click", function() {
+        if (window.event.ctrlKey) {
+            exportLua();
+        }
+        else
+        {
+            exportSketch();
+        }
+    });
+
+    // ------------- UI Functions -----------------
+    // Blinks an element one  
+    function blink(elementid, color) 
+    {
+        var element = document.getElementById(elementid);
+        element.style.transition = "background-color 0.2s ease";
+        element.style.backgroundColor = color;
+
+        setTimeout(function() {
+              element.style.transition = "background-color 0.2s ease";
+              element.style.backgroundColor = "";
+        }, 200);
+    }
+    // generate a blob for the lua file
+    function getLuaBlob()
+    {
+      var luaScript = Blockly.Lua.workspaceToCode(icompadreWorkspace);
+      var blob = new Blob([luaScript], {
+          type: "application/x-lua"
+      });
+
+      return blob;
+    }
+
+    // generate a blob for the sketch
+    function getSketchBlob()
+    {
+      var sketch = Blockly.serialization.workspaces.save(icompadreWorkspace);
+      var sketchString = JSON.stringify(sketch);
+      var blob = new Blob([sketchString], {
+          type: "application/json"
+      });
+
+      return blob;
+    }
+
+    // Export lua to Disk
+    function exportLua() 
+    {
+        saveAs(getLuaBlob(), "main.lua");
+    }
+
+    // Export sketch to Disk
+    function exportSketch() 
+    {
+        saveAs(getSketchBlob(), "icompadre.json");
+    }
+
+
+    // Uploads a file to the microcontroller
+    async function storeFile(filename, content)
+    {
+      await fetch(filename, {
+        method: "PUT", 
+        body: content
+      }).then(function (response) {
+        if (response.ok) {
+          blink("saveButton", "#90ee90"); // light green
+        } else {
+          blink("saveButton", "#ffcccb"); // light red
+        }
+      }); 
+    }
+
+    // Uploads the sketch and the lua file to the microcontroller
+    async function saveWorkspace() 
+    {
+      storeFile("/main.lua", getLuaBlob());
+      storeFile("/icompadre.json", getSketchBlob());
+    }
+
+
+
+    // Opens the sharing window
+    function openSharingWindow() 
+    {
+      var sketch = Blockly.serialization.workspaces.save(icompadreWorkspace);
+      var sketchString = "";
+
+      if (window.event.ctrlKey) 
+      {
+        sketchString = Blockly.Lua.workspaceToCode(icompadreWorkspace);
+      }
+      else
+      {
+        sketchString = JSON.stringify(sketch);
+      }
+
+      document.getElementById('codeArea').value = sketchString;
+      document.getElementById('codeModal').style.display = 'block';
+      document.getElementById('codeArea').select();
+    }
+
+    // Closes the sharing window
+    function closeSharingWindow() 
+    {
+      document.getElementById('codeModal').style.display = 'none';
+    }
+
+    // Loads code from the window
+    function importCodeIntoWorkspace() 
+    {
+      var currentSketch = Blockly.serialization.workspaces.save(icompadreWorkspace);
+      var newSketch = document.getElementById('codeArea').value;
+
+      try 
+      {
+        var newSketchObj = JSON.parse(newSketch); // No json - no import !
+        icompadreWorkspace.clear();
+        Blockly.serialization.workspaces.load(newSketchObj, icompadreWorkspace);
+      } 
+      catch (error) 
+      {
+        icompadreWorkspace.clear();
+        Blockly.serialization.workspaces.load(currentSketch, icompadreWorkspace);
+      }
+      document.getElementById('codeModal').style.display = 'none';
+    }
+
+    // Copies the current code into the clipboard
+    function copyCodeToClipboard() 
+    {
+      var theCode = document.getElementById('codeArea').value;
+      navigator.clipboard.writeText(theCode);
+    }
+
+    // Copies the current clipboard content into the code window
+    function pasteCodeFromClipboard() 
+    {
+        navigator.clipboard.readText().then(function(text) {
+          document.getElementById('codeArea').value = text;
+        });
+    }
+
+  </script>
+</html>

@@ -1,0 +1,94 @@
+html, body {
+    height: 100%;
+    margin: 0;
+  }
+  body {
+    background-color: #fff;
+    font-family: sans-serif;
+    overflow: hidden;
+  }
+  h1 {
+    font-weight: normal;
+    font-size: 140%;
+  }
+  table {
+    height: 100%;
+    width: 100%;
+  }
+  #blocklyArea {
+    height: 99%;
+  }
+
+  .header
+  {
+      min-height: 15%;
+      display: table-cell;
+      vertical-align: middle;
+      float:none;
+
+  }
+
+  .branding
+  {
+      float:left;
+  }
+
+  .action{
+      margin-left: 10px;
+      float:right;
+      margin-right: 10px;
+      border-radius: 10px;
+      border: 2px dashed #4b2869;
+  }
+
+  .action img{
+    width: 50px;
+  }
+  
+  #modalHeader .action {
+    width: 25px;
+    border-radius: 3px;
+    border: 1px dashed #4b2869 !important; 
+  }
+
+  #modalHeader .action img{
+    width: 25px;
+  }
+
+  #codeArea
+  {
+    font-family: monospace !important;
+    background-color: #ddd;
+  }
+
+  #file-input {
+    display: none;
+  }
+
+  #loading {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(255,255,255,0.8);
+    z-index: 9999;
+  }
+
+  #codeModal {
+    display: none; 
+    z-index: 9999; 
+    width: 50%; 
+    height: 50%; 
+    overflow: auto; 
+    background: white; 
+    position: fixed; 
+    top: 25%; 
+    left: 25%; 
+    border: solid 1px black; 
+    padding: 15px;
+    overflow: hidden;
+  }

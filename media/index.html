@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>loading iCOMpadre Studio ...</title>
+  <link rel="icon" href="favicon.png" type="image/png">
+  <style>
+    
+    body {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+      font-family: sans-serif;
+      overflow: hidden; /* Verhindert Scrollbars */
+    }
+      
+    #progress-meter {
+        display: flex;
+        align-items: flex-end;
+        width: 200px;
+        height: 100px;
+        position: relative;
+    }
+
+    #progress-container {
+      padding: 50 px;
+    }
+
+    #progress-container svg {
+      height: 100%
+    }
+
+    .bar {
+        width: 15px;
+        height: 100px; /* Höhe der Balken */
+        background-color: lightgray; /* Standardfarbe der Balken */
+        margin: 0 5px; /* Abstand zwischen den Balken */
+    }
+
+    @keyframes zoomin {
+      0% {
+          transform: scale(1);
+          opacity: 1;
+      }
+      100% {
+          transform: scale(3);
+          opacity: 0.0;
+      }
+    }
+
+    .zoomin-animation {
+        animation: zoomin 2s ease-in-out forwards;
+    }
+
+  </style>
+</head>
+<body>
+  <div id="progress-container">
+    <div id="loadingFileName">loading ...</div>
+    <svg width="60" height="100" viewBox="10 0 80 60" xmlns="http://www.w3.org/2000/svg" style="float: left; margin-right: 10px;">
+        <g id="layer1" transform="translate(-50.962684,-83.016309)" style="stroke-width:3.43958362;stroke-miterlimit:4;stroke-dasharray:none">
+            <path style="fill:none;stroke:#000000;stroke-width:3.43958362;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+                d="M 99.58209,181.60443 99.65364,96.358068" id="path819" />
+            <path style="fill:none;stroke:#000000;stroke-width:3.43958362;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+                d="M 99.58209,152.44086 135.02178,96.358071 H 64.285494 Z" id="path821" />
+        </g>
+    </svg>
+    <div id="progress-meter">
+        <span class="bar" id="bar1" style="height: 20%;"></span>
+        <span class="bar" id="bar2" style="height: 40%;"></span>
+        <span class="bar" id="bar3" style="height: 60%;"></span>
+        <span class="bar" id="bar4" style="height: 80%;"></span>
+        <span class="bar" id="bar5" style="height: 100%;"></span>
+    </div>
+  </div>
+
+  
+  <div>
+    <span style="font-size: large"><span style="font-weight: bold;"><span style="color: red;">i</span>COM</span>padre</span><br>
+    The swiss army knife for iCOM radios !<br>
+  </div>
+
+  <script>
+
+    /*
+    * Loads one single file from the server (into the browser cache)
+    */
+    function preloadFile(file) {
+        return new Promise((resolve, reject) => {
+            const xhr = new XMLHttpRequest();
+            document.getElementById('loadingFileName').innerHTML = "loading <br/>" + file.name;
+            xhr.open('GET', file.url, true);
+
+            xhr.onload = function() {
+                if (xhr.status === 200) {
+                    console.log(file.name + ' loaded successfully');
+                    resolve(file.url);
+                } else {
+                    reject('Error loading ' + file.name);
+                }
+            };
+
+            xhr.onerror = function() {
+                reject('Network error loading ' + file.name);
+            };
+
+            xhr.send();
+        });
+    }
+    
+    /*
+    * Updates the progressbar
+    */
+    function updateProgress(total, loaded) 
+    {
+        const progress = (loaded / total) * 100;
+        
+        // Umrechnen des Wertes (0-100) in die Anzahl der zu füllenden Balken
+        const totalBars = 5;
+        const barsToFill = Math.round((progress / 100) * totalBars);
+
+        for (let i = 1; i <= totalBars; i++) {
+            const bar = document.getElementById('bar' + i);
+            if (i <= barsToFill) {
+                bar.style.backgroundColor = 'red'; // Farbe für gefüllte Balken
+            } else {
+                bar.style.backgroundColor = 'lightgray'; // Farbe für nicht gefüllte Balken
+            }
+        }
+
+
+        // Forward to studio if finished :)
+        if(progress == 100)
+        {
+          document.body.classList.add('zoomin-animation');
+          setTimeout(() => {
+            window.location.href = './studio/index.html'; 
+          }, 2000);
+        }
+    }
+
+    /*
+    * Loads the given files sequentially tinto the browser cache
+    * This prevents problems with slow sd cards and cuncurrently too many open files
+    */
+    async function loadFilesSequentially() {
+        const filesToLoad = [
+            {"name":"gui framework",          "url":"studio/blockly/blockly_compressed.js"},
+            {"name":"default blocks",         "url":"studio/blockly/blocks_compressed.js"},
+            {"name":"english language files", "url":"studio/blockly/en.js"},
+            {"name":"compiler",               "url":"studio/blockly/lua_compressed.js"},
+            {"name":"images",                 "url":"studio/blockly/sprites.png"},
+            {"name":"images",                 "url":"studio/img/close.svg"},
+            {"name":"images",                 "url":"studio/img/copy.svg"},
+            {"name":"images",                 "url":"studio/img/export.svg"},
+            {"name":"images",                 "url":"studio/img/import.svg"},
+            {"name":"images",                 "url":"studio/img/open.svg"},
+            {"name":"images",                 "url":"studio/img/paste.svg"},
+            {"name":"images",                 "url":"studio/img/save.svg"},
+            {"name":"images",                 "url":"studio/img/share.svg"},
+            {"name":"base functionality",     "url":"studio/base.js"},
+            {"name":"radio functionality",    "url":"studio/radio/ic705.js"},
+        ];
+
+        let loadedFiles = 0;
+
+        for (const file of filesToLoad) {
+            try {
+                await preloadFile(file);
+                loadedFiles++;
+                updateProgress(filesToLoad.length, loadedFiles);
+            } catch (error) {
+                console.error(error);
+                break; // Stoppt die Schleife im Fehlerfall
+                return false;
+            }
+        }
+
+        console.log('All files loaded');
+        document.getElementById('loadingFileName').textContent = "All files loaded";
+    }
+
+    // Preload the files
+    loadFilesSequentially()
+    
+    
+  </script>
+</body>
+</html>
