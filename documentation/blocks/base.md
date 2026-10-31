@@ -133,8 +133,37 @@ The time since iCOMpadre was started, in milliseconds. Useful to measure how lon
 
 ## <span style="color:#5fa8c9">■</span> Radio {#radio}
 
-With these blocks you can send any CI-V command to the radio, even if there is no ready-made block for it in the category of your radio.
+With these blocks you select the radio iCOMpadre talks to, and you can send any CI-V command to it, even if there is no ready-made block for it in the category of your radio.
 The commands are described in the *CI-V reference guide* of your radio. Commands and answers are [lists](lists.md) of numbers.
+
+### Connect to radio {#connect_radio}
+
+![Connect to radio block](img/connect_radio.png){ width="390" }
+
+Selects the radio iCOMpadre talks to, and how it is connected:
+
+* **Bluetooth** for the IC-705, which has no REMOTE jack. This is what iCOMpadre does if there is no *Connect* block.
+* **cable** for all other radios: connect the REMOTE jack of the radio to iCOMpadre with a mono cable (see [Radios](../../radios.md)). Choose the baud rate which is set as *CI-V Baud Rate* in the menu of the radio, or set the radio to *Auto*.
+
+The block uses the default CI-V address of the radio, e.g. 94h for the IC-7300. Put it into [OnStartup](#onstartup), so it is executed before iCOMpadre talks to the radio.
+
+??? info "Lua code"
+    ```lua
+    configCIV(0x98, "cable", 19200)   -- IC-7610 at the REMOTE jack
+    configCIV(0xA4, "bluetooth")      -- IC-705
+    ```
+
+### Connect to CI-V address {#connect_address}
+
+![Connect to CI-V address block](img/connect_address.png){ width="403" }
+
+Like [Connect to radio](#connect_radio), but with the CI-V address in hex (01 ~ DF), as it is set in the menu of the radio.
+You need it if you changed the address, e.g. because two radios of the same type share the CI-V bus.
+
+??? info "Lua code"
+    ```lua
+    configCIV(0x96, "cable", 9600)
+    ```
 
 ### Send command to radio {#sendcommand}
 

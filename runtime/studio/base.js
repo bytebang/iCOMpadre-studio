@@ -312,6 +312,78 @@ program.property("millis");
 /*           RADIO: Raw CI-V communication with the radio           */
 /* **************************************************************** */
 
+// The connections to a radio: bluetooth (IC-705) or the cable at the REMOTE jack with a baud rate
+var CIV_CONNECTIONS = [["cable (19200 baud)", "cable/19200"], ["cable (9600 baud)", "cable/9600"],
+                       ["cable (4800 baud)", "cable/4800"], ["cable (1200 baud)", "cable/1200"], ["Bluetooth", "bluetooth"]];
+
+// Lua arguments of configCIV() for the connection: "bluetooth" or "cable", 19200
+function civConnection(value)
+{
+  var parts = value.split('/');
+  return parts[0] == 'cable' ? '"cable", ' + parts[1] : '"bluetooth"';
+}
+
+// Selects the radio by its default CI-V address and the connection to it.
+// Lua: configCIV(address, connection, baud)
+Blockly.Blocks['connect_radio'] = {
+  init: function() {
+    this.jsonInit({
+      "message0": "Connect to %1 via %2",
+      "args0": [
+        {
+          "type": "field_dropdown",
+          "name": "RADIO",
+          "options": [["IC-7300 (94h)", "0x94"], ["IC-705 (A4h)", "0xA4"], ["IC-7610 (98h)", "0x98"], ["IC-7851 (8Eh)", "0x8E"],
+                      ["IC-9700 (A2h)", "0xA2"], ["IC-7100 (88h)", "0x88"], ["IC-718 (5Eh)", "0x5E"], ["IC-78 (62h)", "0x62"],
+                      ["IC-2730 (90h)", "0x90"], ["IC-A120E (92h)", "0x92"]]
+        },
+        {"type": "field_dropdown", "name": "CONNECTION", "options": CIV_CONNECTIONS}
+      ],
+      "previousStatement": null,
+      "nextStatement": null,
+      "tooltip": "Selects the radio iCOMpadre talks to, with the default CI-V address of the radio. " +
+                 "Put it into OnStartup. Without this block iCOMpadre talks to an IC-705 via Bluetooth"
+    });
+  }
+};
+
+Blockly.Lua.forBlock['connect_radio'] = function(block) {
+  return 'configCIV(' + block.getFieldValue('RADIO') + ', ' + civConnection(block.getFieldValue('CONNECTION')) + ')\n';
+};
+
+radio.action("connect_radio");
+
+//-------------------------------------------------------------------
+// Selects the radio by any CI-V address, e.g. if two radios of the same type are on the bus.
+// Lua: configCIV(address, connection, baud)
+Blockly.Blocks['connect_address'] = {
+  init: function() {
+    this.jsonInit({
+      "message0": "Connect to CI-V address %1 h via %2",
+      "args0": [
+        {"type": "field_input", "name": "ADDRESS", "text": "A4"},
+        {"type": "field_dropdown", "name": "CONNECTION", "options": CIV_CONNECTIONS}
+      ],
+      "previousStatement": null,
+      "nextStatement": null,
+      "tooltip": "Selects the radio iCOMpadre talks to by its CI-V address in hex (01 ~ DF), as it is set in the menu of the radio. " +
+                 "Put it into OnStartup"
+    });
+    this.getField('ADDRESS').setValidator(function(text) {
+      var hex = text.trim().toUpperCase().replace(/^0X/, '').replace(/H$/, '');
+      var number = parseInt(hex, 16);
+      return (/^[0-9A-F]{1,2}$/.test(hex) && number >= 0x01 && number <= 0xDF) ? hex : null;
+    });
+  }
+};
+
+Blockly.Lua.forBlock['connect_address'] = function(block) {
+  return 'configCIV(0x' + block.getFieldValue('ADDRESS') + ', ' + civConnection(block.getFieldValue('CONNECTION')) + ')\n';
+};
+
+radio.action("connect_address");
+
+//-------------------------------------------------------------------
 // Sends a raw CI-V command (and optional data) to the radio.
 // Lua: sendCommand(cmd, data)
 Blockly.Blocks['sendcommand'] = {
