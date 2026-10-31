@@ -400,6 +400,7 @@
     // Called (debounced) whenever the sketch changes
     function onSketchChanged()
     {
+      Studio.checkEvents(icompadreWorkspace);
       updateLuaPanel();
       if (savedSketch === null)
       {

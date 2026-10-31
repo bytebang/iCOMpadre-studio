@@ -20,6 +20,10 @@ The blocks of the radios (e.g. [IC-705](radio/ic705.md)) are blue as well, becau
 
 Events start your program, the other blocks control when something happens.
 
+!!! warning "Every event only once"
+    Each event block (OnStartup, Periodically, OnRadioConnected, ...) may only be once in a program. If there are two of them,
+    only one is executed, and the studio shows a warning at both. Put all blocks into one of them and delete the others.
+
 ### OnStartup {#onstartup}
 
 ![OnStartup block](img/onstartup.png){ width="96" }

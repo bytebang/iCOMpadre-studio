@@ -127,6 +127,25 @@ def main():
         page.wait("!isDirty() && !saving")
         check("ctrl+s saves", "periodically" in open(server.file("icompadre.json"), encoding="utf-8").read())
 
+        # an event block twice: both get a warning, until one of them is deleted or disabled
+        warned = "icompadreWorkspace.getBlocksByType('periodically').filter(function(b) { return b.hasIcon(Blockly.icons.IconType.WARNING); }).length"
+        check("one Periodically block has no warning", page.eval(warned) == 0, page.eval(warned))
+        add_block({"type": "periodically", "x": 400, "y": 400})
+        page.wait(warned + " == 2")
+        check("two Periodically blocks both get a warning", True)
+        page.eval("icompadreWorkspace.getBlocksByType('periodically')[1].setDisabledReason(true, 'MANUALLY_DISABLED')")
+        page.wait(warned + " == 0")
+        check("a disabled second block doesn't count", True)
+        page.eval("icompadreWorkspace.getBlocksByType('periodically')[1].setDisabledReason(false, 'MANUALLY_DISABLED')")
+        page.wait(warned + " == 2")
+        page.eval("icompadreWorkspace.getBlocksByType('periodically')[1].dispose()")
+        page.wait(warned + " == 0")
+        check("the warning is gone when the second block is deleted", True)
+        changes = page.eval("new Promise(function(resolve) { var n = 0; var count = function(e) { if (!e.isUiEvent) n++; };"
+                            " icompadreWorkspace.addChangeListener(count);"
+                            " setTimeout(function() { icompadreWorkspace.removeChangeListener(count); resolve(n); }, 1500); })")
+        check("the warnings cause no further changes", changes == 0, changes)
+
         problems = page.problems(ignore=("Saving failed",))  # the failed saves above are logged on purpose
         check("no console problems", not problems, problems)
 

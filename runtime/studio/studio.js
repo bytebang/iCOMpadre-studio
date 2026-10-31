@@ -59,6 +59,7 @@ var Studio = (function() {
 
   var contributions = [];   // categories and separators in registration order
   var luaFunctions = {};    // name -> array of lua source lines
+  var eventTypes = [];      // block types registered with .event()
 
   // Returns the help page of the block file which is currently executed, or null for inline scripts
   function helpPageOfCurrentScript()
@@ -119,6 +120,10 @@ var Studio = (function() {
     {
       return function(blocktype, toolboxEntry) {
         container.sections[key].push(Object.assign({"kind": "block", "type": blocktype}, toolboxEntry || {}));
+        if (key == "events")
+        {
+          eventTypes.push(blocktype);
+        }
         return handle;
       };
     }
@@ -264,11 +269,34 @@ var Studio = (function() {
     return {"kind": "categoryToolbox", "contents": contents};
   }
 
+  /**
+   * Warns at event blocks which are on the workspace more than once. Every event block becomes a lua function
+   * (e.g. function periodically()), and a second function with the same name replaces the first one, so only
+   * one of the blocks would be executed. Disabled blocks don't count, they generate no code.
+   * Called by index.html whenever the sketch changes.
+   * @param {Blockly.Workspace} workspace the workspace of the sketch
+   */
+  function checkEvents(workspace)
+  {
+    var blocks = workspace.getTopBlocks(false).filter(function(block) {
+      return eventTypes.indexOf(block.type) >= 0;
+    });
+    blocks.forEach(function(block) {
+      var twins = blocks.filter(function(other) {
+        return other.type == block.type && other.isEnabled();
+      });
+      var duplicate = block.isEnabled() && twins.length > 1;
+      block.setWarningText(duplicate ? "This block is " + twins.length + " times in the program,\nbut only one of them is executed.\n" +
+                                       "Put all blocks into one of them\nand delete the others." : null, "duplicate-event");
+    });
+  }
+
   return {
     "category": category,
     "separator": separator,
     "luaFunction": luaFunction,
     "use": use,
     "buildToolbox": buildToolbox,
+    "checkEvents": checkEvents,
   };
 })();
