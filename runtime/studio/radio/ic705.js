@@ -1518,7 +1518,8 @@ ic705Gps.helper("ic705_locator");
 // Functions which can be switched on and off with command 16 (p. 4)
 var IC705_FUNCTIONS = [["Noise Blanker", "0x22"], ["Noise Reduction", "0x40"], ["Auto Notch", "0x41"],
                        ["Manual Notch", "0x48"], ["Speech Compressor", "0x44"], ["Monitor", "0x45"], ["VOX", "0x46"],
-                       ["Repeater Tone", "0x42"], ["Tone Squelch", "0x43"], ["Dial Lock", "0x50"]];
+                       ["Repeater Tone", "0x42"], ["Tone Squelch", "0x43"], ["DTCS", "0x4B"], ["Twin Peak Filter", "0x4F"],
+                       ["Dial Lock", "0x50"]];
 
 // CI-V: 16 xx + 00 (off) / 01 (on) (p. 4)
 Blockly.Blocks['ic705_switch_function'] = {
@@ -1631,3 +1632,545 @@ Blockly.Lua.forBlock['ic705_get_lcd_brightness'] = function(block) {
 };
 
 ic705Settings.property("ic705_get_lcd_brightness");
+
+/* **************************************************************** */
+/*                MORE SETTINGS                                     */
+/* **************************************************************** */
+// Levels and settings which are used less often. Settings of the menu which have no own block
+// can be changed with the blocks "Set Menu Setting" and "Menu Setting".
+
+// Converts a value between min and max into the 2 byte BCD level 0000 ~ 0255
+Studio.luaFunction('ic705Level', [
+  'function ic705Level(value, min, max)',
+  '  value = math.max(min, math.min(max, value))',
+  '  return numberToBcd(math.floor((value - min) * 255 / (max - min) + 0.5), 2)',
+  'end'
+], ['numberToBcd']);
+
+// Reads a level 0000 ~ 0255 and converts it into a value between min and max, rounded to 0.1
+Studio.luaFunction('ic705ReadLevel', [
+  'function ic705ReadLevel(cmd, min, max)',
+  '  return math.floor((min + ic705ReadNumber(cmd) * (max - min) / 255) * 10 + 0.5) / 10',
+  'end'
+], ['ic705ReadNumber']);
+
+// Name of the first byte of the answer, "" if there is no answer yet. names maps the byte to the name.
+Studio.luaFunction('ic705ReadName', [
+  'function ic705ReadName(cmd, names)',
+  '  local d = ic705Query(cmd)',
+  '  if d[1] == nil then return "" end',
+  '  return names[d[1]] or ""',
+  'end'
+], ['ic705Query']);
+
+// Data of the DTCS code (e.g. 23 for code 023) and the polarity (command 1B 02, p. 21)
+Studio.luaFunction('ic705DtcsData', [
+  'function ic705DtcsData(code, polarity)',
+  '  local s = string.format("%03d", math.max(0, math.min(777, math.floor(code))))',
+  '  return {polarity, tonumber(s:sub(1, 1)), tonumber(s:sub(2, 2)) * 16 + tonumber(s:sub(3, 3))}',
+  'end'
+]);
+
+// Reads the DTCS code (e.g. 23 for code 023), 0 if there is no answer yet
+Studio.luaFunction('ic705ReadDtcs', [
+  'function ic705ReadDtcs()',
+  '  local d = ic705Query({0x1B, 0x02})',
+  '  if #d < 3 then return 0 end',
+  '  return (d[2] % 16) * 100 + math.floor(d[3] / 16) * 10 + d[3] % 16',
+  'end'
+], ['ic705Query']);
+
+// The command of a menu setting: 1A 05 + the number of the setting as 2 bytes BCD, e.g. 0029
+Studio.luaFunction('ic705MenuCmd', [
+  'function ic705MenuCmd(item)',
+  '  local b = numberToBcd(item, 2)',
+  '  return {0x1A, 0x05, b[1], b[2]}',
+  'end'
+], ['numberToBcd']);
+
+// Levels 0 ~ 100 % of command 14 (p. 3 and 4)
+var IC705_LEVELS = [["NR level", "0x06"], ["NB level", "0x12"], ["inner PBT (PBT1)", "0x07"], ["outer PBT (PBT2)", "0x08"],
+                    ["manual notch position", "0x0D"], ["monitor level", "0x15"], ["VOX gain", "0x16"], ["anti-VOX gain", "0x17"]];
+
+// CI-V: 14 xx + 0000 ~ 0255 (p. 3 and 4)
+Blockly.Blocks['ic705_set_level'] = {
+  init: function() {
+    this.jsonInit({
+      "message0": "Set %1 to %2 %%",
+      "args0": [
+        {"type": "field_dropdown", "name": "LEVEL", "options": IC705_LEVELS},
+        {"type": "input_value", "name": "VALUE", "check": "Number"}
+      ],
+      "inputsInline": true,
+      "previousStatement": null,
+      "nextStatement": null,
+      "tooltip": "Sets a level in %. For the PBT and the notch position 50 % is the center"
+    });
+  },
+  onchange: function() {
+    ic705CheckRange(this, 'VALUE', 0, 100, "The level must be between 0 and 100%");
+  }
+};
+
+Blockly.Lua.forBlock['ic705_set_level'] = function(block) {
+  Studio.use(['ic705Percent']);
+  return 'sendCommand({0x14, ' + block.getFieldValue('LEVEL') + '}, ic705Percent(' + ic705Value(block, 'VALUE') + '))\n';
+};
+
+ic705Settings.action("ic705_set_level");
+
+//-------------------------------------------------------------------
+// CI-V: 14 xx -> 0000 ~ 0255 (p. 3 and 4)
+Blockly.Blocks['ic705_get_level'] = {
+  init: function() {
+    this.jsonInit({
+      "message0": "%1",
+      "args0": [
+        {"type": "field_dropdown", "name": "LEVEL", "options": IC705_LEVELS}
+      ],
+      "output": "Number",
+      "tooltip": "Reads a level (in %)"
+    });
+  }
+};
+
+Blockly.Lua.forBlock['ic705_get_level'] = function(block) {
+  Studio.use(['ic705ReadPercent']);
+  return ['ic705ReadPercent({0x14, ' + block.getFieldValue('LEVEL') + '})', lua.Order.HIGH];
+};
+
+ic705Settings.property("ic705_get_level");
+
+//-------------------------------------------------------------------
+// A setting of command 16 with more than on/off: a block to set it and one to read it.
+// CI-V: 16 xx + value, 16 xx -> value (p. 4)
+function ic705Choice(suffix, label, sub, options, tooltip, group)
+{
+  Blockly.Blocks['ic705_set_' + suffix] = {
+    init: function() {
+      this.jsonInit({
+        "message0": "Set " + label + " to %1",
+        "args0": [
+          {"type": "field_dropdown", "name": "VALUE", "options": options}
+        ],
+        "previousStatement": null,
+        "nextStatement": null,
+        "tooltip": tooltip
+      });
+    }
+  };
+
+  Blockly.Lua.forBlock['ic705_set_' + suffix] = function(block) {
+    return 'sendCommand({0x16, ' + sub + '}, {' + block.getFieldValue('VALUE') + '})\n';
+  };
+
+  Blockly.Blocks['ic705_get_' + suffix] = {
+    init: function() {
+      this.jsonInit({
+        "message0": label,
+        "output": "String",
+        "tooltip": "Reads the " + label + ": " + options.map(function(option) { return option[0]; }).join(", ")
+      });
+    }
+  };
+
+  Blockly.Lua.forBlock['ic705_get_' + suffix] = function(block) {
+    Studio.use(['ic705ReadName']);
+    var names = options.map(function(option) { return '[' + parseInt(option[1], 16) + '] = "' + option[0] + '"'; });
+    return ['ic705ReadName({0x16, ' + sub + '}, {' + names.join(', ') + '})', lua.Order.HIGH];
+  };
+
+  group.action('ic705_set_' + suffix);
+  group.property('ic705_get_' + suffix);
+}
+
+// CI-V: 16 56 + 00 (SHARP) / 01 (SOFT) (p. 4)
+ic705Choice('dsp_filter_type', 'DSP Filter Type', '0x56', [["SHARP", "0x00"], ["SOFT", "0x01"]],
+            "Sets the shape of the DSP IF filter in the operating band", ic705Receiver);
+
+// CI-V: 16 57 + 00 (WIDE) / 01 (MID) / 02 (NAR) (p. 4)
+ic705Choice('notch_width', 'Manual Notch Width', '0x57', [["WIDE", "0x00"], ["MID", "0x01"], ["NAR", "0x02"]],
+            "Sets the width of the manual notch filter", ic705Receiver);
+
+// CI-V: 16 5B + 00 (OFF) / 01 (DSQL) / 02 (CSQL) (p. 4)
+ic705Choice('digital_squelch', 'Digital Squelch', '0x5B', [["OFF", "0x00"], ["DSQL", "0x01"], ["CSQL", "0x02"]],
+            "Sets the digital call sign squelch (DSQL) or the digital code squelch (CSQL). DV mode only", ic705Receiver);
+
+// CI-V: 16 5D + 00 ~ 03, 06 ~ 09 (p. 4)
+ic705Choice('tone_function', 'Tone Function', '0x5D',
+            [["OFF", "0x00"], ["TONE", "0x01"], ["TSQL", "0x02"], ["DTCS", "0x03"], ["DTCS(T)", "0x06"],
+             ["TONE(T)/DTCS(R)", "0x07"], ["DTCS(T)/TSQL(R)", "0x08"], ["TONE(T)/TSQL(R)", "0x09"]],
+            "Selects the repeater tone, tone squelch or DTCS function (FM mode)", ic705Transmit);
+
+// CI-V: 16 58 + 00 (WIDE) / 01 (MID) / 02 (NAR) (p. 4)
+ic705Choice('ssb_tx_bandwidth', 'SSB TX Bandwidth', '0x58', [["WIDE", "0x00"], ["MID", "0x01"], ["NAR", "0x02"]],
+            "Selects the SSB transmit bandwidth", ic705Transmit);
+
+// CI-V: 16 47 + 00 (OFF) / 01 (semi) / 02 (full) (p. 4)
+ic705Choice('break_in', 'Break-In', '0x47', [["OFF", "0x00"], ["semi", "0x01"], ["full", "0x02"]],
+            "Sets the CW break-in function: off, semi or full break-in", ic705CwVoice);
+
+// CI-V: 16 5C + 00 (OFF) / 01 (D-PRS) / 02 (NMEA) (p. 4)
+ic705Choice('gps_tx_mode', 'GPS TX Mode', '0x5C', [["OFF", "0x00"], ["D-PRS", "0x01"], ["NMEA", "0x02"]],
+            "Selects which position data is transmitted in DV mode", ic705Gps);
+
+//-------------------------------------------------------------------
+// CI-V: 14 0E + 0000 = 0 ~ 0255 = 10 (p. 4)
+Blockly.Blocks['ic705_set_comp_level'] = {
+  init: function() {
+    this.jsonInit({
+      "message0": "Set Compressor Level to %1",
+      "args0": [
+        {"type": "input_value", "name": "LEVEL", "check": "Number"}
+      ],
+      "inputsInline": true,
+      "previousStatement": null,
+      "nextStatement": null,
+      "tooltip": "Sets the level of the speech compressor (0 ~ 10)"
+    });
+  },
+  onchange: function() {
+    ic705CheckRange(this, 'LEVEL', 0, 10, "The compressor level must be between 0 and 10");
+  }
+};
+
+Blockly.Lua.forBlock['ic705_set_comp_level'] = function(block) {
+  Studio.use(['ic705Level']);
+  return 'sendCommand({0x14, 0x0E}, ic705Level(' + ic705Value(block, 'LEVEL') + ', 0, 10))\n';
+};
+
+ic705Transmit.action("ic705_set_comp_level");
+
+//-------------------------------------------------------------------
+// CI-V: 14 0E -> 0000 = 0 ~ 0255 = 10 (p. 4)
+Blockly.Blocks['ic705_get_comp_level'] = {
+  init: function() {
+    this.jsonInit({
+      "message0": "Compressor Level",
+      "output": "Number",
+      "tooltip": "Reads the level of the speech compressor (0 ~ 10)"
+    });
+  }
+};
+
+Blockly.Lua.forBlock['ic705_get_comp_level'] = function(block) {
+  Studio.use(['ic705ReadLevel']);
+  return ['ic705ReadLevel({0x14, 0x0E}, 0, 10)', lua.Order.HIGH];
+};
+
+ic705Transmit.property("ic705_get_comp_level");
+
+//-------------------------------------------------------------------
+// Tone squelch frequency.
+// CI-V: 1B 01 + 3 bytes BCD in 0.1 Hz (p. 14 and 21)
+Blockly.Blocks['ic705_set_tsql_frequency'] = {
+  init: function() {
+    this.jsonInit({
+      "message0": "Set Tone Squelch to %1 Hz",
+      "args0": [
+        {"type": "input_value", "name": "TONE", "check": "Number"}
+      ],
+      "inputsInline": true,
+      "previousStatement": null,
+      "nextStatement": null,
+      "tooltip": "Sets the frequency of the tone squelch (CTCSS), e.g. 88.5 Hz"
+    });
+  },
+  onchange: function() {
+    ic705CheckRange(this, 'TONE', 67, 254.1, "The tone squelch frequency must be between 67.0 and 254.1 Hz");
+  }
+};
+
+Blockly.Lua.forBlock['ic705_set_tsql_frequency'] = function(block) {
+  Studio.use(['numberToBcd']);
+  return 'sendCommand({0x1B, 0x01}, numberToBcd(math.floor(' + ic705Value(block, 'TONE', lua.Order.MULTIPLICATIVE) + ' * 10 + 0.5), 3))\n';
+};
+
+ic705Transmit.action("ic705_set_tsql_frequency");
+
+//-------------------------------------------------------------------
+// CI-V: 1B 02 + polarity, 0 + first digit, second + third digit (p. 14 and 21)
+Blockly.Blocks['ic705_set_dtcs_code'] = {
+  init: function() {
+    this.jsonInit({
+      "message0": "Set DTCS Code to %1 polarity %2",
+      "args0": [
+        {"type": "input_value", "name": "CODE", "check": "Number"},
+        {
+          "type": "field_dropdown",
+          "name": "POLARITY",
+          "options": [["normal", "0x00"], ["TX reverse", "0x10"], ["RX reverse", "0x01"], ["TX and RX reverse", "0x11"]]
+        }
+      ],
+      "inputsInline": true,
+      "previousStatement": null,
+      "nextStatement": null,
+      "tooltip": "Sets the DTCS code (e.g. 23 for code 023, digits 0 ~ 7) and its polarity"
+    });
+  },
+  onchange: function() {
+    var input = this.getInputTargetBlock('CODE');
+    var code = (input && input.type == 'math_number') ? input.getFieldValue('NUM') : null;
+    this.setWarningText(code !== null && !/^[0-7]{1,3}$/.test(code) ? "A DTCS code has up to 3 digits from 0 to 7, e.g. 23" : null);
+  }
+};
+
+Blockly.Lua.forBlock['ic705_set_dtcs_code'] = function(block) {
+  Studio.use(['ic705DtcsData']);
+  return 'sendCommand({0x1B, 0x02}, ic705DtcsData(' + ic705Value(block, 'CODE') + ', ' + block.getFieldValue('POLARITY') + '))\n';
+};
+
+ic705Transmit.action("ic705_set_dtcs_code");
+
+//-------------------------------------------------------------------
+// CI-V: 1B 02 -> polarity, 0 + first digit, second + third digit (p. 14 and 21)
+Blockly.Blocks['ic705_get_dtcs_code'] = {
+  init: function() {
+    this.jsonInit({
+      "message0": "DTCS Code",
+      "output": "Number",
+      "tooltip": "Reads the DTCS code, e.g. 23 for code 023"
+    });
+  }
+};
+
+Blockly.Lua.forBlock['ic705_get_dtcs_code'] = function(block) {
+  Studio.use(['ic705ReadDtcs']);
+  return ['ic705ReadDtcs()', lua.Order.HIGH];
+};
+
+ic705Transmit.property("ic705_get_dtcs_code");
+
+//-------------------------------------------------------------------
+// CI-V: 1B 07 + 00 ~ 99 (p. 14 and 22)
+Blockly.Blocks['ic705_set_csql_code'] = {
+  init: function() {
+    this.jsonInit({
+      "message0": "Set Digital Code Squelch to %1",
+      "args0": [
+        {"type": "input_value", "name": "CODE", "check": "Number"}
+      ],
+      "inputsInline": true,
+      "previousStatement": null,
+      "nextStatement": null,
+      "tooltip": "Sets the code of the digital code squelch (CSQL) in DV mode (0 ~ 99)"
+    });
+  },
+  onchange: function() {
+    ic705CheckRange(this, 'CODE', 0, 99, "The code must be between 0 and 99");
+  }
+};
+
+Blockly.Lua.forBlock['ic705_set_csql_code'] = function(block) {
+  Studio.use(['numberToBcd']);
+  return 'sendCommand({0x1B, 0x07}, numberToBcd(' + ic705Value(block, 'CODE') + ', 1))\n';
+};
+
+ic705Transmit.action("ic705_set_csql_code");
+
+//-------------------------------------------------------------------
+// CI-V: 14 09 + 0000 = 300 Hz ~ 0255 = 900 Hz (p. 4)
+Blockly.Blocks['ic705_set_cw_pitch'] = {
+  init: function() {
+    this.jsonInit({
+      "message0": "Set CW Pitch to %1 Hz",
+      "args0": [
+        {"type": "input_value", "name": "PITCH", "check": "Number"}
+      ],
+      "inputsInline": true,
+      "previousStatement": null,
+      "nextStatement": null,
+      "tooltip": "Sets the CW pitch (300 ~ 900 Hz)"
+    });
+  },
+  onchange: function() {
+    ic705CheckRange(this, 'PITCH', 300, 900, "The CW pitch must be between 300 and 900 Hz");
+  }
+};
+
+Blockly.Lua.forBlock['ic705_set_cw_pitch'] = function(block) {
+  Studio.use(['ic705Level']);
+  return 'sendCommand({0x14, 0x09}, ic705Level(' + ic705Value(block, 'PITCH') + ', 300, 900))\n';
+};
+
+ic705CwVoice.action("ic705_set_cw_pitch");
+
+//-------------------------------------------------------------------
+// CI-V: 14 0F + 0000 = 2.0 d ~ 0255 = 13.0 d (p. 4)
+Blockly.Blocks['ic705_set_break_in_delay'] = {
+  init: function() {
+    this.jsonInit({
+      "message0": "Set Break-In Delay to %1 dots",
+      "args0": [
+        {"type": "input_value", "name": "DELAY", "check": "Number"}
+      ],
+      "inputsInline": true,
+      "previousStatement": null,
+      "nextStatement": null,
+      "tooltip": "Sets the delay of the semi break-in (2.0 ~ 13.0 dots)"
+    });
+  },
+  onchange: function() {
+    ic705CheckRange(this, 'DELAY', 2, 13, "The break-in delay must be between 2.0 and 13.0 dots");
+  }
+};
+
+Blockly.Lua.forBlock['ic705_set_break_in_delay'] = function(block) {
+  Studio.use(['ic705Level']);
+  return 'sendCommand({0x14, 0x0F}, ic705Level(' + ic705Value(block, 'DELAY') + ', 2, 13))\n';
+};
+
+ic705CwVoice.action("ic705_set_break_in_delay");
+
+//-------------------------------------------------------------------
+// CI-V: 14 09 -> 0000 = 300 Hz ~ 0255 = 900 Hz (p. 4)
+Blockly.Blocks['ic705_get_cw_pitch'] = {
+  init: function() {
+    this.jsonInit({
+      "message0": "CW Pitch",
+      "output": "Number",
+      "tooltip": "Reads the CW pitch (in Hz)"
+    });
+  }
+};
+
+Blockly.Lua.forBlock['ic705_get_cw_pitch'] = function(block) {
+  Studio.use(['ic705ReadNumber']);
+  return ['math.floor(300 + ic705ReadNumber({0x14, 0x09}) * 600 / 255 + 0.5)', lua.Order.HIGH];
+};
+
+ic705CwVoice.property("ic705_get_cw_pitch");
+
+//-------------------------------------------------------------------
+// CI-V: 14 0F -> 0000 = 2.0 d ~ 0255 = 13.0 d (p. 4)
+Blockly.Blocks['ic705_get_break_in_delay'] = {
+  init: function() {
+    this.jsonInit({
+      "message0": "Break-In Delay",
+      "output": "Number",
+      "tooltip": "Reads the delay of the semi break-in (in dots)"
+    });
+  }
+};
+
+Blockly.Lua.forBlock['ic705_get_break_in_delay'] = function(block) {
+  Studio.use(['ic705ReadLevel']);
+  return ['ic705ReadLevel({0x14, 0x0F}, 2, 13)', lua.Order.HIGH];
+};
+
+ic705CwVoice.property("ic705_get_break_in_delay");
+
+//-------------------------------------------------------------------
+// CI-V: 15 05 -> 00 (closed) / 01 (open) (p. 4)
+Blockly.Blocks['ic705_is_tone_squelch_open'] = {
+  init: function() {
+    this.jsonInit({
+      "message0": "Is Tone Squelch open?",
+      "output": "Boolean",
+      "tooltip": "True if the tone squelch (or DTCS, DSQL, CSQL) is open, i.e. a matching signal is received"
+    });
+  }
+};
+
+Blockly.Lua.forBlock['ic705_is_tone_squelch_open'] = function(block) {
+  Studio.use(['ic705ReadOn']);
+  return ['ic705ReadOn({0x15, 0x05})', lua.Order.HIGH];
+};
+
+ic705Receiver.property("ic705_is_tone_squelch_open");
+
+//-------------------------------------------------------------------
+// CI-V: 15 07 -> 00 (OVF off) / 01 (OVF on) (p. 4)
+Blockly.Blocks['ic705_is_overflow'] = {
+  init: function() {
+    this.jsonInit({
+      "message0": "Is Overflow?",
+      "output": "Boolean",
+      "tooltip": "True if the OVF indicator is on, i.e. the receiver is overloaded by a strong signal"
+    });
+  }
+};
+
+Blockly.Lua.forBlock['ic705_is_overflow'] = function(block) {
+  Studio.use(['ic705ReadOn']);
+  return ['ic705ReadOn({0x15, 0x07})', lua.Order.HIGH];
+};
+
+ic705Meters.property("ic705_is_overflow");
+
+//-------------------------------------------------------------------
+// CI-V: 15 14 -> 0000 = 0 dB, 0130 = 15 dB, 0210 = 25.5 dB (p. 4)
+Blockly.Blocks['ic705_get_comp_meter'] = {
+  init: function() {
+    this.jsonInit({
+      "message0": "Compression",
+      "output": "Number",
+      "tooltip": "Reads the COMP meter while transmitting with the speech compressor (in dB)"
+    });
+  }
+};
+
+Blockly.Lua.forBlock['ic705_get_comp_meter'] = function(block) {
+  Studio.use(['ic705Meter']);
+  return ['ic705Meter({0x15, 0x14}, {{0, 0}, {130, 15}, {210, 25.5}})', lua.Order.HIGH];
+};
+
+ic705Meters.property("ic705_get_comp_meter");
+
+//-------------------------------------------------------------------
+// Any setting of the menu. The number of the setting is in the CI-V reference guide, e.g. 0029 for the beep level.
+// CI-V: 1A 05 + number of the setting (2 bytes BCD) + value (BCD) (p. 5 ~ 13)
+Blockly.Blocks['ic705_set_menu'] = {
+  init: function() {
+    this.jsonInit({
+      "message0": "Set Menu Setting %1 to %2 %3",
+      "args0": [
+        {"type": "input_value", "name": "ITEM", "check": "Number"},
+        {"type": "input_value", "name": "VALUE", "check": "Number"},
+        {"type": "field_dropdown", "name": "BYTES", "options": [["as 00 ~ 99", "1"], ["as 0000 ~ 9999", "2"]]}
+      ],
+      "inputsInline": true,
+      "previousStatement": null,
+      "nextStatement": null,
+      "tooltip": "Changes a setting of the menu (command 1A 05). The number of the setting and the format of its value " +
+                 "(00 ~ 99 or 0000 ~ 9999) are in the CI-V reference guide, e.g. 29 for the beep level (0000 ~ 0255)"
+    });
+  },
+  onchange: function() {
+    ic705CheckRange(this, 'ITEM', 1, 9999, "The number of the setting must be between 1 and 9999");
+  }
+};
+
+Blockly.Lua.forBlock['ic705_set_menu'] = function(block) {
+  Studio.use(['ic705MenuCmd', 'numberToBcd']);
+  return 'sendCommand(ic705MenuCmd(' + ic705Value(block, 'ITEM') + '), numberToBcd(' + ic705Value(block, 'VALUE') + ', ' +
+         block.getFieldValue('BYTES') + '))\n';
+};
+
+ic705Settings.action("ic705_set_menu");
+
+//-------------------------------------------------------------------
+// CI-V: 1A 05 + number of the setting (2 bytes BCD) -> value (BCD) (p. 5 ~ 13)
+Blockly.Blocks['ic705_get_menu'] = {
+  init: function() {
+    this.jsonInit({
+      "message0": "Menu Setting %1",
+      "args0": [
+        {"type": "input_value", "name": "ITEM", "check": "Number"}
+      ],
+      "inputsInline": true,
+      "output": "Number",
+      "tooltip": "Reads a setting of the menu (command 1A 05) as number, e.g. 29 for the beep level"
+    });
+  },
+  onchange: function() {
+    ic705CheckRange(this, 'ITEM', 1, 9999, "The number of the setting must be between 1 and 9999");
+  }
+};
+
+Blockly.Lua.forBlock['ic705_get_menu'] = function(block) {
+  Studio.use(['ic705MenuCmd', 'ic705ReadNumber']);
+  return ['ic705ReadNumber(ic705MenuCmd(' + ic705Value(block, 'ITEM') + '))', lua.Order.HIGH];
+};
+
+ic705Settings.property("ic705_get_menu");
