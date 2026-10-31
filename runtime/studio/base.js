@@ -165,6 +165,46 @@ Blockly.Lua.forBlock['periodically'] = function(block) {
 program.event("periodically");
 
 //-------------------------------------------------------------------
+// Executed when the radio starts to answer (after the start of iCOMpadre or when it is switched on).
+// Lua: function onRadioConnected() ... end
+Blockly.Blocks['onradioconnected'] = {
+  init: function() {
+    this.appendDummyInput()
+        .appendField("OnRadioConnected");
+    this.appendStatementInput("actions")
+        .setCheck(null);
+    this.setTooltip("This is executed when the radio starts to answer: after the start of iCOMpadre or when the radio is switched on");
+  }
+};
+
+Blockly.Lua.forBlock['onradioconnected'] = function(block) {
+  var statements_actions = Blockly.Lua.statementToCode(block, 'actions');
+  return 'function onRadioConnected()\n' + statements_actions + 'end';
+};
+
+program.event("onradioconnected");
+
+//-------------------------------------------------------------------
+// Executed when the radio stops to answer (e.g. when it is switched off).
+// Lua: function onRadioDisconnected() ... end
+Blockly.Blocks['onradiodisconnected'] = {
+  init: function() {
+    this.appendDummyInput()
+        .appendField("OnRadioDisconnected");
+    this.appendStatementInput("actions")
+        .setCheck(null);
+    this.setTooltip("This is executed when the radio stops to answer, e.g. when it is switched off");
+  }
+};
+
+Blockly.Lua.forBlock['onradiodisconnected'] = function(block) {
+  var statements_actions = Blockly.Lua.statementToCode(block, 'actions');
+  return 'function onRadioDisconnected()\n' + statements_actions + 'end';
+};
+
+program.event("onradiodisconnected");
+
+//-------------------------------------------------------------------
 // Executes the inner blocks only if the watched value differs from the last call.
 // Lua: local actValue = expr
 //      if(_G.lastValue ~= actValue ) then _G.lastValue = actValue ... end

@@ -48,6 +48,36 @@ Keep the blocks in here short: iCOMpadre talks to the radio in between, and long
     end
     ```
 
+### OnRadioConnected {#onradioconnected}
+
+![OnRadioConnected block](img/onradioconnected.png){ width="149" }
+
+The blocks in here are executed when the radio starts to answer: shortly after iCOMpadre starts (if the radio is on), and whenever the radio is switched on again.
+Use it to bring the radio into a known state, e.g. to set the frequency or the RF power.
+
+iCOMpadre asks the radio every second. While the radio is off, it keeps asking every 2 seconds, so it notices when the radio comes back.
+
+??? info "Lua code"
+    ```lua
+    function onRadioConnected()
+      ...
+    end
+    ```
+
+### OnRadioDisconnected {#onradiodisconnected}
+
+![OnRadioDisconnected block](img/onradiodisconnected.png){ width="167" }
+
+The blocks in here are executed when the radio stops to answer for about a second, e.g. because it was switched off or the cable was unplugged.
+[Periodically](#periodically) is not executed while the radio is disconnected.
+
+??? info "Lua code"
+    ```lua
+    function onRadioDisconnected()
+      ...
+    end
+    ```
+
 ### On change of {#onchangeof}
 
 ![On change of block](img/onchangeof.png){ width="125" }
