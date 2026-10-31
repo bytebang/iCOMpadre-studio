@@ -1,73 +1,89 @@
+# Logic
 
- Logic blocks are essential for building logical conditions, handling user input, and managing program flow in block-based programming environments. They can be combined in various ways to create complex behavior, such as game mechanics or app logic.
-
----
-
-## Comparison Block
-
-#### Purpose
-Compares two values, and returns a boolean if the condition is met. Depending on the selected comparator the result looks like the following:
-
-| **Operator** | **Description**                 | **Example**                                     |
-|--------------|---------------------------------|------------------------------------------------|
-| `=`          | Checks if two values are equal. | `if (a = 5) { display "a is 5"; }`             |
-| `≠`          | Checks if two values are not equal. | `if (a ≠ 5) { display "a is not 5"; }`         |
-| `<`          | Checks if one value is less than another. | `if (a < 10) { display "a is less than 10"; }` |
-| `≤`          | Checks if one value is less than or equal to another. | `if (a ≤ 10) { display "a is 10 or less"; }`   |
-| `>`          | Checks if one value is greater than another. | `if (a > 10) { display "a is greater than 10"; }` |
-| `≥`          | Checks if one value is greater than or equal to another. | `if (a ≥ 10) { display "a is 10 or more"; }`   |
-
-#### Usage
-Used in conditional statements to compare variables or values.
+Logic blocks answer questions with *true* or *false*, e.g. *"Is the AF level above 80 %?"*.
+They are mostly used as condition of an [if block](control.md#controls_if).
 
 ---
 
-## Logical AND / OR Block
+## Compare {#logic_compare}
 
-#### Purpose
-Combines two conditions.
+![Compare block](img/logic_compare.png){ width="123" }
 
-#### Usage
-Used to combine multiple conditions that must all (AND block) or only one of them (OR block) be satisfied.
+Compares two values and answers with *true* or *false*. Choose the comparison in the middle:
 
+| Comparison | is *true* if ...                            |
+|------------|---------------------------------------------|
+| `=`        | both values are equal                       |
+| `≠`        | the values are different                    |
+| `<`        | the left value is smaller                   |
+| `≤`        | the left value is smaller or equal          |
+| `>`        | the left value is bigger                    |
+| `≥`        | the left value is bigger or equal           |
 
-| **Input A** | **Input B** | **A AND B** | **A OR B** |
-|-------------|-------------|-------------|------------|
-| `false`     | `false`     | `false`     | `false`    |
-| `false`     | `true`      | `false`     | `true`     |
-| `true`      | `false`     | `false`     | `true`     |
-| `true`      | `true`      | `true`      | `true`     |
+Example: *AF Level `>` 80* is true, as soon as the volume is turned up above 80 %.
 
+Numbers can only be compared with numbers, and texts with texts. Only `=` and `≠` work with everything.
 
-#### Example
-`if (collectedAllItems and reachedFinishLine) { display "Level complete!"; }`
-
----
-
-## Boolean Operator Block
-
-#### Purpose
-Represents a constant boolean value of `true` or `false`.
-
-#### Usage
-Used as a default or constant value in logical conditions or to toggle states.
-
-#### Example
-`if (true) { display "This message always shows!"; }`
+??? info "Lua code"
+    ```lua
+    if level > 80 then
+      print('too loud')
+    end
+    ```
 
 ---
 
-## Logical NOT Block
+## And / Or {#logic_operation}
 
-#### Purpose
-Inverts a boolean value. Returns `true` if input is `false` and `false` if input is `true`.
+![And / Or block](img/logic_operation.png){ width="139" }
 
-#### Usage
-Used to check if a condition is *not* met.
+Combines two conditions into one.
 
-#### Example
-`if (not isLoggedIn) { display "Please log in!"; }`
+* **and** is *true* only if **both** conditions are true.
+* **or** is *true* if **at least one** of the conditions is true.
 
+| left    | right   | and     | or      |
+|---------|---------|---------|---------|
+| *false* | *false* | *false* | *false* |
+| *false* | *true*  | *false* | *true*  |
+| *true*  | *false* | *false* | *true*  |
+| *true*  | *true*  | *true*  | *true*  |
 
+Example: *AF Level > 80* **and** *mode = FM*.
 
+??? info "Lua code"
+    ```lua
+    if level > 80 and mode == 'FM' then
+      print('loud FM')
+    end
+    ```
 
+---
+
+## True / False {#logic_boolean}
+
+![True / False block](img/logic_boolean.png){ width="79" }
+
+The fixed value *true* or *false*. Use it to set a [variable](variables.md) or to switch a pin on (*true*) or off (*false*).
+
+??? info "Lua code"
+    ```lua
+    step = true
+    ```
+
+---
+
+## Not {#logic_negate}
+
+![Not block](img/logic_negate.png){ width="65" }
+
+Turns *true* into *false* and *false* into *true*. Use it to check that something is **not** the case.
+
+Example: **not** *State of PIN A* is true while PIN A is low.
+
+??? info "Lua code"
+    ```lua
+    if not (readDigitalInput(PIN_A)) then
+      print('PIN A is low')
+    end
+    ```
