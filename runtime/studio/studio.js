@@ -44,6 +44,7 @@ var Studio = (function() {
     "radio":   "#5fa8c9",   // blue:     everything that talks to the radio (CI-V)
     "pins":    "#9cc46b",   // green:    inputs and outputs of the iCOMpadre connector
     "serial":  "#b39ddb",   // lavender: serial interface
+    "storage": "#e39fb6",   // rose:     files and remembered values on the SD card
     "helpers": "#a0a7ad",   // grey:     conversions and other utilities
   };
 
@@ -116,8 +117,8 @@ var Studio = (function() {
   {
     function adder(key)
     {
-      return function(blocktype) {
-        container.sections[key].push({"kind": "block", "type": blocktype});
+      return function(blocktype, toolboxEntry) {
+        container.sections[key].push(Object.assign({"kind": "block", "type": blocktype}, toolboxEntry || {}));
         return handle;
       };
     }
@@ -144,11 +145,13 @@ var Studio = (function() {
   /**
    * Handle to fill a category (or group) of the toolbox. Every method takes the block type
    * (the key used in Blockly.Blocks[...]) and returns the handle again, so calls can be chained.
+   * The optional second parameter is merged into the toolbox entry of the block, e.g. to give
+   * an input a default value: {"inputs": {"FILE": {"shadow": {"type": "text", "fields": {"TEXT": "log.csv"}}}}}
    * @typedef {Object} CategoryHandle
-   * @property {function(string): CategoryHandle} event    adds an event block (OnStartup, Periodically, ...)
-   * @property {function(string): CategoryHandle} action   adds an action block (changes something on the radio)
-   * @property {function(string): CategoryHandle} property adds a property block (reads a value from the radio)
-   * @property {function(string): CategoryHandle} helper   adds a helper block (conversions, utilities)
+   * @property {function(string, Object=): CategoryHandle} event    adds an event block (OnStartup, Periodically, ...)
+   * @property {function(string, Object=): CategoryHandle} action   adds an action block (changes something on the radio)
+   * @property {function(string, Object=): CategoryHandle} property adds a property block (reads a value from the radio)
+   * @property {function(string, Object=): CategoryHandle} helper   adds a helper block (conversions, utilities)
    * @property {function(string, string=): CategoryHandle} [group] adds a sub category with its own style (only on categories)
    */
 
@@ -161,7 +164,7 @@ var Studio = (function() {
    * Blocks without an own helpUrl link to the documentation of the file which created the category:
    * radio/ic705.js -> ../userguide/studio/blocks/radio/ic705/#<blocktype>
    * @param {string} name the name shown in the toolbox, e.g. "IC-705"
-   * @param {string=} style one of the keys of STYLES: program, radio, pins, serial, helpers
+   * @param {string=} style one of the keys of STYLES: program, radio, pins, serial, storage, helpers
    * @returns {CategoryHandle} handle to add blocks or groups to the category
    */
   function category(name, style)

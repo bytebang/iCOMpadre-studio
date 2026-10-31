@@ -1,6 +1,6 @@
 # iCOMpadre
 
-The blocks of the category *iCOMpadre* work with iCOMpadre itself: when your program runs, the connection to the radio, the pins of the connector and the serial interface.
+The blocks of the category *iCOMpadre* work with iCOMpadre itself: when your program runs, the connection to the radio, the pins of the connector, the serial interface and the SD card.
 They are grouped by topic, and every group has its own colour:
 
 | Group | Colour | Content |
@@ -9,6 +9,7 @@ They are grouped by topic, and every group has its own colour:
 | [Radio](#radio) | <span style="color:#5fa8c9">■</span> blue | sending your own CI-V commands to the radio |
 | [Pins](#pins) | <span style="color:#9cc46b">■</span> green | inputs and outputs of the iCOMpadre connector |
 | [Serial](#serial) | <span style="color:#b39ddb">■</span> lavender | the serial interface |
+| [Storage](#storage) | <span style="color:#e39fb6">■</span> rose | remembering values, logs and files on the SD card |
 | [Helpers](#helpers) | <span style="color:#a0a7ad">■</span> grey | conversions and comments |
 
 The blocks of the radios (e.g. [IC-705](radio/ic705.md)) are blue as well, because they also talk to the radio.
@@ -297,6 +298,138 @@ Changes the speed of the serial interface, e.g. to talk to a device that only un
 ??? info "Lua code"
     ```lua
     configSerial(9600)
+    ```
+
+---
+
+## <span style="color:#e39fb6">■</span> Storage {#storage}
+
+With these blocks your program can remember values and write logs on the SD card. Everything is kept when iCOMpadre is switched off.
+
+!!! note "The folder /data"
+    All files are stored in the folder `data` on the SD card. Your program cannot reach any other files there, so it can't damage the studio or itself.
+
+    * File names may contain letters, digits, `_`, `-` and `.`, up to 32 characters, e.g. `log.csv`. Folders are not possible.
+    * In the PROGRAM mode you can download your files with the browser, e.g. `http://icompadre.local/data/log.csv`, and open a CSV file in a spreadsheet.
+    * If something goes wrong (e.g. no SD card or an invalid file name), a message is printed on the serial interface and the program continues.
+
+### Remember {#storage_remember}
+
+![Remember block](img/storage_remember.png){ width="188" }
+
+Remembers a value under a name: a number, a text, *true* / *false* or a [list](lists.md). The value is kept on the SD card, also when iCOMpadre is switched off.
+The SD card is only written when the value changes, so you can use this block in [Periodically](#periodically).
+
+Example: *Remember* operating frequency *as* "last frequency", and tune to it again after switching on.
+
+??? info "Lua code"
+    ```lua
+    kvSet("counter", 42)   -- stored in /data/memory.lua
+    ```
+
+### Forget {#storage_forget}
+
+![Forget block](img/storage_forget.png){ width="102" }
+
+Forgets the value remembered under the name.
+
+??? info "Lua code"
+    ```lua
+    kvSet("counter", nil)
+    ```
+
+### Append line to file {#storage_append_line}
+
+![Append line block](img/storage_append_line.png){ width="212" }
+
+Adds a text as a new line at the end of a file. The file is created if it does not exist. Ideal for a log book of your program.
+
+Example: *Append line* (*create text with* Radio Clock *time as text*, " ", operating frequency) *to file* "log.txt".
+
+??? info "Lua code"
+    ```lua
+    storageAppendLine("log.txt", "12:34 14074000")
+    ```
+
+### Append values to CSV file {#storage_append_csv}
+
+![Append values to CSV file block](img/storage_append_csv.png){ width="266" }
+
+Adds the values of a [list](lists.md) as a new line to a CSV file, separated by commas. CSV files can be opened in every spreadsheet program, e.g. to draw a diagram of the supply voltage during a field day.
+
+Example: *Append values* (*create list with* GPS Time *as text*, Supply Voltage, S-Meter) *to CSV file* "fieldday.csv".
+
+??? info "Lua code"
+    ```lua
+    storageAppendLine("log.csv", storageCsvLine({"12:34", 12.6, 5}))
+    ```
+
+### Write text to file {#storage_write_file}
+
+![Write text to file block](img/storage_write_file.png){ width="197" }
+
+Writes a text into a file. The old content of the file is replaced.
+
+??? info "Lua code"
+    ```lua
+    writeFile("notes.txt", "Hello")
+    ```
+
+### Delete file {#storage_delete_file}
+
+![Delete file block](img/storage_delete_file.png){ width="125" }
+
+Deletes a file, e.g. to start a new log.
+
+??? info "Lua code"
+    ```lua
+    deleteFile("log.csv")
+    ```
+
+### Recall {#storage_recall}
+
+![Recall block](img/storage_recall.png){ width="193" }
+
+Returns the value that has been remembered under the name. If nothing has been remembered yet, the value after *or else* is returned, e.g. 0 for a counter.
+
+Example: count how often iCOMpadre was started: in [OnStartup](#onstartup) *Remember* (*Recall* "starts" *or else* 0) + 1 *as* "starts".
+
+??? info "Lua code"
+    ```lua
+    kvGet("counter", 0)
+    ```
+
+### Lines of file {#storage_file_lines}
+
+![Lines of file block](img/storage_file_lines.png){ width="142" }
+
+Reads a file and returns its lines as a [list](lists.md). The list is empty if the file does not exist. Use [for each](control.md#controls_forEach) to go through the lines, and [make list from text](lists.md#lists_split) to split a CSV line.
+
+??? info "Lua code"
+    ```lua
+    storageLines("log.txt")
+    ```
+
+### Text of file {#storage_read_file}
+
+![Text of file block](img/storage_read_file.png){ width="133" }
+
+Returns the whole content of a file as text (up to 16 KB). The text is empty if the file does not exist.
+
+??? info "Lua code"
+    ```lua
+    (readFile("notes.txt") or "")
+    ```
+
+### File exists? {#storage_file_exists}
+
+![File exists block](img/storage_file_exists.png){ width="147" }
+
+*True* if the file exists.
+
+??? info "Lua code"
+    ```lua
+    (fileExists("log.csv") == true)
     ```
 
 ---

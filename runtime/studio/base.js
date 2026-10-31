@@ -13,6 +13,7 @@ var program  = base.group("Program", "program");
 var radio    = base.group("Radio", "radio");
 var pins     = base.group("Pins", "pins");
 var serial   = base.group("Serial", "serial");
+var storage  = base.group("Storage", "storage");
 var helpers  = base.group("Helpers", "helpers");
 
 // Pins of the iCOMpadre connector
@@ -628,6 +629,380 @@ Blockly.Lua['configserial'] = function(block) {
 };
 
 serial.action("configserial");
+
+/* **************************************************************** */
+/*         STORAGE: Files and remembered values on the SD card      */
+/* **************************************************************** */
+// The firmware provides readFile, writeFile, appendFile, fileExists and deleteFile.
+// They only work in the directory /data of the SD card and accept plain file names
+// (letters, digits, _ - . and up to 32 characters). On errors they return nil and a message.
+
+// Default values of the inputs in the toolbox
+function storageDefault(inputs)
+{
+  var entry = {"inputs": {}};
+  Object.keys(inputs).forEach(function(name) {
+    var value = inputs[name];
+    entry.inputs[name] = {"shadow": typeof value == "number" ? {"type": "math_number", "fields": {"NUM": value}}
+                                                             : {"type": "text", "fields": {"TEXT": value}}};
+  });
+  return entry;
+}
+
+// Prints the error of a file function on the serial interface, returns true if it worked
+Studio.luaFunction("storageCheck", [
+  "function storageCheck(ok, err)",
+  "  if not ok then print('Storage: ' .. tostring(err)) end",
+  "  return ok == true",
+  "end"]);
+
+// Converts a value into lua source code (numbers, texts, true/false and lists)
+Studio.luaFunction("storageLiteral", [
+  "function storageLiteral(v)",
+  "  local t = type(v)",
+  "  if t == 'string' then return string.format('%q', v) end",
+  "  if t == 'number' or t == 'boolean' then return tostring(v) end",
+  "  if t == 'table' then",
+  "    local parts = {}",
+  "    for k, x in pairs(v) do parts[#parts + 1] = '[' .. storageLiteral(k) .. '] = ' .. storageLiteral(x) end",
+  "    return '{' .. table.concat(parts, ', ') .. '}'",
+  "  end",
+  "  return 'nil'",
+  "end"]);
+
+// The remembered values, loaded once from /data/memory.lua
+Studio.luaFunction("kvLoad", [
+  "function kvLoad()",
+  "  if _kvStore == nil then",
+  "    _kvStore = {}",
+  "    local text = readFile('memory.lua')",
+  "    local chunk = text and load(text)",
+  "    if chunk then",
+  "      local ok, store = pcall(chunk)",
+  "      if ok and type(store) == 'table' then _kvStore = store end",
+  "    end",
+  "  end",
+  "  return _kvStore",
+  "end"]);
+
+// Writes all remembered values to /data/memory.lua
+Studio.luaFunction("kvSave", [
+  "function kvSave()",
+  "  local keys = {}",
+  "  for k in pairs(_kvStore) do keys[#keys + 1] = k end",
+  "  table.sort(keys)",
+  "  local lines = {'return {'}",
+  "  for _, k in ipairs(keys) do",
+  "    lines[#lines + 1] = '  [' .. storageLiteral(k) .. '] = ' .. storageLiteral(_kvStore[k]) .. ','",
+  "  end",
+  "  lines[#lines + 1] = '}'",
+  "  return storageCheck(writeFile('memory.lua', table.concat(lines, '\\n') .. '\\n'))",
+  "end"], ["storageCheck", "storageLiteral"]);
+
+// Remembers a value under a name. The SD card is only written if the value has changed.
+Studio.luaFunction("kvSet", [
+  "function kvSet(key, value)",
+  "  local store = kvLoad()",
+  "  key = tostring(key)",
+  "  if store[key] == value then return end",
+  "  store[key] = value",
+  "  kvSave()",
+  "end"], ["kvLoad", "kvSave"]);
+
+// Returns the value remembered under a name, or the default if there is none
+Studio.luaFunction("kvGet", [
+  "function kvGet(key, default)",
+  "  local value = kvLoad()[tostring(key)]",
+  "  if value == nil then return default end",
+  "  return value",
+  "end"], ["kvLoad"]);
+
+// Appends a line to a file
+Studio.luaFunction("storageAppendLine", [
+  "function storageAppendLine(name, text)",
+  "  return storageCheck(appendFile(name, tostring(text) .. '\\n'))",
+  "end"], ["storageCheck"]);
+
+// Converts a list into a CSV line (values with comma or quotes are quoted)
+Studio.luaFunction("storageCsvLine", [
+  "function storageCsvLine(list)",
+  "  local fields = {}",
+  "  for i, v in ipairs(list) do",
+  "    local s = tostring(v)",
+  "    if string.find(s, '[,\"\\n]') then s = '\"' .. string.gsub(s, '\"', '\"\"') .. '\"' end",
+  "    fields[i] = s",
+  "  end",
+  "  return table.concat(fields, ',')",
+  "end"]);
+
+// Returns the lines of a file as list (empty if the file does not exist)
+Studio.luaFunction("storageLines", [
+  "function storageLines(name)",
+  "  local lines = {}",
+  "  for line in string.gmatch(readFile(name) or '', '[^\\r\\n]+') do lines[#lines + 1] = line end",
+  "  return lines",
+  "end"]);
+
+// Remembers a value under a name. It is kept on the SD card, also when iCOMpadre is switched off.
+// Lua: kvSet("counter", 42)
+Blockly.Blocks['storage_remember'] = {
+  init: function() {
+    this.jsonInit({
+      "message0": "Remember %1 as %2",
+      "args0": [
+        {"type": "input_value", "name": "VALUE"},
+        {"type": "input_value", "name": "KEY", "check": "String"}
+      ],
+      "inputsInline": true,
+      "previousStatement": null,
+      "nextStatement": null,
+      "tooltip": "Remembers a value (number, text, true/false or list) under a name. It is kept on the SD card, also when iCOMpadre is switched off"
+    });
+  }
+};
+
+Blockly.Lua['storage_remember'] = function(block) {
+  Studio.use('kvSet');
+  var value = Blockly.Lua.valueToCode(block, 'VALUE', Blockly.Lua.ORDER_NONE) || 'nil';
+  var key = Blockly.Lua.valueToCode(block, 'KEY', Blockly.Lua.ORDER_NONE) || "''";
+  return 'kvSet(' + key + ', ' + value + ')\n';
+};
+
+storage.action("storage_remember", storageDefault({"VALUE": 0, "KEY": "counter"}));
+
+//-------------------------------------------------------------------
+// Forgets a remembered value.
+// Lua: kvSet("counter", nil)
+Blockly.Blocks['storage_forget'] = {
+  init: function() {
+    this.jsonInit({
+      "message0": "Forget %1",
+      "args0": [
+        {"type": "input_value", "name": "KEY", "check": "String"}
+      ],
+      "inputsInline": true,
+      "previousStatement": null,
+      "nextStatement": null,
+      "tooltip": "Forgets the value remembered under the name"
+    });
+  }
+};
+
+Blockly.Lua['storage_forget'] = function(block) {
+  Studio.use('kvSet');
+  var key = Blockly.Lua.valueToCode(block, 'KEY', Blockly.Lua.ORDER_NONE) || "''";
+  return 'kvSet(' + key + ', nil)\n';
+};
+
+storage.action("storage_forget", storageDefault({"KEY": "counter"}));
+
+//-------------------------------------------------------------------
+// Appends a line of text to a file, e.g. for a log.
+// Lua: storageAppendLine("log.txt", text)
+Blockly.Blocks['storage_append_line'] = {
+  init: function() {
+    this.jsonInit({
+      "message0": "Append line %1 to file %2",
+      "args0": [
+        {"type": "input_value", "name": "TEXT"},
+        {"type": "input_value", "name": "FILE", "check": "String"}
+      ],
+      "inputsInline": true,
+      "previousStatement": null,
+      "nextStatement": null,
+      "tooltip": "Appends the text as a new line to the end of the file. The file is created if it does not exist"
+    });
+  }
+};
+
+Blockly.Lua['storage_append_line'] = function(block) {
+  Studio.use('storageAppendLine');
+  var text = Blockly.Lua.valueToCode(block, 'TEXT', Blockly.Lua.ORDER_NONE) || "''";
+  var file = Blockly.Lua.valueToCode(block, 'FILE', Blockly.Lua.ORDER_NONE) || "''";
+  return 'storageAppendLine(' + file + ', ' + text + ')\n';
+};
+
+storage.action("storage_append_line", storageDefault({"TEXT": "Hello", "FILE": "log.txt"}));
+
+//-------------------------------------------------------------------
+// Appends a list of values as CSV line, e.g. for a log that can be opened in a spreadsheet.
+// Lua: storageAppendLine("log.csv", storageCsvLine(list))
+Blockly.Blocks['storage_append_csv'] = {
+  init: function() {
+    this.jsonInit({
+      "message0": "Append values %1 to CSV file %2",
+      "args0": [
+        {"type": "input_value", "name": "LIST", "check": "Array"},
+        {"type": "input_value", "name": "FILE", "check": "String"}
+      ],
+      "inputsInline": true,
+      "previousStatement": null,
+      "nextStatement": null,
+      "tooltip": "Appends the values of the list as a new line to a CSV file, which can be opened in a spreadsheet"
+    });
+  }
+};
+
+Blockly.Lua['storage_append_csv'] = function(block) {
+  Studio.use(['storageAppendLine', 'storageCsvLine']);
+  var list = Blockly.Lua.valueToCode(block, 'LIST', Blockly.Lua.ORDER_NONE) || '{}';
+  var file = Blockly.Lua.valueToCode(block, 'FILE', Blockly.Lua.ORDER_NONE) || "''";
+  return 'storageAppendLine(' + file + ', storageCsvLine(' + list + '))\n';
+};
+
+storage.action("storage_append_csv", storageDefault({"FILE": "log.csv"}));
+
+//-------------------------------------------------------------------
+// Replaces the content of a file with a text.
+// Lua: writeFile("notes.txt", text)
+Blockly.Blocks['storage_write_file'] = {
+  init: function() {
+    this.jsonInit({
+      "message0": "Write text %1 to file %2",
+      "args0": [
+        {"type": "input_value", "name": "TEXT"},
+        {"type": "input_value", "name": "FILE", "check": "String"}
+      ],
+      "inputsInline": true,
+      "previousStatement": null,
+      "nextStatement": null,
+      "tooltip": "Writes the text to the file. The old content of the file is replaced"
+    });
+  }
+};
+
+Blockly.Lua['storage_write_file'] = function(block) {
+  Studio.use('storageCheck');
+  var text = Blockly.Lua.valueToCode(block, 'TEXT', Blockly.Lua.ORDER_NONE) || "''";
+  var file = Blockly.Lua.valueToCode(block, 'FILE', Blockly.Lua.ORDER_NONE) || "''";
+  return 'storageCheck(writeFile(' + file + ', tostring(' + text + ')))\n';
+};
+
+storage.action("storage_write_file", storageDefault({"TEXT": "Hello", "FILE": "notes.txt"}));
+
+//-------------------------------------------------------------------
+// Deletes a file.
+// Lua: deleteFile("log.csv")
+Blockly.Blocks['storage_delete_file'] = {
+  init: function() {
+    this.jsonInit({
+      "message0": "Delete file %1",
+      "args0": [
+        {"type": "input_value", "name": "FILE", "check": "String"}
+      ],
+      "inputsInline": true,
+      "previousStatement": null,
+      "nextStatement": null,
+      "tooltip": "Deletes the file"
+    });
+  }
+};
+
+Blockly.Lua['storage_delete_file'] = function(block) {
+  var file = Blockly.Lua.valueToCode(block, 'FILE', Blockly.Lua.ORDER_NONE) || "''";
+  return 'deleteFile(' + file + ')\n';
+};
+
+storage.action("storage_delete_file", storageDefault({"FILE": "log.csv"}));
+
+//-------------------------------------------------------------------
+// Returns a remembered value, or the default if nothing has been remembered under the name.
+// Lua: kvGet("counter", 0)
+Blockly.Blocks['storage_recall'] = {
+  init: function() {
+    this.jsonInit({
+      "message0": "Recall %1 or else %2",
+      "args0": [
+        {"type": "input_value", "name": "KEY", "check": "String"},
+        {"type": "input_value", "name": "DEFAULT"}
+      ],
+      "inputsInline": true,
+      "output": null,
+      "tooltip": "Returns the value remembered under the name. If nothing has been remembered yet, the value after 'or else' is returned"
+    });
+  }
+};
+
+Blockly.Lua['storage_recall'] = function(block) {
+  Studio.use('kvGet');
+  var key = Blockly.Lua.valueToCode(block, 'KEY', Blockly.Lua.ORDER_NONE) || "''";
+  var fallback = Blockly.Lua.valueToCode(block, 'DEFAULT', Blockly.Lua.ORDER_NONE) || 'nil';
+  return ['kvGet(' + key + ', ' + fallback + ')', Blockly.Lua.ORDER_HIGH];
+};
+
+storage.property("storage_recall", storageDefault({"KEY": "counter", "DEFAULT": 0}));
+
+//-------------------------------------------------------------------
+// Returns the lines of a file as list.
+// Lua: storageLines("log.txt")
+Blockly.Blocks['storage_file_lines'] = {
+  init: function() {
+    this.jsonInit({
+      "message0": "Lines of file %1",
+      "args0": [
+        {"type": "input_value", "name": "FILE", "check": "String"}
+      ],
+      "inputsInline": true,
+      "output": "Array",
+      "tooltip": "Returns the lines of the file as a list. The list is empty if the file does not exist"
+    });
+  }
+};
+
+Blockly.Lua['storage_file_lines'] = function(block) {
+  Studio.use('storageLines');
+  var file = Blockly.Lua.valueToCode(block, 'FILE', Blockly.Lua.ORDER_NONE) || "''";
+  return ['storageLines(' + file + ')', Blockly.Lua.ORDER_HIGH];
+};
+
+storage.property("storage_file_lines", storageDefault({"FILE": "log.txt"}));
+
+//-------------------------------------------------------------------
+// Returns the content of a file as text (max. 16 KB).
+// Lua: (readFile("notes.txt") or "")
+Blockly.Blocks['storage_read_file'] = {
+  init: function() {
+    this.jsonInit({
+      "message0": "Text of file %1",
+      "args0": [
+        {"type": "input_value", "name": "FILE", "check": "String"}
+      ],
+      "inputsInline": true,
+      "output": "String",
+      "tooltip": "Returns the content of the file as text (up to 16 KB). The text is empty if the file does not exist"
+    });
+  }
+};
+
+Blockly.Lua['storage_read_file'] = function(block) {
+  var file = Blockly.Lua.valueToCode(block, 'FILE', Blockly.Lua.ORDER_NONE) || "''";
+  return ['(readFile(' + file + ') or "")', Blockly.Lua.ORDER_HIGH];
+};
+
+storage.property("storage_read_file", storageDefault({"FILE": "notes.txt"}));
+
+//-------------------------------------------------------------------
+// Lua: fileExists("log.csv")
+Blockly.Blocks['storage_file_exists'] = {
+  init: function() {
+    this.jsonInit({
+      "message0": "File %1 exists?",
+      "args0": [
+        {"type": "input_value", "name": "FILE", "check": "String"}
+      ],
+      "inputsInline": true,
+      "output": "Boolean",
+      "tooltip": "True if the file exists"
+    });
+  }
+};
+
+Blockly.Lua['storage_file_exists'] = function(block) {
+  var file = Blockly.Lua.valueToCode(block, 'FILE', Blockly.Lua.ORDER_NONE) || "''";
+  return ['(fileExists(' + file + ') == true)', Blockly.Lua.ORDER_HIGH];
+};
+
+storage.property("storage_file_exists", storageDefault({"FILE": "log.csv"}));
 
 /* **************************************************************** */
 /*             HELPERS: Conversions and other utilities             */

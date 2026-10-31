@@ -91,6 +91,8 @@ Blockly.Lua['ic705_set_af_level'] = function(block) {
 ```
 
 * A category (or group) shows its blocks sorted by *Events*, *Actions*, *Properties* and *Helpers*. Empty sections are hidden.
+* An optional second parameter is merged into the toolbox entry, e.g. to give inputs default values:
+  `storage.action("storage_append_line", {"inputs": {"FILE": {"shadow": {"type": "text", "fields": {"TEXT": "log.txt"}}}}})`.
 * `Studio.use()` throws if a function is not registered. Registering the same name twice logs a warning.
 * A lua function that calls other registered functions lists them as third parameter, e.g. `Studio.luaFunction("ic705Percent", [...], ["numberToBcd"])`. `Studio.use()` adds them as well.
 * Common helper functions are registered in `base.js`: `pretty`, `map`, `frequencyAsNumber`, `frequencyToBcd`, `numberToBcd`, `bcdToNumber`.
@@ -136,6 +138,7 @@ The colour of a block says what it works with. The palette is defined once, in `
 | `radio` | blue | everything that talks to the radio, i.e. all radio categories |
 | `pins` | green | inputs and outputs of the iCOMpadre connector |
 | `serial` | lavender | the serial interface |
+| `storage` | rose | files and remembered values on the SD card |
 | `helpers` | grey | conversions and other utilities |
 
 Every block gets the style of the group (or category) it is registered in, so block definitions contain no colour at all.
