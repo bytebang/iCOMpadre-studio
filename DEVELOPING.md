@@ -195,6 +195,8 @@ To build the userguide with the studio documentation locally, do what the CI doe
 
 ### Checklist before committing a radio
 
+* The tests pass: `python tests/run_all.py` (see [tests/README.md](tests/README.md)). New blocks change the generated code,
+  update it with `python tests/test_generated_code.py --update` and check the diff of `tests/expected_lua.json`.
 * The studio loads without errors in the browser console.
 * Every new block can be dragged onto the workspace.
 * The *Lua* panel shows the generated lua code. Check it for every new block.
