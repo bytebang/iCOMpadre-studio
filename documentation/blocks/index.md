@@ -13,6 +13,13 @@ The blocks of iCOMpadre-studio are grouped into the categories of the toolbox on
 | [Functions](functions.md)   | reusable groups of blocks |
 | [iCOMpadre](base.md)        | events and the hardware of iCOMpadre: pins, serial interface, raw CI-V commands |
 | [IC-705](radio/ic705.md)    | settings of the ICOM IC-705 |
+| [IC-7610](radio/ic7610.md)  | settings of the ICOM IC-7610 |
+| [IC-7851](radio/ic7851.md)  | settings of the ICOM IC-7850 / IC-7851 |
+| [IC-9700](radio/ic9700.md)  | settings of the ICOM IC-9700 |
+| [IC-718](radio/ic718.md)    | settings of the ICOM IC-718 |
+| [IC-78](radio/ic78.md)      | settings of the ICOM IC-78 |
+| [IC-2730](radio/ic2730.md)  | settings of the ICOM IC-2730 |
+| [IC-A120E](radio/ica120e.md) | settings of the ICOM IC-A120E (airband) |
 
 The first seven categories are the standard blocks, as you know them from the blockly ecosystem. The last ones make iCOMpadre special.
 The blocks of iCOMpadre and the radios have a *Help* entry in their context menu (right click), which leads to their description in this guide.

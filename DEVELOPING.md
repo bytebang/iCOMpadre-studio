@@ -20,7 +20,9 @@ runtime/
     ├── base.js           blocks for the iCOMpadre hardware + common lua helper functions
     ├── radio.js          template for a new radio (not loaded)
     ├── radio/
-    │   └── ic705.js      blocks for the ICOM IC-705
+    │   ├── ic705.js      blocks for the ICOM IC-705
+    │   ├── icom.js       Icom.radio(): creates the blocks of a radio from a description of its CI-V commands
+    │   └── ic7610.js ... descriptions of the IC-7610, IC-7851, IC-9700, IC-718, IC-78, IC-2730 and IC-A120E
     ├── studio.css
     ├── filesaver.js      download of files (export)
     ├── img/              toolbar icons
@@ -29,7 +31,8 @@ documentation/            user documentation (merged into the iCOMpadre userguid
 └── blocks/
     ├── base.md           documentation of the blocks in studio/base.js
     └── radio/
-        └── ic705.md      documentation of the blocks in studio/radio/ic705.js
+        ├── ic705.md      documentation of the blocks in studio/radio/ic705.js
+        └── ic7610.md ... documentation of the radios described with Icom.radio()
 webserver.py              local development server
 ```
 
@@ -101,6 +104,19 @@ Blockly.Lua.forBlock['ic705_set_af_level'] = function(block) {
 * Common helper functions are registered in `base.js`: `pretty`, `map`, `frequencyAsNumber`, `frequencyToBcd`, `numberToBcd`, `bcdToNumber`.
 
 ## Adding a radio
+
+Most Icom radios understand the same CI-V commands as the IC-705 and differ only in details (modes, attenuator steps,
+meter scales, memory channels, ...). For them it is enough to **describe** the radio:
+
+1. Copy `runtime/studio/radio/ic7610.js` (it uses every entry) to `runtime/studio/radio/<radio>.js`.
+2. Go through the command table of the CI-V reference guide and adapt the entries: change the options and the page numbers,
+   remove the entries of commands the radio doesn't have. `Icom.radio()` only creates blocks for the entries which are there.
+   Every entry is explained in `runtime/studio/radio/icom.js`.
+3. Include the file in `runtime/studio/index.html` below `radio/icom.js`, and add it to the `filesToLoad` list in `runtime/index.html`.
+4. Write `documentation/blocks/radio/<radio>.md` (the existing ones show the structure: one section per block, with the CI-V command and the page)
+   and add the radio to `documentation/blocks/index.md`.
+
+Blocks which `Icom.radio()` can't create (like the GPS of the IC-705 or the battery) are written by hand:
 
 1. Copy `runtime/studio/radio.js` to `runtime/studio/radio/<radio>.js`, e.g. `radio/ic7300.js`.
 2. Replace `myradio` / `My Radio` with the name of the radio and remove the example blocks you don't need.
