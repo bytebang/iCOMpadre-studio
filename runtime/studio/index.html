@@ -66,9 +66,8 @@
 <script>
    
   // -------------- The toolbar -----------------
-  var toolbox = {
-          "kind": "categoryToolbox",
-          "contents": [
+  // standard blockly categories. Everything else is registered via Studio.category()
+  var baseCategories = [
           {
               "kind": "category", "name": "Logic",
               "contents": [
@@ -126,119 +125,17 @@
           },
           {"kind": "category",  "name": "Variables",  "custom": "VARIABLE"},
           {"kind": "category",  "name": "Functions",  "custom": "PROCEDURE"},
-      ]
-  }
-  
-  // global utility functions to be used throughout the following scripts
-  utilityfunctions = 
-  {   
-      // pretty prints a lua array
-      "pretty" : [ "function pretty(tbl)",
-                   "  hex = {}",
-                   "  for i, name in ipairs(tbl) do",
-                   "    hex[i] = string.format('0x%02x ', name)",
-                   "  end",
-                   "  return '{' .. table.concat(hex, ',') .. '}'",
-                   "end"],
-   
-      // maps a range of values onto another range
-      "map": [    "function map(x, in_min, in_max, out_min, out_max) ",
-                  "  return out_min + (x - in_min)*(out_max - out_min)/(in_max - in_min)",
-                  "end"],
-
-                            
-      // takes a frequency table and converts it to a number
-      "frequencyAsNumber": ["function frequencyAsNumber(tbl) ",
-                            "  value = ''",
-                            "  for i, name in ipairs(tbl) do",
-                            "    value = string.format('%02x', name) .. value",
-                            "  end",
-                            "  return tonumber(value);",
-                            "end" ],
-      
-      "frequencyToBcd": [ "function frequencyToBcd(freq, tblsize)",
-                          "   freq = math.floor(freq)",
-                          "   local bcdTable = {}",
-                          "   while freq > 0 do",
-                          "     local nibble = freq % 10",
-                          "      table.insert(bcdTable, 1, nibble)",
-                          "      freq = math.floor(freq / 10)",
-                          "    end",
-                          "    if #bcdTable % 2 == 1 then",
-                          "      table.insert(bcdTable, 1, 0)",
-                          "    end",
-                          "    local finalTable = {}",
-                          "    for i = 1, #bcdTable, 2 do",
-                          "      local nibble1 = bcdTable[i+1]",
-                          "      local nibble2 = bcdTable[i]",
-                          "      local bcdValue = nibble2 * 16 + nibble1",
-                          "      table.insert(finalTable, 1, bcdValue)",
-                          "    end",
-                          "    if tblsize ~= nil then",                      
-                          "      while #finalTable < tblsize do",
-                          "        table.insert(finalTable, 0x00)",
-                          "      end",
-                          "    end",
-                          "    return finalTable",
-                          "  end"],
-
-      "numberToBcd": [ "function numberToBcd(number, tblsize)",
-                       "   number = math.floor(number)",
-                       "   local bcdTable = {}",
-                       "   while number > 0 do",
-                       "     local nibble = number % 10",
-                       "     table.insert(bcdTable, 1, nibble)",
-                       "     number = math.floor(number / 10)",
-                       "   end",
-                       "   if #bcdTable % 2 == 1 then",
-                       "     table.insert(bcdTable, 1, 0)",
-                       "   end",
-                       "   local finalTable = {}",
-                       "   for i = 1, #bcdTable, 2 do",
-                       "     local nibble1 = bcdTable[i]",
-                       "     local nibble2 = bcdTable[i+1]",
-                       "     local bcdValue = nibble2 + nibble1 * 16 ",
-                       "     table.insert(finalTable,  bcdValue)",
-                       "   end",
-                       "   if(tblsize ~= nil) then",
-                       "     while #finalTable < tblsize do",
-                       "       table.insert(finalTable, 1, 0x00)",
-                       "     end",
-                       "   end",
-                       "   return finalTable",
-                       " end"],
-
-        "bcdToNumber": ["function bcdToNumber(tbl) ",
-                            "  value = ''",
-                            "  for i, name in ipairs(tbl) do",
-                            "    value = value .. string.format('%02x', name)",
-                            "  end",
-                            "  return tonumber(value);",
-                            "end" ],
-
-  }
-
-  // registers the function on the lua code code generator
-  // after this call you can use the function in your code
-  function use(funcnames)
-  {   
-    // register functions 
-    if(Array.isArray(funcnames))
-    {
-      funcnames.forEach((funcname) => Blockly.Lua.provideFunction_(funcname, utilityfunctions[funcname]));
-    }
-    else
-    {
-      return Blockly.Lua.provideFunction_(funcnames, utilityfunctions[funcnames]);
-    }
-  }
+  ];
   </script>
-  
+
+  <!-- registration api for the block files below -->
+  <script src="studio.js"></script>
+
   <!-- actions for base functionality of the hardware -->
   <script src="base.js"></script>
 
   <!-- separator -->
-  <script>toolbox.contents.push({"kind": "sep"});</script>
+  <script>Studio.separator();</script>
 
   <!-- actions provided by the specific radio -->
   <script src="radio/ic705.js"></script>
@@ -247,6 +144,7 @@
   <!------------------ Rendering of the workspace code ----------------- -->
   <script>
 
+    var toolbox = Studio.buildToolbox(baseCategories);
     var blocklyArea = document.getElementById('blocklyArea');
     var blocklyDiv = document.getElementById('blocklyDiv');
     var icompadreWorkspace = Blockly.inject(blocklyDiv,

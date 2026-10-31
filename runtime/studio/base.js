@@ -1,130 +1,235 @@
-// Describe the contribution
-contribution = {
-    "kind": "category",  "name": "iCOMpadre",
-    "contents": []
-};
+// Blocks for the iCOMpadre hardware itself (independent of the connected radio)
+// and the common lua functions, which can be used by all other block files.
+//
+// The generated lua code calls the functions provided by the iCOMpadre firmware:
+// sendCommand, readResultOfCommand, wait, millis, configSerial,
+// setDigitalOutput, readDigitalInput, setAnalogOutput, readAnalogInput, readTouchInput
+//
+// Documentation of the blocks: documentation/blocks/base.md
 
-// Insert menu contributions in these arrays
-// they will be added to the menu at the end 
-events = [];
-actions = [];
-properties = [];
-helpers = [];
+// Register the contribution of this file
+var base = Studio.category("iCOMpadre");
+
+// Pins of the iCOMpadre connector
+var PINS_ALL   = [["PIN A", "PIN_A"], ["PIN B", "PIN_B"], ["PIN C", "PIN_C"], ["PIN D", "PIN_D"],
+                  ["PIN E", "PIN_E"], ["PIN F", "PIN_F"], ["PIN G", "PIN_G"], ["PIN H", "PIN_H"]];
+var PINS_DAC   = [["PIN A", "PIN_A"], ["PIN B", "PIN_B"]];    // pins with analog output
+var PINS_TOUCH = [["PIN C", "PIN_C"], ["PIN D", "PIN_D"], ["PIN E", "PIN_E"],
+                  ["PIN F", "PIN_F"], ["PIN G", "PIN_G"], ["PIN H", "PIN_H"]];
+
+/* **************************************************************** */
+/*                          LUA FUNCTIONS                           */
+/* **************************************************************** */
+// Common lua functions -> pull them into the generated code with Studio.use(...)
+
+// Converts a table of bytes into a readable string: {0x01 ,0xa4 }
+Studio.luaFunction("pretty", [
+  "function pretty(tbl)",
+  "  hex = {}",
+  "  for i, name in ipairs(tbl) do",
+  "    hex[i] = string.format('0x%02x ', name)",
+  "  end",
+  "  return '{' .. table.concat(hex, ',') .. '}'",
+  "end"]);
+
+// Maps a value from one range onto another range (linear)
+Studio.luaFunction("map", [
+  "function map(x, in_min, in_max, out_min, out_max)",
+  "  return out_min + (x - in_min)*(out_max - out_min)/(in_max - in_min)",
+  "end"]);
+
+// Converts a frequency as sent by the radio (BCD, least significant byte first) into a number in Hz
+Studio.luaFunction("frequencyAsNumber", [
+  "function frequencyAsNumber(tbl)",
+  "  value = ''",
+  "  for i, name in ipairs(tbl) do",
+  "    value = string.format('%02x', name) .. value",
+  "  end",
+  "  return tonumber(value);",
+  "end"]);
+
+// Converts a frequency in Hz into BCD bytes (least significant byte first), padded to tblsize bytes
+Studio.luaFunction("frequencyToBcd", [
+  "function frequencyToBcd(freq, tblsize)",
+  "  freq = math.floor(freq)",
+  "  local bcdTable = {}",
+  "  while freq > 0 do",
+  "    local nibble = freq % 10",
+  "    table.insert(bcdTable, 1, nibble)",
+  "    freq = math.floor(freq / 10)",
+  "  end",
+  "  if #bcdTable % 2 == 1 then",
+  "    table.insert(bcdTable, 1, 0)",
+  "  end",
+  "  local finalTable = {}",
+  "  for i = 1, #bcdTable, 2 do",
+  "    local nibble1 = bcdTable[i+1]",
+  "    local nibble2 = bcdTable[i]",
+  "    local bcdValue = nibble2 * 16 + nibble1",
+  "    table.insert(finalTable, 1, bcdValue)",
+  "  end",
+  "  if tblsize ~= nil then",
+  "    while #finalTable < tblsize do",
+  "      table.insert(finalTable, 0x00)",
+  "    end",
+  "  end",
+  "  return finalTable",
+  "end"]);
+
+// Converts a number into BCD bytes (most significant byte first), padded to tblsize bytes
+Studio.luaFunction("numberToBcd", [
+  "function numberToBcd(number, tblsize)",
+  "  number = math.floor(number)",
+  "  local bcdTable = {}",
+  "  while number > 0 do",
+  "    local nibble = number % 10",
+  "    table.insert(bcdTable, 1, nibble)",
+  "    number = math.floor(number / 10)",
+  "  end",
+  "  if #bcdTable % 2 == 1 then",
+  "    table.insert(bcdTable, 1, 0)",
+  "  end",
+  "  local finalTable = {}",
+  "  for i = 1, #bcdTable, 2 do",
+  "    local nibble1 = bcdTable[i]",
+  "    local nibble2 = bcdTable[i+1]",
+  "    local bcdValue = nibble2 + nibble1 * 16",
+  "    table.insert(finalTable, bcdValue)",
+  "  end",
+  "  if(tblsize ~= nil) then",
+  "    while #finalTable < tblsize do",
+  "      table.insert(finalTable, 1, 0x00)",
+  "    end",
+  "  end",
+  "  return finalTable",
+  "end"]);
+
+// Converts BCD bytes (most significant byte first) into a number
+Studio.luaFunction("bcdToNumber", [
+  "function bcdToNumber(tbl)",
+  "  value = ''",
+  "  for i, name in ipairs(tbl) do",
+  "    value = value .. string.format('%02x', name)",
+  "  end",
+  "  return tonumber(value);",
+  "end"]);
 
 /* **************************************************************** */
 /*                          EVENTS                                  */
 /* **************************************************************** */
+// Event blocks generate lua functions with fixed names, which are called by the firmware.
+
+// Executed once when the device starts.
+// Lua: function onStartUp() ... end
 Blockly.Blocks['onstartup'] = {
-    init: function() {
-        this.appendDummyInput()
-            .appendField("OnStartup");
-        this.appendStatementInput("actions")
-            .setCheck(null);
-        this.setColour(230);
-        this.setTooltip("This is executed during the startup of the device");
-        this.setHelpUrl("");
-    }
+  init: function() {
+    this.appendDummyInput()
+        .appendField("OnStartup");
+    this.appendStatementInput("actions")
+        .setCheck(null);
+    this.setColour(230);
+    this.setTooltip("This is executed during the startup of the device");
+  }
 };
 
 Blockly.Lua['onstartup'] = function(block) {
-    var statements_actions = Blockly.Lua.statementToCode(block, 'actions');
-    var code = 'function onStartUp()\n';
-    code = code + statements_actions;
-    code = code + 'end';
-    return code;
-}; 
+  var statements_actions = Blockly.Lua.statementToCode(block, 'actions');
+  return 'function onStartUp()\n' + statements_actions + 'end';
+};
 
-events.push({"kind": "block",  "type": "onstartup"})
+base.event("onstartup");
 
 //-------------------------------------------------------------------
+// Executed as often as possible while a radio is connected.
+// Lua: function periodically() ... end
 Blockly.Blocks['periodically'] = {
-    init: function() {
-        this.appendDummyInput()
-            .appendField("Periodically");
-        this.appendStatementInput("actions")
-            .setCheck(null);
-        this.setColour(230);
+  init: function() {
+    this.appendDummyInput()
+        .appendField("Periodically");
+    this.appendStatementInput("actions")
+        .setCheck(null);
+    this.setColour(230);
     this.setTooltip("This is executed periodically if the radio is turned on. Otherwise the function is not called");
-    this.setHelpUrl("");
-    }
+  }
 };
 
 Blockly.Lua['periodically'] = function(block) {
-    var statements_actions = Blockly.Lua.statementToCode(block, 'actions');
-    var code = 'function periodically()\n';
-    code = code + statements_actions;
-    code = code + 'end';
-    return code;
-}; 
+  var statements_actions = Blockly.Lua.statementToCode(block, 'actions');
+  return 'function periodically()\n' + statements_actions + 'end';
+};
 
-events.push({"kind": "block",  "type": "periodically"})
+base.event("periodically");
 
 //-------------------------------------------------------------------
+// Executed when a complete line has been received on the serial interface.
+// Lua: function onSerialLine(line) ... end
 Blockly.Blocks['onserialline'] = {
-    init: function() {
-        this.appendDummyInput()
-            .setAlign(Blockly.ALIGN_RIGHT)
-            .appendField(new Blockly.FieldVariable("line"), "Line");
-        this.appendStatementInput("actions")
-            .setCheck(null)
-            .appendField("OnSerialLine");
-        this.setColour(0);
+  init: function() {
+    this.appendDummyInput()
+        .setAlign(Blockly.ALIGN_RIGHT)
+        .appendField(new Blockly.FieldVariable("line"), "Line");
+    this.appendStatementInput("actions")
+        .setCheck(null)
+        .appendField("OnSerialLine");
+    this.setColour(0);
     this.setTooltip("This is triggered when a user enters a command on the serial interface. The content of the line is in the variable line");
-    this.setHelpUrl("");
-    }
+  }
 };
 
 Blockly.Lua['onserialline'] = function(block) {
-    var variable_line = Blockly.Lua.nameDB_.getName(block.getFieldValue('Line'), Blockly.Names.NameType.VARIABLE);
-    var statements_actions = Blockly.Lua.statementToCode(block, 'actions');
-    var code = 'function onSerialLine(' + variable_line + ')\n';
-    code = code + statements_actions;
-    code = code + 'end';
-    return code;
+  var variable_line = Blockly.Lua.nameDB_.getName(block.getFieldValue('Line'), Blockly.Names.NameType.VARIABLE);
+  var statements_actions = Blockly.Lua.statementToCode(block, 'actions');
+  return 'function onSerialLine(' + variable_line + ')\n' + statements_actions + 'end';
 };
-events.push({"kind": "block",  "type": "onserialline"})
+
+base.event("onserialline");
 
 //-------------------------------------------------------------------
+// Executed for every byte received on the serial interface.
+// Lua: function onSerialByte(byte) ... end
 Blockly.Blocks['onserialbyte'] = {
-    init: function() {
-        this.appendDummyInput()
-            .setAlign(Blockly.ALIGN_RIGHT)
-            .appendField(new Blockly.FieldVariable("byte"), "Byte");
-        this.appendStatementInput("actions")
-            .setCheck(null)
-            .appendField("OnSerialByte");
-        this.setColour(0);
-    this.setTooltip("This is triggered each time a byte arrives on the serial interface. The content of the line is in the variable char as number value");
-    this.setHelpUrl("");
-    }
+  init: function() {
+    this.appendDummyInput()
+        .setAlign(Blockly.ALIGN_RIGHT)
+        .appendField(new Blockly.FieldVariable("byte"), "Byte");
+    this.appendStatementInput("actions")
+        .setCheck(null)
+        .appendField("OnSerialByte");
+    this.setColour(0);
+    this.setTooltip("This is triggered each time a byte arrives on the serial interface. The value of the byte is in the variable byte as number");
+  }
 };
 
 Blockly.Lua['onserialbyte'] = function(block) {
-    var variable_data = Blockly.Lua.nameDB_.getName(block.getFieldValue('Byte'), Blockly.Names.NameType.VARIABLE);
-    var statements_actions = Blockly.Lua.statementToCode(block, 'actions');
-    var code = 'function onSerialByte(' + variable_data + ')\n';
-    code = code + statements_actions;
-    code = code + 'end';
-    return code;
+  var variable_data = Blockly.Lua.nameDB_.getName(block.getFieldValue('Byte'), Blockly.Names.NameType.VARIABLE);
+  var statements_actions = Blockly.Lua.statementToCode(block, 'actions');
+  return 'function onSerialByte(' + variable_data + ')\n' + statements_actions + 'end';
 };
-events.push({"kind": "block",  "type": "onserialbyte"})
 
-//-------------------------------------------------------------------
-// events.push({"kind": "block",  "type": "onserialline"})
+base.event("onserialbyte");
 
 /* **************************************************************** */
 /*                          ACTIONS                                 */
 /* **************************************************************** */
+
+// The standard blockly print block. Prints to the serial interface.
+base.action("text_print");
+
+//-------------------------------------------------------------------
+// Executes the inner blocks only if the watched value differs from the last call.
+// Lua: if(_G.lastValue ~= actValue) then _G.lastValue = actValue ... end
 Blockly.Blocks['onchangeof'] = {
   init: function() {
-    //this.appendDummyInput().appendField("On change of");
-    this.appendValueInput("expr").setCheck(null).setAlign(Blockly.ALIGN_RIGHT).appendField("On change of");
-    this.appendStatementInput("statements").setCheck(["Boolean", "Number", "String"]);
+    this.appendValueInput("expr")
+        .setCheck(null)
+        .setAlign(Blockly.ALIGN_RIGHT)
+        .appendField("On change of");
+    this.appendStatementInput("statements")
+        .setCheck(["Boolean", "Number", "String"]);
     this.setPreviousStatement(true, null);
     this.setNextStatement(true, null);
     this.setColour(230);
- this.setTooltip("Executes the block if the watchedValue changes");
- this.setHelpUrl("");
+    this.setTooltip("Executes the block if the watchedValue changes");
   }
 };
 
@@ -132,377 +237,385 @@ Blockly.Lua['onchangeof'] = function(block) {
   var value_expr = Blockly.Lua.valueToCode(block, 'expr', Blockly.Lua.ORDER_ATOMIC);
   var statements_statements = Blockly.Lua.statementToCode(block, 'statements');
 
+  // every block gets its own global variable to remember the last value
   var lastValue = "_G." + Blockly.Lua.nameDB_.getDistinctName('lastValue', Blockly.Variables.NAME_TYPE);
 
   var code = "actValue = " + value_expr + '\n';
   code = code + 'if(' + lastValue + ' ~= actValue ) then ' + lastValue + ' = actValue\n';
   code = code + statements_statements;
   code = code + 'end\n';
-  
   return code;
 };
 
-actions.push({"kind": "block",  "type": "onchangeof"})
-//-------------------------------------------------------------------
+base.action("onchangeof");
 
+//-------------------------------------------------------------------
+// Sends a raw CI-V command (and optional data) to the radio.
+// Lua: sendCommand(cmd, data)
 Blockly.Blocks['sendcommand'] = {
-    init: function() {
-      this.appendDummyInput().appendField("send command to radio");
-      this.appendValueInput("cmd").setCheck("Array").setAlign(Blockly.ALIGN_RIGHT).appendField("command");
-      this.appendValueInput("data").setCheck("Array").setAlign(Blockly.ALIGN_RIGHT).appendField("data");
-      this.setPreviousStatement(true, null);
-      this.setNextStatement(true, null);
-
-      this.setColour(230);
-   this.setTooltip("Sends the given command to the radio");
-   this.setHelpUrl("");
-    }
-  };
-Blockly.Lua['sendcommand'] = function(block) {
-    var value_cmd = Blockly.Lua.valueToCode(block, 'cmd', Blockly.Lua.ORDER_ATOMIC);
-    var value_data = Blockly.Lua.valueToCode(block, 'data', Blockly.Lua.ORDER_ATOMIC);
-    var code = 'sendCommand(' + value_cmd + ', ' + value_data + ')\n';
-    return code;
+  init: function() {
+    this.appendDummyInput()
+        .appendField("send command to radio");
+    this.appendValueInput("cmd")
+        .setCheck("Array")
+        .setAlign(Blockly.ALIGN_RIGHT)
+        .appendField("command");
+    this.appendValueInput("data")
+        .setCheck("Array")
+        .setAlign(Blockly.ALIGN_RIGHT)
+        .appendField("data");
+    this.setPreviousStatement(true, null);
+    this.setNextStatement(true, null);
+    this.setColour(230);
+    this.setTooltip("Sends the given command to the radio");
+  }
 };
-actions.push({"kind": "block",  "type": "sendcommand"})
+
+Blockly.Lua['sendcommand'] = function(block) {
+  var value_cmd = Blockly.Lua.valueToCode(block, 'cmd', Blockly.Lua.ORDER_ATOMIC);
+  var value_data = Blockly.Lua.valueToCode(block, 'data', Blockly.Lua.ORDER_ATOMIC);
+  return 'sendCommand(' + value_cmd + ', ' + value_data + ')\n';
+};
+
+base.action("sendcommand");
 
 //-------------------------------------------------------------------
+// Sets the output voltage of an analog pin (0.0 - 3.3 V).
+// Lua: setAnalogOutput(PIN_A, voltage)
 Blockly.Blocks['setanalogoutput'] = {
-    init: function() {
-        this.appendDummyInput()
-            .appendField("Set")
-            .appendField(new Blockly.FieldDropdown([["PIN A","PIN_A"], ["PIN B","PIN_B"]]), "pinname");
-        this.appendValueInput("newvalue")
-            .setCheck("Number")
-            .appendField("to Voltage");
-        this.setPreviousStatement(true, null);
-        this.setNextStatement(true, null);
-        this.setColour(230);
-        this.setTooltip("Sets the given pin to the selected value");
-        this.setHelpUrl("");
-    }
+  init: function() {
+    this.appendDummyInput()
+        .appendField("Set")
+        .appendField(new Blockly.FieldDropdown(PINS_DAC), "pinname");
+    this.appendValueInput("newvalue")
+        .setCheck("Number")
+        .appendField("to Voltage");
+    this.setPreviousStatement(true, null);
+    this.setNextStatement(true, null);
+    this.setColour(230);
+    this.setTooltip("Sets the given pin to the selected value");
+  }
 };
 
 Blockly.Lua['setanalogoutput'] = function(block) {
-    var desiredPin = Blockly.Lua.nameDB_.getName(block.getFieldValue('pinname'), Blockly.Names.NameType.VARIABLE);
-    var newValue =  Blockly.Lua.valueToCode(block, 'newvalue', Blockly.Lua.ORDER_ATOMIC);
-    var code = 'setAnalogOutput(' + desiredPin + ', ' + newValue + ')\n';
-    return code;
+  var desiredPin = Blockly.Lua.nameDB_.getName(block.getFieldValue('pinname'), Blockly.Names.NameType.VARIABLE);
+  var newValue = Blockly.Lua.valueToCode(block, 'newvalue', Blockly.Lua.ORDER_ATOMIC);
+  return 'setAnalogOutput(' + desiredPin + ', ' + newValue + ')\n';
 };
 
-actions.push({"kind": "block",  "type": "setanalogoutput"})
+base.action("setanalogoutput");
 
 //-------------------------------------------------------------------
+// Sets a digital pin to high (true = 3.3 V) or low (false = 0 V).
+// Lua: setDigitalOutput(PIN_A, state)
 Blockly.Blocks['setdigitaloutput'] = {
-    init: function() {
-        this.appendDummyInput()
-            .appendField("Set")
-            .appendField(new Blockly.FieldDropdown([["PIN A","PIN_A"], ["PIN B","PIN_B"], ["PIN C","PIN_C"], ["PIN D","PIN_D"], ["PIN E","PIN_E"], ["PIN F","PIN_F"], ["PIN G","PIN_G"], ["PIN H","PIN_H"]]), "pinname");
-        this.appendValueInput("newvalue")
-            .setCheck("Boolean")
-            .appendField("to Value");
-        this.setPreviousStatement(true, null);
-        this.setNextStatement(true, null);
-        this.setColour(230);
-        this.setTooltip("Sets the digital output to high (true) or low (false)");
-        this.setHelpUrl("");
-    }
+  init: function() {
+    this.appendDummyInput()
+        .appendField("Set")
+        .appendField(new Blockly.FieldDropdown(PINS_ALL), "pinname");
+    this.appendValueInput("newvalue")
+        .setCheck("Boolean")
+        .appendField("to Value");
+    this.setPreviousStatement(true, null);
+    this.setNextStatement(true, null);
+    this.setColour(230);
+    this.setTooltip("Sets the digital output to high (true) or low (false)");
+  }
 };
 
 Blockly.Lua['setdigitaloutput'] = function(block) {
-    var desiredPin = Blockly.Lua.nameDB_.getName(block.getFieldValue('pinname'), Blockly.Names.NameType.VARIABLE);
-    var newValue =  Blockly.Lua.valueToCode(block, 'newvalue', Blockly.Lua.ORDER_ATOMIC);
-    var code = 'setDigitalOutput(' + desiredPin + ', ' + newValue + ')\n';
-    return code;
+  var desiredPin = Blockly.Lua.nameDB_.getName(block.getFieldValue('pinname'), Blockly.Names.NameType.VARIABLE);
+  var newValue = Blockly.Lua.valueToCode(block, 'newvalue', Blockly.Lua.ORDER_ATOMIC);
+  return 'setDigitalOutput(' + desiredPin + ', ' + newValue + ')\n';
 };
 
-actions.push({"kind": "block",  "type": "setdigitaloutput"})
+base.action("setdigitaloutput");
 
 //-------------------------------------------------------------------
+// Pauses the program for the given time.
+// Lua: wait(milliseconds)
 Blockly.Blocks['wait'] = {
-    init: function() {
-        this.jsonInit({
-            "type": "wait",
-            "message0": "Wait %1 %2 ms",
-            "args0": [
-            {"type": "input_dummy"},
-            {"type": "input_value",  "name": "timeout", "check": "Number" }
-            ],
-            "inputsInline": true,
-            "previousStatement": null,
-            "nextStatement": null,
-            "colour": 230,
-            "tooltip": "Waits for x milliseconds",
-            "helpUrl": ""
-        });
-        var thisBlock = this;
-        this.setTooltip("Waits for x milliseconds");
-    }
+  init: function() {
+    this.jsonInit({
+      "type": "wait",
+      "message0": "Wait %1 %2 ms",
+      "args0": [
+        {"type": "input_dummy"},
+        {"type": "input_value", "name": "timeout", "check": "Number"}
+      ],
+      "inputsInline": true,
+      "previousStatement": null,
+      "nextStatement": null,
+      "colour": 230,
+      "tooltip": "Waits for x milliseconds"
+    });
+  }
 };
 
 Blockly.Lua['wait'] = function(block) {
-    var number_timeout = block.getFieldValue('timeout');
-    var value_timeout = Blockly.Lua.valueToCode(block, 'timeout', Blockly.Lua.ORDER_ATOMIC);
-    var code = 'wait(' + value_timeout + ')\n';
-    return code;
+  var value_timeout = Blockly.Lua.valueToCode(block, 'timeout', Blockly.Lua.ORDER_ATOMIC);
+  return 'wait(' + value_timeout + ')\n';
 };
 
-actions.push({"kind": "block",  "type": "wait"})
+base.action("wait");
 
 //-------------------------------------------------------------------
-
+// Compiles and runs the given string as lua code.
+// Lua: load(chunk)()
 Blockly.Blocks['executeluachunk'] = {
-    init: function() {
-        this.appendDummyInput().appendField("execute Lua Chunk");
-        this.appendValueInput("chunk").setCheck("String");
-        this.setPreviousStatement(true, null);
-        this.setNextStatement(true, null);
-        this.setColour(230);
-        this.setTooltip("Runs the given Lua Script");
-        this.setHelpUrl("https://www.lua.org/manual/5.3/");
-    }
+  init: function() {
+    this.appendDummyInput()
+        .appendField("execute Lua Chunk");
+    this.appendValueInput("chunk")
+        .setCheck("String");
+    this.setPreviousStatement(true, null);
+    this.setNextStatement(true, null);
+    this.setColour(230);
+    this.setTooltip("Runs the given Lua Script");
+    this.setHelpUrl("https://www.lua.org/manual/5.3/");   // the lua manual is more useful than our docs here
+  }
 };
 
-Blockly.Lua['executeluachunk'] = function(block) 
-{
-    var value_script = Blockly.Lua.valueToCode(block, 'chunk', Blockly.Lua.ORDER_ATOMIC);
-    var code = 'load(' + value_script + ')()\n';
-    return code;
+Blockly.Lua['executeluachunk'] = function(block) {
+  var value_script = Blockly.Lua.valueToCode(block, 'chunk', Blockly.Lua.ORDER_ATOMIC);
+  return 'load(' + value_script + ')()\n';
 };
 
-actions.push({"kind": "block",  "type": "executeluachunk"})
+base.action("executeluachunk");
 
 //-------------------------------------------------------------------
-
+// Sets the baudrate of the serial interface (always 8 data bits, no parity, 1 stop bit).
+// Lua: configSerial(baudrate)
 Blockly.Blocks['configserial'] = {
-    init: function() {
-        this.jsonInit({
-            "message0": "Set serial speed to  %1,8,N,1",
-            "args0": [
-                {   "type": "field_dropdown",
-                    "name": "speed",
-                    "options": [["110","110"],["300","300"],["600","600"],["1200","1200"],
-                                ["2400","2400"],["4800","4800"],["9600","9600"],
-                                ["14400","14400"],["19200","19200"],["38400","38400"],
-                                ["57600","57600"],["115200","115200"]]
-                },          
-            ],
-            "colour": 230,
-            "previousStatement": null,
-            "nextStatement": null,
-            });
-            var thisBlock = this;
-            this.setTooltip("Sets the speed of the serial port");
+  init: function() {
+    this.jsonInit({
+      "message0": "Set serial speed to  %1,8,N,1",
+      "args0": [
+        {
+          "type": "field_dropdown",
+          "name": "speed",
+          "options": [["110", "110"], ["300", "300"], ["600", "600"], ["1200", "1200"],
+                      ["2400", "2400"], ["4800", "4800"], ["9600", "9600"],
+                      ["14400", "14400"], ["19200", "19200"], ["38400", "38400"],
+                      ["57600", "57600"], ["115200", "115200"]]
         }
-    };
-
-Blockly.Lua['configserial'] = function(block) 
-{
-    var value_speed = block.getFieldValue('speed');
-    var code = 'configSerial(' + value_speed + ')\n';
-    return code;
+      ],
+      "previousStatement": null,
+      "nextStatement": null,
+      "colour": 230,
+      "tooltip": "Sets the speed of the serial port"
+    });
+  }
 };
 
-actions.push({"kind": "block",  "type": "configserial"})
+Blockly.Lua['configserial'] = function(block) {
+  var value_speed = block.getFieldValue('speed');
+  return 'configSerial(' + value_speed + ')\n';
+};
+
+base.action("configserial");
+
 /* **************************************************************** */
 /*                          PROPERTIES                              */
 /* **************************************************************** */
 
+// Sends a raw CI-V command to the radio and returns the bytes of the response.
+// Lua: readResultOfCommand(sendCommand(cmd))
 Blockly.Blocks['readdata'] = {
-    init: function() {
-        this.appendDummyInput().appendField("Read data from radio");
-        this.appendValueInput("commandsequence").setCheck("Array");
-        this.setOutput(true, "Array");
-        this.setColour(230);
-        this.setTooltip("Returns the plain resultarray of the given command");
-        this.setHelpUrl("");
-    }
+  init: function() {
+    this.appendDummyInput()
+        .appendField("Read data from radio");
+    this.appendValueInput("commandsequence")
+        .setCheck("Array");
+    this.setOutput(true, "Array");
+    this.setColour(230);
+    this.setTooltip("Returns the plain resultarray of the given command");
+  }
 };
+
 Blockly.Lua['readdata'] = function(block) {
-    var value_command = Blockly.Lua.valueToCode(block, 'commandsequence', Blockly.Lua.ORDER_ATOMIC);
-    var code = 'readResultOfCommand(sendCommand(' + value_command + '))';
-    return [code, Blockly.Lua.ORDER_NONE];
+  var value_command = Blockly.Lua.valueToCode(block, 'commandsequence', Blockly.Lua.ORDER_ATOMIC);
+  var code = 'readResultOfCommand(sendCommand(' + value_command + '))';
+  return [code, Blockly.Lua.ORDER_NONE];
 };
-properties.push({"kind": "block",  "type": "readdata"})
+
+base.property("readdata");
 
 //-------------------------------------------------------------------
+// Returns the voltage at the given pin.
+// Lua: readAnalogInput(PIN_A)
 Blockly.Blocks['readanaloginput'] = {
-    init: function() {
-        this.appendDummyInput()
-            .appendField("Voltage of")
-            .appendField(new Blockly.FieldDropdown(([["PIN A","PIN_A"], ["PIN B","PIN_B"], ["PIN C","PIN_C"], ["PIN D","PIN_D"], ["PIN E","PIN_E"], ["PIN F","PIN_F"], ["PIN G","PIN_G"], ["PIN H","PIN_H"]])), "pinname");
-        this.setOutput(true, "Number");
-        this.setColour(230);
-        this.setTooltip("Read the value of the given input in mV");
-        this.setHelpUrl("");
-    }
+  init: function() {
+    this.appendDummyInput()
+        .appendField("Voltage of")
+        .appendField(new Blockly.FieldDropdown(PINS_ALL), "pinname");
+    this.setOutput(true, "Number");
+    this.setColour(230);
+    this.setTooltip("Read the value of the given input in mV");
+  }
 };
 
 Blockly.Lua['readanaloginput'] = function(block) {
-    var desiredPin = Blockly.Lua.nameDB_.getName(block.getFieldValue('pinname'), Blockly.Names.NameType.VARIABLE);
-    var code = 'readAnalogInput(' + desiredPin + ')';
-    return [code, Blockly.Lua.ORDER_RELATIONAL];
+  var desiredPin = Blockly.Lua.nameDB_.getName(block.getFieldValue('pinname'), Blockly.Names.NameType.VARIABLE);
+  var code = 'readAnalogInput(' + desiredPin + ')';
+  return [code, Blockly.Lua.ORDER_RELATIONAL];
 };
 
-properties.push({"kind": "block",  "type": "readanaloginput"})
+base.property("readanaloginput");
 
 //-------------------------------------------------------------------
+// Returns the state of the given pin (true = high, false = low).
+// Lua: readDigitalInput(PIN_A)
 Blockly.Blocks['readdigitalinput'] = {
-init: function() {
-        this.appendDummyInput()
-            .appendField("State of")
-            .appendField(new Blockly.FieldDropdown([["PIN A","PIN_A"], ["PIN B","PIN_B"], ["PIN C","PIN_C"], ["PIN D","PIN_D"], ["PIN E","PIN_E"], ["PIN F","PIN_F"], ["PIN G","PIN_G"], ["PIN H","PIN_H"]]), "pinname");
-        this.setOutput(true, "Boolean");
-        this.setColour(230);
-        this.setTooltip("Read the value of the given input");
-        this.setHelpUrl("");
-    }
+  init: function() {
+    this.appendDummyInput()
+        .appendField("State of")
+        .appendField(new Blockly.FieldDropdown(PINS_ALL), "pinname");
+    this.setOutput(true, "Boolean");
+    this.setColour(230);
+    this.setTooltip("Read the value of the given input");
+  }
 };
 
 Blockly.Lua['readdigitalinput'] = function(block) {
-    var desiredPin = Blockly.Lua.nameDB_.getName(block.getFieldValue('pinname'), Blockly.Names.NameType.VARIABLE);
-    var code = 'readDigitalInput(' + desiredPin + ')';
-    return [code, Blockly.Lua.ORDER_RELATIONAL];
+  var desiredPin = Blockly.Lua.nameDB_.getName(block.getFieldValue('pinname'), Blockly.Names.NameType.VARIABLE);
+  var code = 'readDigitalInput(' + desiredPin + ')';
+  return [code, Blockly.Lua.ORDER_RELATIONAL];
 };
 
-properties.push({"kind": "block",  "type": "readdigitalinput"})
+base.property("readdigitalinput");
 
 //-------------------------------------------------------------------
-Blockly.Blocks['millis'] = 
-{
-    init: function() {
-        this.appendDummyInput().appendField("milliseconds since start");
-        this.setOutput(true, "Number");
-        this.setColour(230);
-        this.setTooltip("returns the milliseconds since the device was started. Rolls over after ~57 days");
-        this.setHelpUrl("");
-    }
+// Returns the milliseconds since the device has been started.
+// Lua: millis()
+Blockly.Blocks['millis'] = {
+  init: function() {
+    this.appendDummyInput()
+        .appendField("milliseconds since start");
+    this.setOutput(true, "Number");
+    this.setColour(230);
+    this.setTooltip("Returns the milliseconds since the device was started. Rolls over after ~57 days");
+  }
 };
 
-Blockly.Lua['millis'] = function(block) 
-{
-    var code = 'millis()';
-    return [code, Blockly.Lua.ORDER_NONE];
+Blockly.Lua['millis'] = function(block) {
+  return ['millis()', Blockly.Lua.ORDER_NONE];
 };
-properties.push({"kind": "block",  "type": "millis"})
+
+base.property("millis");
 
 //-------------------------------------------------------------------
+// Returns the raw value of the capacitive touch sensor of a pin (lower = touched).
+// Lua: readTouchInput(PIN_C)
 Blockly.Blocks['touchvalue'] = {
-    init: function() {
-        this.jsonInit({
-            "message0": "Touch value of %1",
-            "args0": [
-                {   "type": "field_dropdown",
-                    "name": "pinname",
-                    "options": [["PIN C","PIN_C"],["PIN D","PIN_D"],["PIN E","PIN_E"],
-                                ["PIN F","PIN_F"],["PIN G","PIN_G"],["PIN H","PIN_H"]]
-                },          
-            ],
-            "colour": 230,
-            });
-            this.setOutput(true, "Number");
-            this.setTooltip("Reads the touch value of a pin");
-        }
-    };
-
-Blockly.Lua['touchvalue'] = function(block) 
-{
-    var desiredPin = Blockly.Lua.nameDB_.getName(block.getFieldValue('pinname'), Blockly.Names.NameType.VARIABLE);
-    var code = 'readTouchInput(' + desiredPin + ')';
-    return [code, Blockly.Lua.ORDER_RELATIONAL];
+  init: function() {
+    this.jsonInit({
+      "message0": "Touch value of %1",
+      "args0": [
+        {"type": "field_dropdown", "name": "pinname", "options": PINS_TOUCH}
+      ],
+      "output": "Number",
+      "colour": 230,
+      "tooltip": "Reads the touch value of a pin"
+    });
+  }
 };
 
-properties.push({"kind": "block",  "type": "touchvalue"})
+Blockly.Lua['touchvalue'] = function(block) {
+  var desiredPin = Blockly.Lua.nameDB_.getName(block.getFieldValue('pinname'), Blockly.Names.NameType.VARIABLE);
+  var code = 'readTouchInput(' + desiredPin + ')';
+  return [code, Blockly.Lua.ORDER_RELATIONAL];
+};
+
+base.property("touchvalue");
 
 //-------------------------------------------------------------------
+// Returns true if a pin is touched (or released). The threshold is 30.
+// Lua: (readTouchInput(PIN_C) < 30)
 Blockly.Blocks['isTouched'] = {
-    init: function() {
-        this.jsonInit({
-            "message0": "Is %1 %2 ?",
-            "args0": [
-                {   "type": "field_dropdown",
-                    "name": "pinname",
-                    "options": [["PIN C","PIN_C"],["PIN D","PIN_D"],["PIN E","PIN_E"],
-                                ["PIN F","PIN_F"],["PIN G","PIN_G"],["PIN H","PIN_H"]]
-                },      
-                {   "type": "field_dropdown",
-                    "name": "threshold",
-                    "options": [["touched","< 30"],["released",">= 30"]]
-                },                     
-            ],
-            "colour": 230,
-            });
-            this.setOutput(true, "Boolean");
-            this.setTooltip("Retruns true if a pin has been touched");
-        }
-    };
-
-Blockly.Lua['isTouched'] = function(block) 
-{
-    var desiredPin = Blockly.Lua.nameDB_.getName(block.getFieldValue('pinname'), Blockly.Names.NameType.VARIABLE);
-    var threshold =  block.getFieldValue('threshold');
-    var code = '(readTouchInput(' + desiredPin + ') ' + threshold + ')';
-    return [code, Blockly.Lua.ORDER_RELATIONAL];
+  init: function() {
+    this.jsonInit({
+      "message0": "Is %1 %2 ?",
+      "args0": [
+        {"type": "field_dropdown", "name": "pinname", "options": PINS_TOUCH},
+        {"type": "field_dropdown", "name": "threshold", "options": [["touched", "< 30"], ["released", ">= 30"]]}
+      ],
+      "output": "Boolean",
+      "colour": 230,
+      "tooltip": "Returns true if a pin has been touched"
+    });
+  }
 };
 
-properties.push({"kind": "block",  "type": "isTouched"})
+Blockly.Lua['isTouched'] = function(block) {
+  var desiredPin = Blockly.Lua.nameDB_.getName(block.getFieldValue('pinname'), Blockly.Names.NameType.VARIABLE);
+  var threshold = block.getFieldValue('threshold');
+  var code = '(readTouchInput(' + desiredPin + ') ' + threshold + ')';
+  return [code, Blockly.Lua.ORDER_RELATIONAL];
+};
+
+base.property("isTouched");
 
 /* **************************************************************** */
 /*                          HELPERS                                 */
 /* **************************************************************** */
+
+// A comment in the program. Does nothing.
+// Lua: -- text
 Blockly.Blocks['comment'] = {
   init: function() {
     this.jsonInit({
-        "type": "comment",
-        "message0": "Comment: %1",
-        "args0": [
-            {"type": "field_input",  "name": "theContent", "check": "String" }
-        ],
-        "inputsInline": false,
-        "previousStatement": null,
-        "nextStatement": null,
-        "colour": 120,
-        "helpUrl": ""
+      "type": "comment",
+      "message0": "Comment: %1",
+      "args0": [
+        {"type": "field_input", "name": "theContent", "check": "String"}
+      ],
+      "inputsInline": false,
+      "previousStatement": null,
+      "nextStatement": null,
+      "colour": 120,
+      "tooltip": "Does nothing, is just for commenting"
     });
-    var thisBlock = this;
-    this.setTooltip("Does nothing, is just for commenting");
   }
 };
+
 Blockly.Lua['comment'] = function(block) {
-    var theComment = block.getFieldValue('theContent');
-    return "-- " + theComment + "\n";
+  var theComment = block.getFieldValue('theContent');
+  return "-- " + theComment + "\n";
 };
 
-helpers.push({"kind": "block",  "type": "comment"})
+base.helper("comment");
+
 //-------------------------------------------------------------------
+// A voltage with unit. Converts it to its base unit V.
+// Lua: the value in V (calculated when the code is generated)
 Blockly.Blocks['voltagevalue'] = {
-init: function() {
+  init: function() {
     this.jsonInit({
-        "message0": "%1 %2",
-        "args0": [
-            {"type": "input_value",     "name": "voltage", "check": "Number"},
-            {"type": "field_dropdown",  "name": "vunit",
-                "options": [["V", "1"],["mV", "0.001"]]
-            }          
-        ],
-        "output": "Number",
-        "colour": 230
-        });
-        var thisBlock = this;
-        this.setTooltip("Voltage representation");
-    }
+      "message0": "%1 %2",
+      "args0": [
+        {"type": "input_value", "name": "voltage", "check": "Number"},
+        {"type": "field_dropdown", "name": "vunit", "options": [["V", "1"], ["mV", "0.001"]]}
+      ],
+      "output": "Number",
+      "colour": 230,
+      "tooltip": "Voltage representation"
+    });
+  }
 };
 
 Blockly.Lua['voltagevalue'] = function(block) {
-    var voltageValue = Blockly.Lua.valueToCode(block, 'voltage', Blockly.Lua.ORDER_ATOMIC);
-    var dropdown_unit = block.getFieldValue('vunit');
-    var code = voltageValue * parseFloat(dropdown_unit);
-    return [code, Blockly.Lua.ORDER_NONE];
+  var voltageValue = Blockly.Lua.valueToCode(block, 'voltage', Blockly.Lua.ORDER_ATOMIC);
+  var dropdown_unit = block.getFieldValue('vunit');
+  var code = voltageValue * parseFloat(dropdown_unit);
+  return [code, Blockly.Lua.ORDER_NONE];
 };
 
-helpers.push({"kind": "block",  "type": "voltagevalue"})
+base.helper("voltagevalue");
 
 //-------------------------------------------------------------------
+// Converts a list of bytes into a readable string with hex values.
+// Lua: pretty(list)
 Blockly.Blocks['prettystring'] = {
   init: function() {
     this.appendValueInput("inputarray")
@@ -510,25 +623,21 @@ Blockly.Blocks['prettystring'] = {
         .appendField("pretty");
     this.setOutput(true, "String");
     this.setColour(230);
- this.setTooltip("Converts a list to a string with hex values");
- this.setHelpUrl("");
+    this.setTooltip("Converts a list to a string with hex values");
   }
 };
 
 Blockly.Lua['prettystring'] = function(block) {
-  
-    var inarray = Blockly.Lua.valueToCode(block, 'inputarray', Blockly.Lua.ORDER_ATOMIC);
-
-    use('pretty'); 
-  
-    // Generate the function call for this block.
-    var code =  'pretty(' + inarray + ')';
-    return [code, Blockly.Lua.ORDER_ATOMIC];
+  var inarray = Blockly.Lua.valueToCode(block, 'inputarray', Blockly.Lua.ORDER_ATOMIC);
+  Studio.use('pretty');
+  return ['pretty(' + inarray + ')', Blockly.Lua.ORDER_ATOMIC];
 };
 
-helpers.push({"kind": "block",  "type": "prettystring"})
+base.helper("prettystring");
 
 //-------------------------------------------------------------------
+// Converts a list of BCD bytes into a number.
+// Lua: bcdToNumber(list)
 Blockly.Blocks['bcdasnumber'] = {
   init: function() {
     this.appendValueInput("inputarray")
@@ -536,25 +645,21 @@ Blockly.Blocks['bcdasnumber'] = {
         .appendField("BCD values as Number");
     this.setOutput(true, "Number");
     this.setColour(230);
- this.setTooltip("Converts of bcd hex values to the corrsponding number");
- this.setHelpUrl("");
+    this.setTooltip("Converts bcd hex values to the corresponding number");
   }
 };
 
 Blockly.Lua['bcdasnumber'] = function(block) {
-  
   var inarray = Blockly.Lua.valueToCode(block, 'inputarray', Blockly.Lua.ORDER_ATOMIC);
-  use('bcdAsNumber');
-
-  // Generate the function call for this block.
-  var code = 'bcdAsNumber(' + inarray + ')';
-  return [code, Blockly.Lua.ORDER_ATOMIC];
+  Studio.use('bcdToNumber');
+  return ['bcdToNumber(' + inarray + ')', Blockly.Lua.ORDER_ATOMIC];
 };
 
-helpers.push({"kind": "block",  "type": "bcdasnumber"})
+base.helper("bcdasnumber");
 
 //-------------------------------------------------------------------
-
+// Maps a number from one range onto another.
+// Lua: map(value, in_min, in_max, out_min, out_max)
 Blockly.Blocks['mapnumber'] = {
   init: function() {
     this.appendValueInput("val").setCheck("Number").appendField("map");
@@ -565,8 +670,7 @@ Blockly.Blocks['mapnumber'] = {
     this.setInputsInline(true);
     this.setOutput(true, null);
     this.setColour(230);
- this.setTooltip("Maps a number from one range into another (by linear intra/extrapolation).");
- this.setHelpUrl("");
+    this.setTooltip("Maps a number from one range into another (by linear intra/extrapolation).");
   }
 };
 
@@ -576,95 +680,56 @@ Blockly.Lua['mapnumber'] = function(block) {
   var value_in_max = Blockly.Lua.valueToCode(block, 'in_max', Blockly.Lua.ORDER_ATOMIC);
   var value_out_min = Blockly.Lua.valueToCode(block, 'out_min', Blockly.Lua.ORDER_ATOMIC);
   var value_out_max = Blockly.Lua.valueToCode(block, 'out_max', Blockly.Lua.ORDER_ATOMIC);
-
-  use('map');
-      
-  // Generate the function call for this block.
-  var code = 'map(' + value_val  + ', ' + value_in_min + ', '+ value_in_max + ', ' + value_out_min + ', ' + value_out_max + ')';
+  Studio.use('map');
+  var code = 'map(' + value_val + ', ' + value_in_min + ', ' + value_in_max + ', ' + value_out_min + ', ' + value_out_max + ')';
   return [code, Blockly.Lua.ORDER_ATOMIC];
 };
 
-helpers.push({"kind": "block",  "type": "mapnumber"})
-
-
+base.helper("mapnumber");
 
 //-------------------------------------------------------------------
+// Converts a byte value into the corresponding character.
+// Lua: string.char(byte)
 Blockly.Blocks['asChar'] = {
-    init: function() {
-      this.appendValueInput("inByte")
-          .setCheck("Number")
-          .appendField("char of");
-      this.setOutput(true, "String");
-      this.setColour(230);
-   this.setTooltip("Converts the number to a character");
-   this.setHelpUrl("");
-    }
-  };
-  
-  Blockly.Lua['asChar'] = function(block) {
-    
-    var inbyte = Blockly.Lua.valueToCode(block, 'inByte', Blockly.Lua.ORDER_ATOMIC);
-    // Generate the function call for this block.
-    var code = 'string.char(' + inbyte + ')'; 
-    return [code, Blockly.Lua.ORDER_ATOMIC];
-  };
-  
-  helpers.push({"kind": "block",  "type": "asChar"})
+  init: function() {
+    this.appendValueInput("inByte")
+        .setCheck("Number")
+        .appendField("char of");
+    this.setOutput(true, "String");
+    this.setColour(230);
+    this.setTooltip("Converts the number to a character");
+  }
+};
 
-  //-------------------------------------------------------------------
+Blockly.Lua['asChar'] = function(block) {
+  var inbyte = Blockly.Lua.valueToCode(block, 'inByte', Blockly.Lua.ORDER_ATOMIC);
+  return ['string.char(' + inbyte + ')', Blockly.Lua.ORDER_ATOMIC];
+};
+
+base.helper("asChar");
+
+//-------------------------------------------------------------------
+// Converts the first character of a text into its byte value.
+// Lua: string.byte("c")
 Blockly.Blocks['asByte'] = {
   init: function() {
     this.jsonInit({
-        "type": "asByte",
-        "message0": "byte of character %1",
-        "args0": [
-            {"type": "field_input",  "name": "inChar", "check": "String" }
-        ],
-        "output": "Number",
-        "inputsInline": false,
-        "colour": 120,
-        "helpUrl": ""
+      "type": "asByte",
+      "message0": "byte of character %1",
+      "args0": [
+        {"type": "field_input", "name": "inChar", "check": "String"}
+      ],
+      "output": "Number",
+      "inputsInline": false,
+      "colour": 120,
+      "tooltip": "Converts the first character of the given string to a numeric byte value"
     });
-    var thisBlock = this;
-    this.setTooltip("Converts the first character of the given string to a numeric byte value");
   }
-    
 };
-  
+
 Blockly.Lua['asByte'] = function(block) {
-    
-    var inchar = block.getFieldValue('inChar');
-    // Generate the function call for this block.
-    var code = 'string.byte("' + inchar + '")'; 
-    return [code, Blockly.Lua.ORDER_ATOMIC];
+  var inchar = block.getFieldValue('inChar');
+  return ['string.byte("' + inchar + '")', Blockly.Lua.ORDER_ATOMIC];
 };
-  
-helpers.push({"kind": "block",  "type": "asByte"})
-//-------------------------------------------------------------------  
 
-  // map     
-
-
-//-------------------------------------------------------------------
-// Finally add the blocks to the toolbox
-//-------------------------------------------------------------------
-
-// Add all the events
-contribution.contents.push({"kind": "label", "text" : "Events" });
-events.forEach((event) => contribution.contents.push(event));
-
-// Add all the actions
-contribution.contents.push({"kind": "label", "text" : "Actions" });
-contribution.contents.push({"kind": "block",  "type": "text_print"});
-actions.forEach((action) => contribution.contents.push(action));
-
-// Add all the properties
-contribution.contents.push({"kind": "label", "text" : "Properties" });
-properties.forEach((property) => contribution.contents.push(property));
-
-// Add all the helpers
-contribution.contents.push({"kind": "label", "text" : "Helpers" });
-helpers.forEach((helper) => contribution.contents.push(helper));
-
-// Add the things within this file to the toolbox
-toolbox.contents.push(contribution);
+base.helper("asByte");

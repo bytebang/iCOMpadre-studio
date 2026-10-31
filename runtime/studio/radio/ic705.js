@@ -1,19 +1,8 @@
-// Create a main 
-contribution = {
-  "kind": "category",  "name": "IC-705",
-  "contents": []
-};
+// Register the contribution of this file
+var ic705 = Studio.category("IC-705");
 
-// Insert menu contributions in these arrays
-// they will be added to the menu at the end 
-events = [];
-actions = [];
-properties = [];
-helpers = [];
-
-
-// Additional helping functions -> can be used with the use(...) function
-utilityfunctions['getOperatingModeString'] = [
+// Additional helping functions -> can be used with the Studio.use(...) function
+Studio.luaFunction('getOperatingModeString', [
   'function getOperatingModeString(responseTable)',
   '  local reponseByte = string.format("0x%02x", responseTable[1])',
   '  local modeMap = {',
@@ -30,7 +19,7 @@ utilityfunctions['getOperatingModeString'] = [
   "  }",
   '  return modeMap[reponseByte] or "Unknown"',
   "end"
-];
+]);
 
 /* **************************************************************** */
 /*                          EVENTS                                  */
@@ -58,13 +47,13 @@ Blockly.Lua['test'] = function(block) {
   
   var inarray = Blockly.Lua.valueToCode(block, 'inputarray', Blockly.Lua.ORDER_ATOMIC);
   
-    use(['pretty', 'map']);
+    Studio.use(['pretty', 'map']);
 
     var code = 'pretty(' + inarray + ')';
     return [code, Blockly.Lua.ORDER_FUNCTION_CALL];
 };
 
-helpers.push({"kind": "block",  "type": "test"})
+ic705.helper("test");
 
 //-------------------------------------------------------------------
 
@@ -107,12 +96,12 @@ Blockly.Blocks['ic705_set_af_level'] = {
 
 Blockly.Lua['ic705_set_af_level'] = function(block) {
   var level = Blockly.Lua.valueToCode(block, 'level', Blockly.Lua.ORDER_ATOMIC);
-  use(['numberToBcd','map']);
+  Studio.use(['numberToBcd','map']);
   var code = 'sendCommand({0x14, 0x01},numberToBcd(map(' + level + ',0,100,0,255),2))\n';
   return code;
 };
 
-actions.push({"kind": "block", "type": "ic705_set_af_level"});
+ic705.action("ic705_set_af_level");
 
 //-------------------------------------------------------------------
 Blockly.Blocks['ic705_set_frequency'] = {
@@ -147,12 +136,12 @@ Blockly.Blocks['ic705_set_frequency'] = {
 Blockly.Lua['ic705_set_frequency'] = function(block) {
   var frequency = Blockly.Lua.valueToCode(block, 'FREQUENCY', Blockly.Lua.ORDER_ATOMIC);
   var unit = block.getFieldValue('UNIT');
-  use(['frequencyToBcd']);
+  Studio.use(['frequencyToBcd']);
   var code = 'sendCommand({0x05}, frequencyToBcd(' + frequency + '*' + unit + ',5))';  
   return code + ';\n';
 };
 
-actions.push({"kind": "block", "type": "ic705_set_frequency"});
+ic705.action("ic705_set_frequency");
 //-------------------------------------------------------------------
 
 Blockly.Blocks['ic705_set_operating_mode'] = {
@@ -192,7 +181,7 @@ Blockly.Lua['ic705_set_operating_mode'] = function(block) {
   return code + ';\n';
 };
 
-actions.push({"kind": "block", "type": "ic705_set_operating_mode"});
+ic705.action("ic705_set_operating_mode");
 //-------------------------------------------------------------------
 
 Blockly.Blocks['ic705_set_rf_gain'] = {
@@ -231,12 +220,12 @@ Blockly.Blocks['ic705_set_rf_gain'] = {
 
 Blockly.Lua['ic705_set_rf_gain'] = function(block) {
   var gain = Blockly.Lua.valueToCode(block, 'gain', Blockly.Lua.ORDER_ATOMIC);
-  use(['numberToBcd', 'map']);
+  Studio.use(['numberToBcd', 'map']);
   var code = 'sendCommand({0x14, 0x02},numberToBcd(map(' + gain + ',0,100,0,255),2))\n';  // Send the command with RF gain value
   return code;
 };
 
-actions.push({"kind": "block", "type": "ic705_set_rf_gain"});
+ic705.action("ic705_set_rf_gain");
 //-------------------------------------------------------------------
 
 Blockly.Blocks['ic705_set_squelch_level'] = {
@@ -275,12 +264,12 @@ Blockly.Blocks['ic705_set_squelch_level'] = {
 
 Blockly.Lua['ic705_set_squelch_level'] = function(block) {
   var level = Blockly.Lua.valueToCode(block, 'level', Blockly.Lua.ORDER_ATOMIC);
-  use(['numberToBcd', 'map']);
+  Studio.use(['numberToBcd', 'map']);
   var code = 'sendCommand({0x14, 0x03}, numberToBcd(map(' + level + ', 0, 100, 0, 255), 2))\n';  // Send the command with squelch level value
   return code;
 };
 
-actions.push({"kind": "block", "type": "ic705_set_squelch_level"});
+ic705.action("ic705_set_squelch_level");
 //-------------------------------------------------------------------
 Blockly.Blocks['ic705_set_mic_gain'] = {
   init: function() {
@@ -304,11 +293,11 @@ Blockly.Blocks['ic705_set_mic_gain'] = {
 
 Blockly.Lua['ic705_set_mic_gain'] = function(block) {
   var level = Blockly.Lua.valueToCode(block, 'LEVEL', Blockly.Lua.ORDER_ATOMIC);
-  use(['map', 'numberToBcd']);
+  Studio.use(['map', 'numberToBcd']);
   var code = 'sendCommand({0x14, 0x0B, numberToBcd(map(' + level + ', 0, 100, 0, 255))})'; 
   return code + ';\n';
 };
-actions.push({"kind": "block", "type": "ic705_set_mic_gain"});
+ic705.action("ic705_set_mic_gain");
 //-------------------------------------------------------------------
 Blockly.Blocks['ic705_set_tuning_step'] = {
   init: function() {
@@ -351,7 +340,7 @@ Blockly.Lua['ic705_set_tuning_step'] = function(block) {
   return code + ';\n';
 };
 
-actions.push({"kind": "block", "type": "ic705_set_tuning_step"});
+ic705.action("ic705_set_tuning_step");
 //-------------------------------------------------------------------
 
 Blockly.Blocks['ic705_select_vfo_a'] = {
@@ -372,7 +361,7 @@ Blockly.Lua['ic705_select_vfo_a'] = function(block) {
   return code + ';\n';
 };
 
-actions.push({"kind": "block", "type": "ic705_select_vfo_a"});
+ic705.action("ic705_select_vfo_a");
 
 //-------------------------------------------------------------------
 Blockly.Blocks['ic705_select_vfo_b'] = {
@@ -394,7 +383,7 @@ Blockly.Lua['ic705_select_vfo_b'] = function(block) {
 };
 
 
-actions.push({"kind": "block", "type": "ic705_select_vfo_b"});
+ic705.action("ic705_select_vfo_b");
 //-------------------------------------------------------------------
 
 Blockly.Blocks['ic705_equalize_vfo'] = {
@@ -414,7 +403,7 @@ Blockly.Lua['ic705_equalize_vfo'] = function(block) {
   var code = 'sendCommand({0x07, 0xA0})'; 
   return code + ';\n';
 };
-actions.push({"kind": "block", "type": "ic705_equalize_vfo"});
+ic705.action("ic705_equalize_vfo");
 //-------------------------------------------------------------------
 
 Blockly.Blocks['ic705_exchange_vfo'] = {
@@ -435,7 +424,7 @@ Blockly.Lua['ic705_exchange_vfo'] = function(block) {
   return code + ';\n';
 };
 
-actions.push({"kind": "block", "type": "ic705_exchange_vfo"});
+ic705.action("ic705_exchange_vfo");
 //-------------------------------------------------------------------
 
 Blockly.Blocks['ic705_set_lcd_brightness'] = {
@@ -460,11 +449,11 @@ Blockly.Blocks['ic705_set_lcd_brightness'] = {
 
 Blockly.Lua['ic705_set_lcd_brightness'] = function(block) {
   var level = Blockly.Lua.valueToCode(block, 'LEVEL', Blockly.Lua.ORDER_ATOMIC);
-  use(['map', 'numberToBcd']);
+  Studio.use(['map', 'numberToBcd']);
   var code = 'sendCommand({0x14, 0x19, numberToBcd(map(' + level + ', 0, 100, 0, 255))})'; 
   return code + ';\n';
 };
-actions.push({"kind": "block", "type": "ic705_set_lcd_brightness"});
+ic705.action("ic705_set_lcd_brightness");
 //-------------------------------------------------------------------
 
 /* **************************************************************** */
@@ -483,11 +472,11 @@ Blockly.Blocks['ic705_get_swr_meter_level'] = {
 };
 
 Blockly.Lua['ic705_get_swr_meter_level'] = function(block) {
-  use(['bcdToNumber']);
+  Studio.use(['bcdToNumber']);
   var code = 'bcdToNumber(readResultOfCommand(sendCommand({0x15, 0x12})))';  
   return [code, Blockly.Lua.ORDER_ATOMIC];
 };
-properties.push({"kind": "block",  "type": "ic705_get_swr_meter_level"})
+ic705.property("ic705_get_swr_meter_level");
 //-------------------------------------------------------------------
 
 Blockly.Blocks['ic705_get_lcd_brightness'] = {
@@ -502,12 +491,12 @@ Blockly.Blocks['ic705_get_lcd_brightness'] = {
 };
 
 Blockly.Lua['ic705_get_lcd_brightness'] = function(block) {
-  use(['map', 'bcdToNumber']);
+  Studio.use(['map', 'bcdToNumber']);
   var code = 'math.floor(map(bcdToNumber(readResultOfCommand(sendCommand({0x14, 0x19}))), 0, 255, 0, 100))';  
   return [code, Blockly.Lua.ORDER_ATOMIC];
 };
 
-properties.push({"kind": "block",  "type": "ic705_get_lcd_brightness"})
+ic705.property("ic705_get_lcd_brightness");
 //-------------------------------------------------------------------
 
 Blockly.Blocks['ic705_get_mic_gain'] = {
@@ -522,12 +511,12 @@ Blockly.Blocks['ic705_get_mic_gain'] = {
 };
 
 Blockly.Lua['ic705_get_mic_gain'] = function(block) {
-  use(['map', 'bcdToNumber']);
+  Studio.use(['map', 'bcdToNumber']);
   var code = 'math.floor(map(bcdToNumber(readResultOfCommand(sendCommand({0x14, 0x0B}))), 0, 255, 0, 100))'; 
   return [code, Blockly.Lua.ORDER_ATOMIC];
 };
 
-properties.push({"kind": "block",  "type": "ic705_get_mic_gain"})
+ic705.property("ic705_get_mic_gain");
 //-------------------------------------------------------------------
 
 Blockly.Blocks['ic705_get_operating_frequency'] = {
@@ -550,12 +539,12 @@ Blockly.Blocks['ic705_get_operating_frequency'] = {
 Blockly.Lua['ic705_get_operating_frequency'] = function(block) 
 {
   var desiredUnit = block.getFieldValue('unit');
-  use(['frequencyAsNumber']);
+  Studio.use(['frequencyAsNumber']);
   var code = 'frequencyAsNumber(readResultOfCommand(sendCommand({3})))/' + block.getFieldValue('unit');
   return [code, Blockly.Lua.ORDER_ATOMIC];
 };
 
-properties.push({"kind": "block",  "type": "ic705_get_operating_frequency"})
+ic705.property("ic705_get_operating_frequency");
 //-------------------------------------------------------------------
 
 Blockly.Blocks['ic705_get_operating_mode'] = {
@@ -570,12 +559,12 @@ Blockly.Blocks['ic705_get_operating_mode'] = {
 };
 
 Blockly.Lua['ic705_get_operating_mode'] = function(block) {
-  use("getOperatingModeString");
+  Studio.use("getOperatingModeString");
   var code = 'getOperatingModeString(readResultOfCommand(sendCommand({0x04})))';  
   return [code, Blockly.Lua.ORDER_ATOMIC];
 };
 
-properties.push({"kind": "block", "type": "ic705_get_operating_mode"});
+ic705.property("ic705_get_operating_mode");
 
 //-------------------------------------------------------------------
 Blockly.Blocks['ic705_get_af_level'] = {
@@ -590,12 +579,12 @@ Blockly.Blocks['ic705_get_af_level'] = {
 };
 
 Blockly.Lua['ic705_get_af_level'] = function(block) {
-  use(['map', 'bcdToNumber']);
+  Studio.use(['map', 'bcdToNumber']);
   var code = 'math.floor(map(bcdToNumber(readResultOfCommand(sendCommand({0x14, 0x01}))),0,255,0,100))';  // Command to retrieve AF level in %
   return [code, Blockly.Lua.ORDER_ATOMIC];
 };
 
-properties.push({"kind": "block", "type": "ic705_get_af_level"});
+ic705.property("ic705_get_af_level");
 
 //-------------------------------------------------------------------
 Blockly.Blocks['ic705_get_rf_gain'] = {
@@ -610,12 +599,12 @@ Blockly.Blocks['ic705_get_rf_gain'] = {
 };
 
 Blockly.Lua['ic705_get_rf_gain'] = function(block) {
-  use(['map', 'bcdToNumber']);
+  Studio.use(['map', 'bcdToNumber']);
   var code = 'math.floor(map(bcdToNumber(readResultOfCommand(sendCommand({0x14, 0x02}))), 0, 255, 0, 100))';  // Command to retrieve RF gain level in %
   return [code, Blockly.Lua.ORDER_ATOMIC];
 };
 
-properties.push({"kind": "block", "type": "ic705_get_rf_gain"});
+ic705.property("ic705_get_rf_gain");
 
 //-------------------------------------------------------------------
 Blockly.Blocks['ic705_get_squelch_level'] = {
@@ -630,37 +619,13 @@ Blockly.Blocks['ic705_get_squelch_level'] = {
 };
 
 Blockly.Lua['ic705_get_squelch_level'] = function(block) {
-  use(['map', 'bcdToNumber']);
+  Studio.use(['map', 'bcdToNumber']);
   var code = 'math.floor(map(bcdToNumber(readResultOfCommand(sendCommand({0x14, 0x03}))), 0, 255, 0, 100))';  // Command to retrieve squelch level in %
   return [code, Blockly.Lua.ORDER_ATOMIC];
 };
 
-properties.push({"kind": "block", "type": "ic705_get_squelch_level"});
+ic705.property("ic705_get_squelch_level");
 //-------------------------------------------------------------------
 /* **************************************************************** */
 /*                          HELPERS                                 */
 /* **************************************************************** */
-
-
-//-------------------------------------------------------------------
-// Finally add the blocks to the toolbox
-//-------------------------------------------------------------------
-
-// Add all the events
-contribution.contents.push({"kind": "label", "text" : "Events" });
-events.forEach((event) => contribution.contents.push(event));
-
-// Add all the actions
-contribution.contents.push({"kind": "label", "text" : "Actions" });
-actions.forEach((action) => contribution.contents.push(action));
-
-// Add all the properties
-contribution.contents.push({"kind": "label", "text" : "Properties" });
-properties.forEach((property) => contribution.contents.push(property));
-
-// Add all the helpers
-contribution.contents.push({"kind": "label", "text" : "Helpers" });
-helpers.forEach((helper) => contribution.contents.push(helper));
-
-// Add the things within this file to the toolbox
-toolbox.contents.push(contribution);
