@@ -186,19 +186,21 @@ var Studio = (function() {
    * which keeps the program on the microcontroller small.
    * @param {string} name the name of the lua function. It must match the name in the first line.
    * @param {string[]} lines the lua source code, one entry per line
+   * @param {string[]=} requires other registered lua functions this one calls. Studio.use() adds them as well.
    */
-  function luaFunction(name, lines)
+  function luaFunction(name, lines, requires)
   {
     if (luaFunctions[name])
     {
       console.warn("Lua function '" + name + "' is registered twice. The last one wins.");
     }
-    luaFunctions[name] = lines;
+    luaFunctions[name] = {"lines": lines, "requires": requires || []};
   }
 
   /**
    * Adds the given lua function(s) to the generated code. Call it inside a Blockly.Lua generator.
    * Every function is emitted only once per program, no matter how often it is used.
+   * The functions it requires are added as well.
    * @param {string|string[]} funcnames name or list of names registered with Studio.luaFunction()
    * @throws {Error} if a function has not been registered
    */
@@ -206,11 +208,13 @@ var Studio = (function() {
   {
     var names = Array.isArray(funcnames) ? funcnames : [funcnames];
     names.forEach(function(funcname) {
-      if (!luaFunctions[funcname])
+      var func = luaFunctions[funcname];
+      if (!func)
       {
         throw new Error("Unknown lua function '" + funcname + "'. Register it with Studio.luaFunction() first.");
       }
-      Blockly.Lua.provideFunction_(funcname, luaFunctions[funcname]);
+      use(func.requires);
+      Blockly.Lua.provideFunction_(funcname, func.lines);
     });
   }
 

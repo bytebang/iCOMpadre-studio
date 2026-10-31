@@ -53,10 +53,11 @@ Studio.luaFunction("frequencyAsNumber", [
   "  return tonumber(value);",
   "end"]);
 
-// Converts a frequency in Hz into BCD bytes (least significant byte first), padded to tblsize bytes
+// Converts a frequency in Hz into BCD bytes (least significant byte first), padded to tblsize bytes.
+// Rounds to whole Hz, because e.g. 14.074 * 1e6 is 14073999.999... as floating point number.
 Studio.luaFunction("frequencyToBcd", [
   "function frequencyToBcd(freq, tblsize)",
-  "  freq = math.floor(freq)",
+  "  freq = math.floor(freq + 0.5)",
   "  local bcdTable = {}",
   "  while freq > 0 do",
   "    local nibble = freq % 10",

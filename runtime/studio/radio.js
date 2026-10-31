@@ -17,12 +17,13 @@
 var myradio = Studio.category("My Radio", "radio");
 
 // Additional helping functions -> can be used with the Studio.use(...) function
-// Common functions (map, numberToBcd, bcdToNumber, frequencyToBcd, ...) are registered in base.js
+// Common functions (map, numberToBcd, bcdToNumber, frequencyToBcd, ...) are registered in base.js.
+// The last parameter lists the functions this one calls, Studio.use() adds them automatically.
 Studio.luaFunction('myradioPercentToLevel', [
   'function myradioPercentToLevel(percent)',
   '  return numberToBcd(map(percent, 0, 100, 0, 255), 2)',
   'end'
-]);
+], ['map', 'numberToBcd']);
 
 /* **************************************************************** */
 /*                          EVENTS                                  */
@@ -64,7 +65,7 @@ Blockly.Blocks['myradio_set_af_level'] = {
 // Lua generator of an action block: returns a statement (string, ending with a newline)
 Blockly.Lua['myradio_set_af_level'] = function(block) {
   var level = Blockly.Lua.valueToCode(block, 'level', Blockly.Lua.ORDER_ATOMIC);
-  Studio.use(['map', 'numberToBcd', 'myradioPercentToLevel']); // pull the lua helpers into main.lua
+  Studio.use(['myradioPercentToLevel']); // pulls the lua helper (and map, numberToBcd) into main.lua
   return 'sendCommand({0x14, 0x01}, myradioPercentToLevel(' + level + '))\n';
 };
 

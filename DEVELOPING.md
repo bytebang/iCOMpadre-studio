@@ -60,6 +60,13 @@ The studio talks to iCOMpadre over plain HTTP:
 The generated lua code may use the functions the firmware provides (`sendCommand`, `readResultOfCommand`, `wait`, `millis`, `setDigitalOutput`, ...).
 They are described in the iCOMpadre documentation, chapter *operating modes / run*.
 
+Things to know when talking to a radio:
+
+* `sendCommand(cmd, data)` only accepts tables of numbers. Data has to be the **second** table, never a table inside the command table.
+* `sendCommand` does not wait for the answer. `readResultOfCommand(cmd)` returns the data of the **last** answer to `cmd`, or `nil` if there was none yet. Read blocks must handle `nil` (see `ic705Query` in `radio/ic705.js`).
+* Answers are matched by their command bytes, and the CI-V library decides how many bytes belong to the command: 2 bytes for `07 0E 13 14 15 16 19 1A 1B 1C 1E 21 27`, 4 bytes for `1A 05`, 1 byte for all others. A command like `23 00` therefore has to be sent as `sendCommand({0x23}, {0x00})`, otherwise its answer is never found.
+* Values in the CI-V reference guides are BCD: `0x14` means *14*, not *20*. Levels "0000 ~ 0255" are 2 bytes BCD, most significant byte first. Frequencies are BCD with the least significant byte first.
+
 ## The registration API
 
 Block files never touch the toolbox directly. They register their blocks with `Studio` (see `runtime/studio/studio.js`):
@@ -85,6 +92,7 @@ Blockly.Lua['ic705_set_af_level'] = function(block) {
 
 * A category (or group) shows its blocks sorted by *Events*, *Actions*, *Properties* and *Helpers*. Empty sections are hidden.
 * `Studio.use()` throws if a function is not registered. Registering the same name twice logs a warning.
+* A lua function that calls other registered functions lists them as third parameter, e.g. `Studio.luaFunction("ic705Percent", [...], ["numberToBcd"])`. `Studio.use()` adds them as well.
 * Common helper functions are registered in `base.js`: `pretty`, `map`, `frequencyAsNumber`, `frequencyToBcd`, `numberToBcd`, `bcdToNumber`.
 
 ## Adding a radio
