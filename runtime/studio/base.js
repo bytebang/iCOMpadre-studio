@@ -217,7 +217,8 @@ base.action("text_print");
 
 //-------------------------------------------------------------------
 // Executes the inner blocks only if the watched value differs from the last call.
-// Lua: if(_G.lastValue ~= actValue) then _G.lastValue = actValue ... end
+// Lua: local actValue = expr
+//      if(_G.lastValue ~= actValue ) then _G.lastValue = actValue ... end
 Blockly.Blocks['onchangeof'] = {
   init: function() {
     this.appendValueInput("expr")
@@ -237,11 +238,13 @@ Blockly.Lua['onchangeof'] = function(block) {
   var value_expr = Blockly.Lua.valueToCode(block, 'expr', Blockly.Lua.ORDER_ATOMIC);
   var statements_statements = Blockly.Lua.statementToCode(block, 'statements');
 
-  // every block gets its own global variable to remember the last value
-  var lastValue = "_G." + Blockly.Lua.nameDB_.getDistinctName('lastValue', Blockly.Variables.NAME_TYPE);
+  // every block gets its own global variable to remember the last value,
+  // and a local one for the current value (so it does not collide with variables of the user)
+  var lastValue = "_G." + Blockly.Lua.nameDB_.getDistinctName('lastValue', Blockly.Names.NameType.VARIABLE);
+  var actValue = Blockly.Lua.nameDB_.getDistinctName('actValue', Blockly.Names.NameType.VARIABLE);
 
-  var code = "actValue = " + value_expr + '\n';
-  code = code + 'if(' + lastValue + ' ~= actValue ) then ' + lastValue + ' = actValue\n';
+  var code = 'local ' + actValue + ' = ' + value_expr + '\n';
+  code = code + 'if(' + lastValue + ' ~= ' + actValue + ' ) then ' + lastValue + ' = ' + actValue + '\n';
   code = code + statements_statements;
   code = code + 'end\n';
   return code;
@@ -588,7 +591,7 @@ base.helper("comment");
 
 //-------------------------------------------------------------------
 // A voltage with unit. Converts it to its base unit V.
-// Lua: the value in V (calculated when the code is generated)
+// Lua: 3.3 for a plain number (calculated when the code is generated), otherwise expr * 0.001
 Blockly.Blocks['voltagevalue'] = {
   init: function() {
     this.jsonInit({
@@ -605,10 +608,21 @@ Blockly.Blocks['voltagevalue'] = {
 };
 
 Blockly.Lua['voltagevalue'] = function(block) {
-  var voltageValue = Blockly.Lua.valueToCode(block, 'voltage', Blockly.Lua.ORDER_ATOMIC);
+  var voltageValue = Blockly.Lua.valueToCode(block, 'voltage', Blockly.Lua.ORDER_MULTIPLICATIVE) || '0';
   var dropdown_unit = block.getFieldValue('vunit');
-  var code = voltageValue * parseFloat(dropdown_unit);
-  return [code, Blockly.Lua.ORDER_NONE];
+
+  // a plain number can be converted right away
+  if (/^-?\d+(\.\d+)?$/.test(voltageValue))
+  {
+    return [String(parseFloat(voltageValue) * parseFloat(dropdown_unit)), Blockly.Lua.ORDER_ATOMIC];
+  }
+
+  // everything else (variables, calculations, ...) has to be converted at runtime
+  if (dropdown_unit == "1")
+  {
+    return [voltageValue, Blockly.Lua.ORDER_MULTIPLICATIVE];
+  }
+  return [voltageValue + ' * ' + dropdown_unit, Blockly.Lua.ORDER_MULTIPLICATIVE];
 };
 
 base.helper("voltagevalue");
