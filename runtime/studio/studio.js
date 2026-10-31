@@ -6,11 +6,19 @@
 //
 // Usage in a block file:
 //
-//   var ic705 = Studio.category("IC-705");
+//   var ic705 = Studio.category("IC-705", "radio");
 //   ic705.action("ic705_set_frequency");
+//
+//   var base = Studio.category("iCOMpadre");
+//   var pins = base.group("Pins", "pins");
+//   pins.action("setdigitaloutput");
 //
 //   Studio.luaFunction("myHelper", ["function myHelper()", "end"]);
 //   ... and inside a lua generator: Studio.use(["myHelper"]);
+//
+// Conventions instead of configuration:
+// - the colour of a block is the style of its group (or category), see STYLES
+// - the help link of a block points to the documentation of its file
 //
 // See DEVELOPING.md for a step by step guide on how to add a new radio.
 
@@ -27,6 +35,23 @@ var Studio = (function() {
     {"key": "properties", "label": "Properties"},
     {"key": "helpers",    "label": "Helpers"},
   ];
+
+  // The colour palette of the iCOMpadre blocks. The hues don't collide with the
+  // standard blockly categories (logic 210, loops 120, math 230, text 160, lists 260,
+  // variables 330, functions 290).
+  var STYLES = {
+    "program": "#e0b65e",   // sand:     events, timing, program flow
+    "radio":   "#5fa8c9",   // blue:     everything that talks to the radio (CI-V)
+    "pins":    "#9cc46b",   // green:    inputs and outputs of the iCOMpadre connector
+    "serial":  "#b39ddb",   // lavender: serial interface
+    "helpers": "#a0a7ad",   // grey:     conversions and other utilities
+  };
+
+  // Register the styles in the default theme, so every workspace knows them
+  Object.keys(STYLES).forEach(function(style) {
+    Blockly.Themes.Classic.setBlockStyle(style + "_blocks", {"colourPrimary": STYLES[style]});
+    Blockly.Themes.Classic.setCategoryStyle(style + "_category", {"colour": STYLES[style]});
+  });
 
   // The documentation mirrors the block files: radio/ic705.js -> blocks/radio/ic705.md
   var HELP_ROOT = "../userguide/studio/blocks/";
@@ -46,33 +71,85 @@ var Studio = (function() {
     return HELP_ROOT + src.replace(/^\.\//, "").replace(/\.js$/, "") + "/";
   }
 
-  // Gives every block without its own helpUrl a link to the documentation of its file
-  function applyHelpUrl(blocktype, helpPage)
+  // Applies the conventions to a block type: the style of its group and a link to its documentation
+  function applyConventions(blocktype, helpPage, style)
   {
     var definition = Blockly.Blocks[blocktype];
-    if (!helpPage || !definition || definition.studioHelpApplied)
+    if (!definition || definition.studioConventionsApplied)
     {
       return;
     }
     var init = definition.init;
     definition.init = function() {
       init.call(this);
-      if (!this.helpUrl)
+      if (style)
+      {
+        this.setStyle(style + "_blocks");
+      }
+      if (helpPage && !this.helpUrl)
       {
         this.setHelpUrl(helpPage + "#" + blocktype);
       }
     };
-    definition.studioHelpApplied = true;
+    definition.studioConventionsApplied = true;
+  }
+
+  // Throws if the given style is not part of the palette
+  function checkStyle(style)
+  {
+    if (style && !STYLES[style])
+    {
+      throw new Error("Unknown style '" + style + "'. Use one of: " + Object.keys(STYLES).join(", "));
+    }
+  }
+
+  // Creates the internal representation of a category or group
+  function createContainer(name, style, helpPage)
+  {
+    var container = {"name": name, "style": style || null, "helpPage": helpPage, "sections": {}, "groups": []};
+    SECTIONS.forEach((section) => container.sections[section.key] = []);
+    return container;
+  }
+
+  // Creates the handle with which a block file fills a category or group
+  function createHandle(container, allowGroups)
+  {
+    function adder(key)
+    {
+      return function(blocktype) {
+        container.sections[key].push({"kind": "block", "type": blocktype});
+        return handle;
+      };
+    }
+
+    var handle = {
+      "event":    adder("events"),
+      "action":   adder("actions"),
+      "property": adder("properties"),
+      "helper":   adder("helpers"),
+    };
+
+    if (allowGroups)
+    {
+      handle.group = function(name, style) {
+        checkStyle(style);
+        var group = createContainer(name, style || container.style, container.helpPage);
+        container.groups.push(group);
+        return createHandle(group, false);
+      };
+    }
+    return handle;
   }
 
   /**
-   * Handle to fill a category of the toolbox. Every method takes the block type
+   * Handle to fill a category (or group) of the toolbox. Every method takes the block type
    * (the key used in Blockly.Blocks[...]) and returns the handle again, so calls can be chained.
    * @typedef {Object} CategoryHandle
    * @property {function(string): CategoryHandle} event    adds an event block (OnStartup, Periodically, ...)
    * @property {function(string): CategoryHandle} action   adds an action block (changes something on the radio)
    * @property {function(string): CategoryHandle} property adds a property block (reads a value from the radio)
    * @property {function(string): CategoryHandle} helper   adds a helper block (conversions, utilities)
+   * @property {function(string, string=): CategoryHandle} [group] adds a sub category with its own style (only on categories)
    */
 
   /**
@@ -80,32 +157,19 @@ var Studio = (function() {
    * Categories appear in the order in which they are created, i.e. in the order of the script tags.
    * Empty sections are not shown.
    *
+   * All blocks of the category get the colour of its style (radio blocks use "radio").
    * Blocks without an own helpUrl link to the documentation of the file which created the category:
    * radio/ic705.js -> ../userguide/studio/blocks/radio/ic705/#<blocktype>
    * @param {string} name the name shown in the toolbox, e.g. "IC-705"
-   * @returns {CategoryHandle} handle to add blocks to the category
+   * @param {string=} style one of the keys of STYLES: program, radio, pins, serial, helpers
+   * @returns {CategoryHandle} handle to add blocks or groups to the category
    */
-  function category(name)
+  function category(name, style)
   {
-    var cat = {"name": name, "sections": {}, "helpPage": helpPageOfCurrentScript()};
-    SECTIONS.forEach((section) => cat.sections[section.key] = []);
+    checkStyle(style);
+    var cat = createContainer(name, style, helpPageOfCurrentScript());
     contributions.push(cat);
-
-    function adder(key)
-    {
-      return function(blocktype) {
-        cat.sections[key].push({"kind": "block", "type": blocktype});
-        return api;
-      };
-    }
-
-    var api = {
-      "event":    adder("events"),
-      "action":   adder("actions"),
-      "property": adder("properties"),
-      "helper":   adder("helpers"),
-    };
-    return api;
+    return createHandle(cat, true);
   }
 
   /**
@@ -150,9 +214,35 @@ var Studio = (function() {
     });
   }
 
+  // Converts a category or group into its toolbox definition
+  function toToolboxCategory(container)
+  {
+    var entry = {"kind": "category", "name": container.name, "contents": []};
+    if (container.style)
+    {
+      entry.categorystyle = container.style + "_category";
+    }
+
+    SECTIONS.forEach(function(section) {
+      var blocks = container.sections[section.key];
+      if (blocks.length == 0)
+      {
+        return; // no empty labels
+      }
+      entry.contents.push({"kind": "label", "text": section.label});
+      blocks.forEach(function(block) {
+        applyConventions(block.type, container.helpPage, container.style);
+        entry.contents.push(block);
+      });
+    });
+
+    container.groups.forEach((group) => entry.contents.push(toToolboxCategory(group)));
+    return entry;
+  }
+
   /**
    * Returns the complete toolbox definition for Blockly.inject().
-   * Called once by index.html after all block files have been loaded. It also applies the help urls.
+   * Called once by index.html after all block files have been loaded. It also applies the conventions.
    * @param {Object[]} baseCategories the standard blockly categories (Logic, Math, ...)
    * @returns {Object} a categoryToolbox: the base categories followed by all registered ones
    */
@@ -161,26 +251,7 @@ var Studio = (function() {
     var contents = baseCategories.slice();
 
     contributions.forEach(function(contribution) {
-      if (contribution.separator)
-      {
-        contents.push({"kind": "sep"});
-        return;
-      }
-
-      var entry = {"kind": "category", "name": contribution.name, "contents": []};
-      SECTIONS.forEach(function(section) {
-        var blocks = contribution.sections[section.key];
-        if (blocks.length == 0)
-        {
-          return; // no empty labels
-        }
-        entry.contents.push({"kind": "label", "text": section.label});
-        blocks.forEach(function(block) {
-          applyHelpUrl(block.type, contribution.helpPage);
-          entry.contents.push(block);
-        });
-      });
-      contents.push(entry);
+      contents.push(contribution.separator ? {"kind": "sep"} : toToolboxCategory(contribution));
     });
 
     return {"kind": "categoryToolbox", "contents": contents};

@@ -65,8 +65,12 @@ They are described in the iCOMpadre documentation, chapter *operating modes / ru
 Block files never touch the toolbox directly. They register their blocks with `Studio` (see `runtime/studio/studio.js`):
 
 ```js
-var ic705 = Studio.category("IC-705");          // new category in the toolbox
+var ic705 = Studio.category("IC-705", "radio"); // new category in the toolbox, with the colour "radio"
 ic705.action("ic705_set_af_level");             // also .event() .property() .helper()
+
+var base = Studio.category("iCOMpadre");        // a category can be split into groups (sub categories)
+var pins = base.group("Pins", "pins");          // ... each one with its own colour
+pins.action("setdigitaloutput");
 
 Studio.luaFunction("map", [                     // lua helper function ...
   "function map(x, in_min, in_max, out_min, out_max)",
@@ -79,7 +83,7 @@ Blockly.Lua['ic705_set_af_level'] = function(block) {
 };
 ```
 
-* A category shows its blocks grouped by *Events*, *Actions*, *Properties* and *Helpers*. Empty groups are hidden.
+* A category (or group) shows its blocks sorted by *Events*, *Actions*, *Properties* and *Helpers*. Empty sections are hidden.
 * `Studio.use()` throws if a function is not registered. Registering the same name twice logs a warning.
 * Common helper functions are registered in `base.js`: `pretty`, `map`, `frequencyAsNumber`, `frequencyToBcd`, `numberToBcd`, `bcdToNumber`.
 
@@ -109,9 +113,25 @@ Blockly.Lua['ic705_set_af_level'] = function(block) {
 * **CI-V:** put the command and the data format in a comment above the block, e.g. `// CI-V: 0x14 0x01 + level as 2 byte BCD`.
 * **Values for the user:** blocks work with values people understand (percent, Hz, mode names). Converting them to what the radio expects happens in the generator.
 * **Validation:** use `onchange` and `setWarningText()` to warn about invalid inputs.
+* **Colour:** don't set a colour, see below.
 * **Help:** don't set a `helpUrl`, see below.
 
 `radio.js` contains a complete example for an action and a property block.
+
+## Colours (convention over configuration)
+
+The colour of a block says what it works with. The palette is defined once, in `STYLES` of `runtime/studio/studio.js`:
+
+| Style | Colour | Used for |
+| --- | --- | --- |
+| `program` | sand | events, timing, program flow |
+| `radio` | blue | everything that talks to the radio, i.e. all radio categories |
+| `pins` | green | inputs and outputs of the iCOMpadre connector |
+| `serial` | lavender | the serial interface |
+| `helpers` | grey | conversions and other utilities |
+
+Every block gets the style of the group (or category) it is registered in, so block definitions contain no colour at all.
+The colours don't collide with the standard blockly categories. A new radio simply uses `Studio.category("<name>", "radio")`.
 
 ## Help (convention over configuration)
 

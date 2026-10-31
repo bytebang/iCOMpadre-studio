@@ -1,5 +1,5 @@
 // Register the contribution of this file
-var ic705 = Studio.category("IC-705");
+var ic705 = Studio.category("IC-705", "radio");
 
 // Additional helping functions -> can be used with the Studio.use(...) function
 Studio.luaFunction('getOperatingModeString', [
@@ -37,7 +37,6 @@ Blockly.Blocks['test'] = {
         .setCheck("Array")
         .appendField("test");
     this.setOutput(true, "Number");
-    this.setColour(230);
  this.setTooltip("Test");
  this.setHelpUrl("");
   }
@@ -75,7 +74,6 @@ Blockly.Blocks['ic705_set_af_level'] = {
       "inputsInline": true,
       "previousStatement": null,
       "nextStatement": null,
-      "colour": 230,
       "tooltip": "Sets the AF output",
       "helpUrl": ""
     });
@@ -127,7 +125,6 @@ Blockly.Blocks['ic705_set_frequency'] = {
       "inputsInline": true,
       "previousStatement": null,
       "nextStatement": null,
-      "colour": 300,
       "tooltip": "Sets the frequency of the radio"
     });
   }
@@ -169,7 +166,6 @@ Blockly.Blocks['ic705_set_operating_mode'] = {
       "inputsInline": true,
       "previousStatement": null,
       "nextStatement": null,
-      "colour": 350,
       "tooltip": "Sets the operating mode of the radio"
     });
   }
@@ -199,7 +195,6 @@ Blockly.Blocks['ic705_set_rf_gain'] = {
       "inputsInline": true,
       "previousStatement": null,
       "nextStatement": null,
-      "colour": 230,
       "tooltip": "Sets the RF gain level",
       "helpUrl": ""
     });
@@ -243,7 +238,6 @@ Blockly.Blocks['ic705_set_squelch_level'] = {
       "inputsInline": true,
       "previousStatement": null,
       "nextStatement": null,
-      "colour": 230,
       "tooltip": "Sets the squelch level",
       "helpUrl": ""
     });
@@ -285,7 +279,6 @@ Blockly.Blocks['ic705_set_mic_gain'] = {
       "inputsInline": true,
       "previousStatement": null,
       "nextStatement": null,
-      "colour": 240,
       "tooltip": "Sets the mic gain level of the radio (in %)"
     });
   }
@@ -328,7 +321,6 @@ Blockly.Blocks['ic705_set_tuning_step'] = {
       "inputsInline": true,
       "previousStatement": null,
       "nextStatement": null,
-      "colour": 280,
       "tooltip": "Sets the tuning step of the radio"
     });
   }
@@ -350,7 +342,6 @@ Blockly.Blocks['ic705_select_vfo_a'] = {
       "inputsInline": true,
       "previousStatement": null,
       "nextStatement": null,
-      "colour": 310,
       "tooltip": "Selects VFO A on the radio"
     });
   }
@@ -371,7 +362,6 @@ Blockly.Blocks['ic705_select_vfo_b'] = {
       "inputsInline": true,
       "previousStatement": null,
       "nextStatement": null,
-      "colour": 320,
       "tooltip": "Selects VFO B on the radio"
     });
   }
@@ -393,7 +383,6 @@ Blockly.Blocks['ic705_equalize_vfo'] = {
       "inputsInline": true,
       "previousStatement": null,
       "nextStatement": null,
-      "colour": 330,
       "tooltip": "Equalizes the settings of VFO A and VFO B"
     });
   }
@@ -413,7 +402,6 @@ Blockly.Blocks['ic705_exchange_vfo'] = {
       "inputsInline": true,
       "previousStatement": null,
       "nextStatement": null,
-      "colour": 340,
       "tooltip": "Exchanges the frequencies and settings of VFO A and VFO B"
     });
   }
@@ -441,7 +429,6 @@ Blockly.Blocks['ic705_set_lcd_brightness'] = {
       "inputsInline": true,
       "previousStatement": null,
       "nextStatement": null,
-      "colour": 260,
       "tooltip": "Sets the LCD brightness level of the radio (in %)"
     });
   }
@@ -465,7 +452,6 @@ Blockly.Blocks['ic705_get_swr_meter_level'] = {
     this.jsonInit({
       "message0": "SWR Meter Level",
       "output": "Number",
-      "colour": 270,
       "tooltip": "Reads the current SWR Meter level of the radio"
     });
   }
@@ -484,7 +470,6 @@ Blockly.Blocks['ic705_get_lcd_brightness'] = {
     this.jsonInit({
       "message0": "LCD Brightness",
       "output": "Number",
-      "colour": 260,
       "tooltip": "Reads the current LCD brightness level of the radio (in %)"
     });
   }
@@ -504,7 +489,6 @@ Blockly.Blocks['ic705_get_mic_gain'] = {
     this.jsonInit({
       "message0": "Mic Gain",
       "output": "Number",
-      "colour": 240,
       "tooltip": "Reads the current mic gain level of the radio (in %)"
     });
   }
@@ -529,7 +513,6 @@ Blockly.Blocks['ic705_get_operating_frequency'] = {
                   "options": [["Hz","1"],["kHz","1e3"],["MHz","1e6"]]
               },          
           ],
-          "colour": 230,
           });
           this.setOutput(true, "Number");
           this.setTooltip("Reads the current frequency of the radio");
@@ -552,7 +535,6 @@ Blockly.Blocks['ic705_get_operating_mode'] = {
     this.jsonInit({
       "message0": "Operating Mode",
       "output": "String",
-      "colour": 360,
       "tooltip": "Gets the current operating mode of the radio as string"
     });
   }
@@ -572,7 +554,6 @@ Blockly.Blocks['ic705_get_af_level'] = {
     this.jsonInit({
       "message0": "AF Level",
       "output": "Number",
-      "colour": 230,
       "tooltip": "Reads the current AF level of the radio (in %)"
     });
   }
@@ -592,7 +573,6 @@ Blockly.Blocks['ic705_get_rf_gain'] = {
     this.jsonInit({
       "message0": "RF Gain",
       "output": "Number",
-      "colour": 230,
       "tooltip": "Reads the current RF gain level of the radio (in %)"
     });
   }
@@ -612,7 +592,6 @@ Blockly.Blocks['ic705_get_squelch_level'] = {
     this.jsonInit({
       "message0": "Squelch Level",
       "output": "Number",
-      "colour": 230,
       "tooltip": "Reads the current squelch level of the radio (in %)"
     });
   }

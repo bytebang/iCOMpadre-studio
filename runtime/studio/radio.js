@@ -9,11 +9,12 @@
 // - Block types are prefixed with the radio: "myradio_set_af_level"
 // - Use jsonInit() for the block definition and set the tooltip only there
 // - Every generator states the CI-V command it sends (see the CI-V reference guide of the radio)
+// - Don't set a colour: all blocks of the category get the colour of the style "radio"
 // - Don't set a helpUrl: every block links automatically to the heading with its block type
 //   in documentation/blocks/radio/<radio>.md, e.g. "## Set AF Level {#myradio_set_af_level}"
 
 // Register the contribution of this file
-var myradio = Studio.category("My Radio");
+var myradio = Studio.category("My Radio", "radio");
 
 // Additional helping functions -> can be used with the Studio.use(...) function
 // Common functions (map, numberToBcd, bcdToNumber, frequencyToBcd, ...) are registered in base.js
@@ -45,7 +46,6 @@ Blockly.Blocks['myradio_set_af_level'] = {
       "inputsInline": true,
       "previousStatement": null,   // action blocks can be stacked ...
       "nextStatement": null,       // ... above and below each other
-      "colour": 230,
       "tooltip": "Sets the AF output level (0 - 100 %)"
     });
   },
@@ -83,7 +83,6 @@ Blockly.Blocks['myradio_get_af_level'] = {
     this.jsonInit({
       "message0": "AF Level",
       "output": "Number",          // property blocks have an output instead of previous/next
-      "colour": 230,
       "tooltip": "Reads the current AF level of the radio (in %)"
     });
   }
