@@ -1,94 +1,300 @@
-html, body {
+:root {
+    --background: #ffffff;
+    --foreground: #222222;
+    --muted: #999999;
+    --accent: #4b2869;
+    --panel: #f3f3f3;
+    --border: #cccccc;
+    --code-background: #f8f8f8;
+    --ok: #2e7d32;
+    --error: #c62828;
+    --unsaved: #e6a100;
+    --icon-filter: none;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --background: #1e1e1e;
+      --foreground: #dddddd;
+      --muted: #888888;
+      --accent: #b39ddb;
+      --panel: #2d2d30;
+      --border: #444444;
+      --code-background: #181818;
+      --ok: #81c784;
+      --error: #ef9a9a;
+      --unsaved: #ffc107;
+      --icon-filter: invert(1);
+    }
+  }
+
+  @keyframes zoomin {
+    0% {
+        transform: scale(0.1);
+        opacity: 0.3;
+    }
+    100% {
+        transform: scale(1);
+        opacity: 1;
+    }
+  }
+
+  html, body {
     height: 100%;
     margin: 0;
   }
+
   body {
-    background-color: #fff;
+    display: flex;
+    flex-direction: column;
+    background-color: var(--background);
+    color: var(--foreground);
     font-family: sans-serif;
     overflow: hidden;
-  }
-  h1 {
-    font-weight: normal;
-    font-size: 140%;
-  }
-  table {
-    height: 100%;
-    width: 100%;
-  }
-  #blocklyArea {
-    height: 99%;
+    /* backwards: the transform is gone after the animation, otherwise it would break fixed positioned elements */
+    animation: zoomin 0.8s ease-in-out backwards;
   }
 
-  .header
-  {
-      min-height: 15%;
-      display: table-cell;
-      vertical-align: middle;
-      float:none;
-
+  button {
+    font: inherit;
+    color: inherit;
+    cursor: pointer;
+    padding: 3px 10px;
+    background-color: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 4px;
   }
 
-  .branding
-  {
-      float:left;
+  button:disabled {
+    cursor: default;
+    opacity: 0.5;
   }
 
-  .action{
-      margin-left: 10px;
-      float:right;
-      margin-right: 10px;
-      border-radius: 10px;
-      border: 2px dashed #4b2869;
+  /* ---------------- header ---------------- */
+  #header {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 10px;
   }
 
-  .action img{
-    width: 50px;
-  }
-  
-  #modalHeader .action {
-    width: 25px;
-    border-radius: 3px;
-    border: 1px dashed #4b2869 !important; 
+  .branding {
+    flex: 0 0 auto;
   }
 
-  #modalHeader .action img{
-    width: 25px;
+  .byline {
+    color: var(--muted);
   }
 
-  #codeArea
-  {
-    font-family: monospace !important;
-    background-color: #ddd;
+  #status {
+    flex: 1 1 200px;
+    text-align: right;
+    font-size: 90%;
   }
 
-  #file-input {
+  #status.ok {
+    color: var(--ok);
+  }
+
+  #status.error {
+    color: var(--error);
+    font-weight: bold;
+  }
+
+  #toolbar {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+
+  .action {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-width: 64px;
+    padding: 4px 6px;
+    background-color: transparent;
+    border-radius: 10px;
+    border: 2px dashed var(--accent);
+    font-size: 80%;
+  }
+
+  .action:hover:not(:disabled), .action[aria-pressed="true"] {
+    background-color: var(--panel);
+  }
+
+  .action img {
+    width: 36px;
+    height: 36px;
+    filter: var(--icon-filter);
+  }
+
+  /* dot on the save button while there are unsaved changes */
+  .action.dirty::after {
+    content: "";
+    position: absolute;
+    top: 4px;
+    right: 4px;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background-color: var(--unsaved);
+  }
+
+  #fileInput {
     display: none;
   }
 
-  #loading {
+  #restoreBanner {
     display: flex;
+    flex-wrap: wrap;
     align-items: center;
-    justify-content: center;
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background-color: rgba(255,255,255,0.8);
-    z-index: 9999;
+    gap: 10px;
+    padding: 6px 10px;
+    background-color: var(--panel);
+    border-top: 2px solid var(--unsaved);
   }
 
-  #codeModal {
-    display: none; 
-    z-index: 9999; 
-    width: 50%; 
-    height: 50%; 
-    overflow: auto; 
-    background: white; 
-    position: fixed; 
-    top: 25%; 
-    left: 25%; 
-    border: solid 1px black; 
+  #restoreBanner[hidden] {
+    display: none;
+  }
+
+  /* ---------------- workspace and lua panel ---------------- */
+  #main {
+    flex: 1 1 auto;
+    display: flex;
+    min-height: 0;
+  }
+
+  #blocklyDiv {
+    flex: 1 1 auto;
+    min-width: 0;
+    position: relative;
+  }
+
+  #luaPanel {
+    flex: 0 0 40%;
+    max-width: 600px;
+    display: flex;
+    flex-direction: column;
+    border-left: 1px solid var(--border);
+    background-color: var(--code-background);
+  }
+
+  #luaPanel[hidden] {
+    display: none;
+  }
+
+  .panelHeader {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 10px;
+    background-color: var(--panel);
+    font-family: monospace;
+  }
+
+  #luaMessage {
+    flex: 1 1 auto;
+    text-align: right;
+    font-family: sans-serif;
+    font-size: 90%;
+    color: var(--ok);
+  }
+
+  #luaCode {
+    flex: 1 1 auto;
+    margin: 0;
+    padding: 10px;
+    overflow: auto;
+    font-size: 13px;
+  }
+
+  @media (max-width: 700px) {
+    #main {
+      flex-direction: column;
+    }
+
+    #luaPanel {
+      flex-basis: 40%;
+      max-width: none;
+      border-left: none;
+      border-top: 1px solid var(--border);
+    }
+  }
+
+  /* ---------------- share dialog ---------------- */
+  #shareDialog {
+    width: min(700px, 90vw);
+    height: min(500px, 80vh);
+    padding: 0;
+    border: solid 1px var(--border);
+    border-radius: 8px;
+    background-color: var(--background);
+    color: var(--foreground);
+  }
+
+  #shareDialog::backdrop {
+    background-color: rgba(0, 0, 0, 0.4);
+  }
+
+  .dialogContent {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    height: 100%;
     padding: 15px;
-    overflow: hidden;
+    box-sizing: border-box;
+  }
+
+  .dialogHeader, .dialogFooter {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .dialogHeader span {
+    flex: 1 1 auto;
+  }
+
+  .dialogFooter button {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+  }
+
+  .dialogFooter img, .iconButton img {
+    width: 20px;
+    height: 20px;
+    filter: var(--icon-filter);
+  }
+
+  .iconButton {
+    padding: 0;
+    background-color: transparent;
+    border: none;
+  }
+
+  #shareText {
+    flex: 1 1 auto;
+    resize: none;
+    font-family: monospace;
+    background-color: var(--code-background);
+    color: var(--foreground);
+    border: 1px solid var(--border);
+  }
+
+  #shareMessage {
+    flex: 1 1 auto;
+    font-size: 90%;
+  }
+
+  #shareMessage.ok {
+    color: var(--ok);
+  }
+
+  #shareMessage.error {
+    color: var(--error);
   }

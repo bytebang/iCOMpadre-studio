@@ -2,6 +2,7 @@
 <html>
 <head>
   <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>iCOMpadre Studio</title>
   <link rel="icon" href="favicon.png" type="image/png">
   <script src="./blockly/blockly_compressed.js"></script>
@@ -10,58 +11,59 @@
   <script src="./blockly/lua_compressed.js"></script>
   <script src="./filesaver.js"></script>
   <link rel="stylesheet" href="./studio.css">
-  <style>
-	@keyframes zoomin {
-      0% {
-          transform: scale(0.1);
-          opacity: 0.3;
-      }
-      100% {
-          transform: scale(1);
-          opacity: 1;
-      }
-    }
-
-    .zoomin-animation {
-        animation: zoomin 1.5s ease-in-out forwards;
-    }
-  </style>
 </head>
-<body style="opacity:0">
-  <div id="codeModal" >
-    <div id="modalHeader" style="width: 100%; height: 15%;">
-      <span id="modelHelp" style="float:left"><b>Share your project with others !</b><br/>Copy the code below into the clipboard and share it, or paste code from others here</span>
-      <span>
-      <span class="action" id="codeCloseButton" title="Closes this window" onclick="closeSharingWindow()"><img id="close" src="img/close.svg"></span>
-      <span class="action" id="codeCopyButton" title="Copies the current code into the clipboard" onclick="copyCodeToClipboard()"><img id="copy" src="img/copy.svg"></span>
-      <span class="action" id="codeImportButton" title="Imports the current code int the workspace" onclick="importCodeIntoWorkspace()"><img id="import" src="img/import.svg"></span>
-      <span class="action" id="codePasteButton" title="Pasts the current clipboard content into the window" onclick="pasteCodeFromClipboard()"><img id="paste" src="img/paste.svg"></span>
-      </span>
-    </div>
-    <textarea id="codeArea" style="width: 100%; height: 85%;"></textarea>
+<body>
+  <header id="header">
+    <span class="branding">
+      <span style="font-size: larger"><span style="font-weight: bold;"><span style="color: red;">i</span>COM</span>padre</span><br>
+      The swiss army knife for iCOM radios !<br>
+      <span class="byline">by OE6GUE</span>
+    </span>
+    <span id="status" role="status"></span>
+    <nav id="toolbar">
+      <button class="action" id="saveButton" title="Save the sketch on iCOMpadre (ctrl+s)" disabled><img src="img/save.svg" alt=""><span>Save</span></button>
+      <button class="action" id="downloadButton" title="Download the sketch to your computer"><img src="img/export.svg" alt=""><span>Download</span></button>
+      <button class="action" id="openButton" title="Open a sketch from your computer. You can also drop the file here."><img src="img/open.svg" alt=""><span>Open</span></button>
+      <button class="action" id="shareButton" title="Show the sketch as text, to share it with others"><img src="img/share.svg" alt=""><span>Share</span></button>
+      <button class="action" id="luaButton" title="Show the lua code which is generated from the sketch" aria-pressed="false"><img src="img/code.svg" alt=""><span>Lua</span></button>
+      <input type="file" id="fileInput" accept=".json,application/json">
+    </nav>
+  </header>
+
+  <div id="restoreBanner" hidden>
+    <span id="restoreText"></span>
+    <button id="restoreButton">Restore</button>
+    <button id="discardButton">Discard</button>
   </div>
-  <table>
-    <tr>
-      <td>
-        <div id="header">
-          <span class="branding">
-            <span style="font-size: larger"><span style="font-weight: bold;"><span style="color: red;">i</span>COM</span>padre</span><br>
-            The swiss army knife for iCOM radios !<br>
-            <span style="color:lightgray">by OE6GUE</span>
-          </span>
-          <span class="action" id="shareButton" title="Opens a new whindow with the content of the corkspace" onclick="openSharingWindow()"><img id="save" src="img/share.svg"></span>
-          <span class="action" id="fileDropZone" title="Load a sketch from disk"><label for="file-input" accept=".json"><img id="open" src="img/open.svg"></label><input type="file" id="file-input" onchange="openFile(event)"/></span>
-          <span class="action" title="Save the current sketch to disk"><img id="export" src="img/export.svg"></span>
-          <span class="action" id="saveButton"  title="Save the current sketch on the SD card" onclick="saveWorkspace()"><img id="save" src="img/save.svg"></span>
-        </div>            
-      </td>
-    </tr>
-    <tr>
-      <td id="blocklyArea"></td>
-    </tr>
-  </table>
-  <div id="blocklyDiv" style="position: absolute"></div>
-</body>
+
+  <main id="main">
+    <div id="blocklyDiv"></div>
+    <aside id="luaPanel" hidden>
+      <div class="panelHeader">
+        <span>main.lua</span>
+        <span id="luaMessage"></span>
+        <button id="luaCopyButton">Copy</button>
+        <button id="luaDownloadButton">Download</button>
+      </div>
+      <pre id="luaCode"></pre>
+    </aside>
+  </main>
+
+  <dialog id="shareDialog">
+    <div class="dialogContent">
+      <div class="dialogHeader">
+        <span><b>Share your sketch with others !</b><br>Copy the text below and share it, or paste the text of someone else's sketch and import it.</span>
+        <button id="shareCloseButton" class="iconButton" title="Close this window"><img src="img/close.svg" alt="Close"></button>
+      </div>
+      <textarea id="shareText" spellcheck="false"></textarea>
+      <div class="dialogFooter">
+        <span id="shareMessage"></span>
+        <button id="shareCopyButton" title="Copy the text into the clipboard"><img src="img/copy.svg" alt="">Copy</button>
+        <button id="sharePasteButton" title="Paste the clipboard into the text field"><img src="img/paste.svg" alt="">Paste</button>
+        <button id="shareImportButton" title="Replace the current sketch with the text"><img src="img/import.svg" alt="">Import</button>
+      </div>
+    </div>
+  </dialog>
 
 <script>
    
@@ -144,249 +146,588 @@
   <!------------------ Rendering of the workspace code ----------------- -->
   <script>
 
+    // -------------- Workspace -----------------
+    var darkMode = window.matchMedia('(prefers-color-scheme: dark)');
+
+    // The dark theme is based on the classic one, which already knows the iCOMpadre block styles (see studio.js)
+    var darkTheme = Blockly.Theme.defineTheme('icompadre-dark', {
+      'base': Blockly.Themes.Classic,
+      'componentStyles': {
+        'workspaceBackgroundColour': '#1e1e1e',
+        'toolboxBackgroundColour': '#2d2d30',
+        'toolboxForegroundColour': '#e0e0e0',
+        'flyoutBackgroundColour': '#252526',
+        'flyoutForegroundColour': '#cccccc',
+        'flyoutOpacity': 1,
+        'scrollbarColour': '#797979',
+        'scrollbarOpacity': 0.4,
+        'insertionMarkerColour': '#ffffff',
+        'insertionMarkerOpacity': 0.3,
+        'cursorColour': '#d0d0d0',
+      }
+    });
+
+    function currentTheme()
+    {
+      return darkMode.matches ? darkTheme : Blockly.Themes.Classic;
+    }
+
     var toolbox = Studio.buildToolbox(baseCategories);
-    var blocklyArea = document.getElementById('blocklyArea');
     var blocklyDiv = document.getElementById('blocklyDiv');
     var icompadreWorkspace = Blockly.inject(blocklyDiv,
         {media: './blockly/',
-        sounds: false, 
+        sounds: false,
         toolbox: toolbox,
+        theme: currentTheme(),
+        trashcan: true,
+        zoom:
+        {controls: true,
+          startScale: 1.0},
         grid:
         {spacing: 20,
           length: 3,
-          colour: '#ccc',
+          colour: darkMode.matches ? '#444' : '#ccc',
           snap: true}});
 
-
-    var onresize = function(e) {
-      // Compute the absolute coordinates and dimensions of blocklyArea.
-      var element = blocklyArea;
-      var x = 0;
-      var y = 0;
-      do {
-        x += element.offsetLeft;
-        y += element.offsetTop;
-        element = element.offsetParent;
-      } while (element);
-
-      // Position blocklyDiv over blocklyArea.
-      blocklyDiv.style.left = x + 'px';
-      blocklyDiv.style.top = y + 'px';
-      blocklyDiv.style.width = blocklyArea.offsetWidth + 'px';
-      blocklyDiv.style.height = blocklyArea.offsetHeight + 'px';
-      Blockly.svgResize(icompadreWorkspace);
-    };
-    onresize();
-    document.body.classList.add('zoomin-animation');
-    window.addEventListener('resize', onresize, false);
-
-    // Load the latest project from the server
-    function openLastProjectFromServer()
-    {
-      fetch('/icompadre.json')
-        .then(
-          function(response) {
-            if (response.status !== 200) {
-              console.log('No previous workspace file found. Status ' + response.status);
-              return;
-            }
-
-            // Examine the text in the response
-            response.json().then(function(data) 
-            {
-              Blockly.serialization.workspaces.load(data, icompadreWorkspace);
-            });
-          }
-        )
-        .catch(function(err) {
-          // console.log('Fetch Error :-S', err);
-        });
-    }
-    openLastProjectFromServer();
-    
-    // ----------------import program or workspace --------------------
-    function showFileInWorkspace(aFile)
-    {
-      var reader = new FileReader();
-      reader.onload = function(loadedEvent) 
-      {
-          // result contains loaded file.
-          console.log(loadedEvent.target.result);
-          Blockly.serialization.workspaces.load(JSON.parse(loadedEvent.target.result), icompadreWorkspace);
-      }
-      reader.readAsText(aFile);
-    }
-    
-    // Triggered when the user clicks the upload buttin
-    function openFile(event) 
-    {
-      showFileInWorkspace(event.target.files[0])
-    }
-    
-    // Triggered when the user drops onto the upload button
-    function drop(evt) 
-    {
-      evt.stopPropagation();
-      evt.preventDefault();
-
-      showFileInWorkspace(event.dataTransfer.files[0])
-    }
-
-    function dragOver(evt) 
-    {
-        evt.stopPropagation();
-        evt.preventDefault();
-        evt.dataTransfer.dropEffect = 'copy';
-    }
-
-    var dropZone = document.getElementById("fileDropZone");
-    dropZone.addEventListener("dragover", dragOver, false);
-    dropZone.addEventListener("drop"    , drop    , false);
-
-    // -----------------export workspace--------------------
-    document.getElementById("export").addEventListener("click", function() {
-        if (window.event.ctrlKey) {
-            exportLua();
-        }
-        else
-        {
-            exportSketch();
-        }
+    darkMode.addEventListener('change', function() {
+      icompadreWorkspace.setTheme(currentTheme());
     });
 
+    // blockly has to be told whenever its div changes the size (window resized, lua panel shown, ...)
+    new ResizeObserver(function() {
+      Blockly.svgResize(icompadreWorkspace);
+    }).observe(blocklyDiv);
+
     // ------------- UI Functions -----------------
-    // Blinks an element one  
-    function blink(elementid, color) 
+    // Shows a message in the header. kind is one of info, ok, error
+    function showStatus(text, kind)
     {
-        var element = document.getElementById(elementid);
-        element.style.transition = "background-color 0.2s ease";
-        element.style.backgroundColor = color;
-
-        setTimeout(function() {
-              element.style.transition = "background-color 0.2s ease";
-              element.style.backgroundColor = "";
-        }, 200);
-    }
-    // generate a blob for the lua file
-    function getLuaBlob()
-    {
-      var luaScript = Blockly.Lua.workspaceToCode(icompadreWorkspace);
-      var blob = new Blob([luaScript], {
-          type: "application/x-lua"
-      });
-
-      return blob;
+      var status = document.getElementById('status');
+      status.textContent = text;
+      status.className = kind || 'info';
     }
 
-    // generate a blob for the sketch
-    function getSketchBlob()
+    function timeOfDay()
     {
-      var sketch = Blockly.serialization.workspaces.save(icompadreWorkspace);
-      var sketchString = JSON.stringify(sketch);
-      var blob = new Blob([sketchString], {
-          type: "application/json"
-      });
-
-      return blob;
+      return new Date().toLocaleTimeString([], {hour: '2-digit', minute: '2-digit'});
     }
 
-    // Export lua to Disk
-    function exportLua() 
+    // Returns the current date as 2024-12-31
+    function dateStamp()
     {
-        saveAs(getLuaBlob(), "main.lua");
+      var now = new Date();
+      return now.getFullYear() + '-' + String(now.getMonth() + 1).padStart(2, '0') + '-' + String(now.getDate()).padStart(2, '0');
     }
 
-    // Export sketch to Disk
-    function exportSketch() 
+    // Copies the text into the clipboard and resolves to true if it worked.
+    // navigator.clipboard only exists on https and localhost, but the studio is served via http://icompadre.local
+    function copyText(text)
     {
-        saveAs(getSketchBlob(), "icompadre.json");
-    }
-
-
-    // Uploads a file to the microcontroller
-    async function storeFile(filename, content)
-    {
-      await fetch(filename, {
-        method: "PUT", 
-        body: content
-      }).then(function (response) {
-        if (response.ok) {
-          blink("saveButton", "#90ee90"); // light green
-        } else {
-          blink("saveButton", "#ffcccb"); // light red
-        }
-      }); 
-    }
-
-    // Uploads the sketch and the lua file to the microcontroller
-    async function saveWorkspace() 
-    {
-      storeFile("/main.lua", getLuaBlob());
-      storeFile("/icompadre.json", getSketchBlob());
-    }
-
-
-
-    // Opens the sharing window
-    function openSharingWindow() 
-    {
-      var sketch = Blockly.serialization.workspaces.save(icompadreWorkspace);
-      var sketchString = "";
-
-      if (window.event.ctrlKey) 
+      if (navigator.clipboard && window.isSecureContext)
       {
-        sketchString = Blockly.Lua.workspaceToCode(icompadreWorkspace);
+        return navigator.clipboard.writeText(text).then(function() { return true; }, function() { return copyTextFallback(text); });
+      }
+      return Promise.resolve(copyTextFallback(text));
+    }
+
+    function copyTextFallback(text)
+    {
+      // An open modal dialog makes the rest of the page inert, so the helper has to live inside of it
+      var host = document.querySelector('dialog[open]') || document.body;
+      var area = document.createElement('textarea');
+      area.value = text;
+      area.setAttribute('readonly', '');
+      area.style.position = 'fixed';
+      area.style.opacity = '0';
+      host.appendChild(area);
+      area.select();
+      var copied = false;
+      try
+      {
+        copied = document.execCommand('copy');
+      }
+      catch (error)
+      {
+        console.error('Copy failed', error);
+      }
+      host.removeChild(area);
+      return copied;
+    }
+
+    // -------------- Sketch -----------------
+    function sketchAsText()
+    {
+      return JSON.stringify(Blockly.serialization.workspaces.save(icompadreWorkspace));
+    }
+
+    function luaCode()
+    {
+      return Blockly.Lua.workspaceToCode(icompadreWorkspace);
+    }
+
+    // Parses the text of a sketch file, throws if it is none
+    function parseSketch(text)
+    {
+      var sketch = JSON.parse(text);
+      if (!sketch || typeof sketch !== 'object' || Array.isArray(sketch))
+      {
+        throw new Error('This is not an iCOMpadre sketch');
+      }
+      return sketch;
+    }
+
+    // Replaces the workspace with the given sketch. The user can undo this with ctrl+z.
+    // If the sketch can't be loaded, the previous workspace is restored and the error is thrown.
+    function replaceSketch(sketch)
+    {
+      var previous = Blockly.serialization.workspaces.save(icompadreWorkspace);
+      try
+      {
+        Blockly.serialization.workspaces.load(sketch, icompadreWorkspace, {recordUndo: true});
+      }
+      catch (error)
+      {
+        console.error('Could not load the sketch', error);
+        Blockly.serialization.workspaces.load(previous, icompadreWorkspace);
+        icompadreWorkspace.clearUndo();
+        throw error;
+      }
+    }
+
+    // -------------- Unsaved changes and backup -----------------
+    // The sketch as it is stored on iCOMpadre. null until it has been loaded from there.
+    var savedSketch = null;
+
+    // Unsaved changes are kept in the browser, so they survive a closed tab or a crashed browser
+    var BACKUP_KEY = 'icompadre-studio.backup';
+    var pendingBackup = null; // the backup which is offered to be restored
+
+    function isDirty()
+    {
+      return savedSketch !== null && sketchAsText() !== savedSketch;
+    }
+
+    function writeBackup()
+    {
+      try
+      {
+        localStorage.setItem(BACKUP_KEY, JSON.stringify({'time': Date.now(), 'sketch': sketchAsText()}));
+      }
+      catch (error)
+      {
+        // no storage (private mode, ...) -> no backup
+      }
+    }
+
+    function readBackup()
+    {
+      try
+      {
+        var backup = JSON.parse(localStorage.getItem(BACKUP_KEY));
+        return (backup && typeof backup.sketch === 'string') ? backup : null;
+      }
+      catch (error)
+      {
+        return null;
+      }
+    }
+
+    function removeBackup()
+    {
+      try
+      {
+        localStorage.removeItem(BACKUP_KEY);
+      }
+      catch (error)
+      {
+        // nothing to remove
+      }
+    }
+
+    // Offers to restore the changes of an earlier session, if they were never saved
+    function offerBackup()
+    {
+      var backup = readBackup();
+      if (!backup)
+      {
+        return;
+      }
+      if (backup.sketch === savedSketch)
+      {
+        removeBackup();
+        return;
+      }
+      pendingBackup = backup;
+      document.getElementById('restoreText').textContent =
+        'This browser has unsaved changes from ' + new Date(backup.time).toLocaleString() + '.';
+      document.getElementById('restoreBanner').hidden = false;
+    }
+
+    document.getElementById('restoreButton').addEventListener('click', function() {
+      document.getElementById('restoreBanner').hidden = true;
+      var backup = pendingBackup;
+      pendingBackup = null;
+      try
+      {
+        replaceSketch(parseSketch(backup.sketch));
+        showStatus('Restored the unsaved changes. Undo with ctrl+z.', 'info');
+      }
+      catch (error)
+      {
+        showStatus('Could not restore the unsaved changes: ' + error.message, 'error');
+      }
+    });
+
+    document.getElementById('discardButton').addEventListener('click', function() {
+      document.getElementById('restoreBanner').hidden = true;
+      pendingBackup = null;
+      removeBackup();
+      onSketchChanged(); // a change made in the meantime gets its own backup
+    });
+
+    // Called (debounced) whenever the sketch changes
+    function onSketchChanged()
+    {
+      updateLuaPanel();
+      if (savedSketch === null)
+      {
+        return; // still loading, the backup must not be touched yet
+      }
+
+      var dirty = isDirty();
+      document.getElementById('saveButton').classList.toggle('dirty', dirty);
+      document.title = (dirty ? '● ' : '') + 'iCOMpadre Studio';
+      if (pendingBackup !== null)
+      {
+        return; // the user has not decided yet whether to restore the backup, so keep it
+      }
+      if (dirty)
+      {
+        writeBackup();
       }
       else
       {
-        sketchString = JSON.stringify(sketch);
+        removeBackup();
+      }
+    }
+
+    var changeTimer = null;
+    icompadreWorkspace.addChangeListener(function(event) {
+      if (event.isUiEvent)
+      {
+        return;
+      }
+      clearTimeout(changeTimer);
+      changeTimer = setTimeout(onSketchChanged, 300);
+    });
+
+    window.addEventListener('beforeunload', function(event) {
+      if (isDirty())
+      {
+        event.preventDefault();
+        event.returnValue = '';
+      }
+    });
+
+    // -------------- Load from iCOMpadre -----------------
+    // Load the latest project from the server
+    async function openLastProjectFromServer()
+    {
+      try
+      {
+        var response = await fetch('/icompadre.json', {cache: 'no-cache'});
+        if (response.status === 200)
+        {
+          Blockly.serialization.workspaces.load(parseSketch(await response.text()), icompadreWorkspace);
+        }
+        else
+        {
+          console.log('No previous workspace file found. Status ' + response.status);
+        }
+      }
+      catch (error)
+      {
+        console.error('Could not load the sketch from iCOMpadre', error);
+        showStatus('Could not open the sketch stored on iCOMpadre: ' + error.message, 'error');
       }
 
-      document.getElementById('codeArea').value = sketchString;
-      document.getElementById('codeModal').style.display = 'block';
-      document.getElementById('codeArea').select();
+      savedSketch = sketchAsText();
+      document.getElementById('saveButton').disabled = false;
+      offerBackup();
+      onSketchChanged();
     }
+    openLastProjectFromServer();
 
-    // Closes the sharing window
-    function closeSharingWindow() 
+    // -------------- Save on iCOMpadre -----------------
+    // Uploads a file to the microcontroller, throws if it didn't work
+    async function storeFile(filename, content)
     {
-      document.getElementById('codeModal').style.display = 'none';
-    }
-
-    // Loads code from the window
-    function importCodeIntoWorkspace() 
-    {
-      var currentSketch = Blockly.serialization.workspaces.save(icompadreWorkspace);
-      var newSketch = document.getElementById('codeArea').value;
-
-      try 
+      var controller = new AbortController();
+      var timer = setTimeout(function() { controller.abort(); }, 20000);
+      try
       {
-        var newSketchObj = JSON.parse(newSketch); // No json - no import !
-        icompadreWorkspace.clear();
-        Blockly.serialization.workspaces.load(newSketchObj, icompadreWorkspace);
-      } 
-      catch (error) 
-      {
-        icompadreWorkspace.clear();
-        Blockly.serialization.workspaces.load(currentSketch, icompadreWorkspace);
+        var response = await fetch(filename, {method: 'PUT', body: content, signal: controller.signal});
+        if (!response.ok)
+        {
+          throw new Error(filename + ': ' + response.status + ' ' + response.statusText);
+        }
       }
-      document.getElementById('codeModal').style.display = 'none';
+      catch (error)
+      {
+        if (error.name === 'AbortError')
+        {
+          throw new Error(filename + ': no answer from iCOMpadre');
+        }
+        if (error instanceof TypeError)
+        {
+          throw new Error(filename + ': iCOMpadre is not reachable');
+        }
+        throw error;
+      }
+      finally
+      {
+        clearTimeout(timer);
+      }
     }
 
-    // Copies the current code into the clipboard
-    function copyCodeToClipboard() 
+    // Uploads the lua file and the sketch to the microcontroller. One after the other, the SD card is slow.
+    var saving = false;
+    async function saveWorkspace()
     {
-      var theCode = document.getElementById('codeArea').value;
-      navigator.clipboard.writeText(theCode);
+      var button = document.getElementById('saveButton');
+      if (saving || button.disabled)
+      {
+        return;
+      }
+      saving = true;
+      button.disabled = true;
+      showStatus('Saving ...', 'info');
+
+      try
+      {
+        var sketch = sketchAsText();
+        await storeFile('/main.lua', new Blob([luaCode()], {type: 'application/x-lua'}));
+        await storeFile('/icompadre.json', new Blob([sketch], {type: 'application/json'}));
+        savedSketch = sketch;
+        pendingBackup = null; // saving replaces the unsaved changes of an earlier session
+        document.getElementById('restoreBanner').hidden = true;
+        showStatus('Saved on iCOMpadre at ' + timeOfDay(), 'ok');
+      }
+      catch (error)
+      {
+        console.error('Saving failed', error);
+        showStatus('Saving failed - ' + error.message, 'error');
+      }
+      finally
+      {
+        saving = false;
+        button.disabled = false;
+        onSketchChanged();
+      }
     }
 
-    // Copies the current clipboard content into the code window
-    function pasteCodeFromClipboard() 
+    document.getElementById('saveButton').addEventListener('click', saveWorkspace);
+
+    document.addEventListener('keydown', function(event) {
+      if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === 's')
+      {
+        event.preventDefault();
+        saveWorkspace();
+      }
+    });
+
+    // ----------------import program or workspace --------------------
+    function openSketchFile(file)
     {
+      if (!file)
+      {
+        return;
+      }
+      var reader = new FileReader();
+      reader.onload = function()
+      {
+        try
+        {
+          replaceSketch(parseSketch(reader.result));
+          showStatus('Opened ' + file.name + '. Undo with ctrl+z.', 'info');
+        }
+        catch (error)
+        {
+          showStatus('Could not open ' + file.name + ' - ' + error.message, 'error');
+        }
+      };
+      reader.onerror = function()
+      {
+        showStatus('Could not read ' + file.name, 'error');
+      };
+      reader.readAsText(file);
+    }
+
+    var fileInput = document.getElementById('fileInput');
+    var openButton = document.getElementById('openButton');
+
+    openButton.addEventListener('click', function() {
+      fileInput.click();
+    });
+
+    fileInput.addEventListener('change', function() {
+      openSketchFile(fileInput.files[0]);
+      fileInput.value = ''; // otherwise the same file can't be opened twice
+    });
+
+    // A file can also be dropped onto the open button
+    openButton.addEventListener('dragover', function(event) {
+      event.stopPropagation();
+      event.preventDefault();
+      event.dataTransfer.dropEffect = 'copy';
+    });
+
+    openButton.addEventListener('drop', function(event) {
+      event.stopPropagation();
+      event.preventDefault();
+      openSketchFile(event.dataTransfer.files[0]);
+    });
+
+    // -----------------export workspace--------------------
+    document.getElementById('downloadButton').addEventListener('click', function() {
+      saveAs(new Blob([sketchAsText()], {type: 'application/json'}), 'icompadre-' + dateStamp() + '.json');
+    });
+
+    // -----------------lua panel--------------------
+    var LUA_PANEL_KEY = 'icompadre-studio.luaPanel';
+    var luaPanel = document.getElementById('luaPanel');
+
+    function setLuaPanelVisible(visible)
+    {
+      luaPanel.hidden = !visible;
+      document.getElementById('luaButton').setAttribute('aria-pressed', String(visible));
+      try
+      {
+        localStorage.setItem(LUA_PANEL_KEY, visible ? 'shown' : 'hidden');
+      }
+      catch (error)
+      {
+        // the panel is just hidden again next time
+      }
+      updateLuaPanel();
+    }
+
+    function updateLuaPanel()
+    {
+      if (luaPanel.hidden)
+      {
+        return;
+      }
+      try
+      {
+        document.getElementById('luaCode').textContent = luaCode();
+      }
+      catch (error)
+      {
+        document.getElementById('luaCode').textContent = '-- The lua code could not be generated: ' + error.message;
+      }
+    }
+
+    function showLuaMessage(text)
+    {
+      var message = document.getElementById('luaMessage');
+      message.textContent = text;
+      setTimeout(function() { message.textContent = ''; }, 3000);
+    }
+
+    document.getElementById('luaButton').addEventListener('click', function() {
+      setLuaPanelVisible(luaPanel.hidden);
+    });
+
+    document.getElementById('luaCopyButton').addEventListener('click', function() {
+      copyText(luaCode()).then(function(copied) {
+        showLuaMessage(copied ? 'Copied' : 'Select the code and press ctrl+c');
+      });
+    });
+
+    document.getElementById('luaDownloadButton').addEventListener('click', function() {
+      saveAs(new Blob([luaCode()], {type: 'application/x-lua'}), 'main.lua');
+    });
+
+    try
+    {
+      setLuaPanelVisible(localStorage.getItem(LUA_PANEL_KEY) === 'shown');
+    }
+    catch (error)
+    {
+      setLuaPanelVisible(false);
+    }
+
+    // -----------------sharing--------------------
+    var shareDialog = document.getElementById('shareDialog');
+    var shareText = document.getElementById('shareText');
+
+    function showShareMessage(text, kind)
+    {
+      var message = document.getElementById('shareMessage');
+      message.textContent = text;
+      message.className = kind || 'info';
+    }
+
+    document.getElementById('shareButton').addEventListener('click', function() {
+      shareText.value = sketchAsText();
+      showShareMessage('');
+      shareDialog.showModal();
+      shareText.select();
+    });
+
+    document.getElementById('shareCloseButton').addEventListener('click', function() {
+      shareDialog.close();
+    });
+
+    // A click next to the dialog closes it (escape works as well)
+    shareDialog.addEventListener('click', function(event) {
+      if (event.target === shareDialog)
+      {
+        shareDialog.close();
+      }
+    });
+
+    document.getElementById('shareCopyButton').addEventListener('click', function() {
+      copyText(shareText.value).then(function(copied) {
+        showShareMessage(copied ? 'Copied into the clipboard' : 'Select the text and press ctrl+c', copied ? 'ok' : 'info');
+      });
+    });
+
+    document.getElementById('sharePasteButton').addEventListener('click', function() {
+      function pasteManually()
+      {
+        shareText.value = '';
+        shareText.focus();
+        showShareMessage('Press ctrl+v to paste the text', 'info');
+      }
+
+      if (navigator.clipboard && navigator.clipboard.readText && window.isSecureContext)
+      {
         navigator.clipboard.readText().then(function(text) {
-          document.getElementById('codeArea').value = text;
-        });
-    }
+          shareText.value = text;
+          showShareMessage('');
+        }, pasteManually);
+      }
+      else
+      {
+        pasteManually();
+      }
+    });
+
+    document.getElementById('shareImportButton').addEventListener('click', function() {
+      try
+      {
+        replaceSketch(parseSketch(shareText.value));
+        shareDialog.close();
+        showStatus('Imported the sketch. Undo with ctrl+z.', 'info');
+      }
+      catch (error)
+      {
+        showShareMessage('Could not import - ' + error.message, 'error');
+      }
+    });
 
   </script>
+</body>
 </html>

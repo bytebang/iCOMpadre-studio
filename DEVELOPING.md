@@ -44,6 +44,9 @@ webserver.py              local development server
    4. `base.js`, then `Studio.separator()`, then the radio files
    5. `Studio.buildToolbox(baseCategories)` and `Blockly.inject(...)`
 4. The last workspace is loaded from `/icompadre.json` on the device.
+5. If the browser holds unsaved changes of an earlier session (`localStorage`, key `icompadre-studio.backup`), the studio offers to restore them.
+
+Every file the studio loads (scripts, styles, images) has to be in the `filesToLoad` list of `runtime/index.html`, otherwise it is not preloaded.
 
 The order of the radio `<script>` tags is the order of the categories in the toolbox.
 
@@ -178,5 +181,5 @@ To build the userguide with the studio documentation locally, do what the CI doe
 
 * The studio loads without errors in the browser console.
 * Every new block can be dragged onto the workspace.
-* *Share* with `ctrl` pressed shows the generated lua code. Check it for every new block.
+* The *Lua* panel shows the generated lua code. Check it for every new block.
 * The new file is in both `studio/index.html` and the preloader list.

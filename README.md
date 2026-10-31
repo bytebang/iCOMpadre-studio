@@ -14,19 +14,25 @@ The following sections describe our version of the editor, which comes bundled w
 
 However - our version can be called by visiting the webpage http://icompadre.local ... and it is a customized version of blockly (which is embedded into a nice webpage) which serves as a code editor. 
 
-## Run
+## Save
 
-The _run_ button uploads the code of the current sketch to the hardware and runs the code.
-If a user drops a lua file onto this button then this code will be uploaded an ran on the microcontroller.
+The _save_ button (or `ctrl+s`) stores the generated `main.lua` and the sketch on the SD card of iCOMpadre. The program runs the next time iCOMpadre is started in run mode.
 
-## Export
+## Download
 
-The button _export_ downloads the current sketch to the file. The filename is dynamically created (appended with date). 
-If the user presses the `ctrl` button during the press of this button then there will be the lua script exported.
+The button _download_ downloads the current sketch to a file. The filename contains the date.
 
 ## Open
 
-The button _open_ lets the user upload a previously exported sketch.
+The button _open_ replaces the current sketch with a previously downloaded one. A file can also be dropped onto the button.
+
+## Share
+
+The button _share_ shows the sketch as text to share it with others, and imports sketches others have shared.
+
+## Lua
+
+The button _lua_ shows the generated lua code next to the workspace. It can be copied or downloaded as `main.lua` from there.
 
 
 # Programming

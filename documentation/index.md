@@ -15,14 +15,19 @@ When iCOMpadre is started up the next time in the run mode, then this file will 
 
 ### Action Buttons
 
-The Dashed Buttons 
+The dashed buttons at the top right:
 
 | Button                      | Functionality                 |
 |-----------------------------|-------------------------------|
-| ![Save](button-save.png)    | The **save** button compiles the current sketch and uploads it to iCOMpadre. If a user drops a lua file onto this button then this code will be uploaded an ran on the microcontroller.|    
-| ![Download](button-download.png)    | The **download** button downloads the current sketch to the file. The filename is dynamically created (appended with date). If the user presses the `ctrl` button during the press of this button then there will be the lua script exported.|
-| ![Open](button-open.png)    | The **open** button replaces the current sketchwith the one that the user selects from the local disk. |
-| ![Share](button-share.png)    | The **share** button shows the current sketch as text, where it can be shared via mail, patebin or other techniques. If the user presses the `ctrl` button during the press of this button then the lua script will be exported. |
+| ![Save](button-save.png)    | The **save** button compiles the current sketch and stores it on iCOMpadre (as `main.lua` and `icompadre.json`). `ctrl+s` does the same. A dot on the button shows that there are unsaved changes. Next to the buttons you can see whether saving worked. |
+| ![Download](button-download.png)    | The **download** button downloads the current sketch to your computer. The filename contains the date, e.g. `icompadre-2024-12-31.json`. |
+| ![Open](button-open.png)    | The **open** button replaces the current sketch with one that you select from your computer. You can also drop the file onto the button. `ctrl+z` brings the previous sketch back. |
+| ![Share](button-share.png)    | The **share** button shows the current sketch as text, so it can be shared via mail, pastebin or other techniques. Paste the text of someone else's sketch there and press **Import** to open it. |
+| ![Lua](button-lua.png)    | The **lua** button shows the lua code which is generated from the sketch, next to the workspace. It is updated while you work. From there it can be copied or downloaded as `main.lua`. |
+
+### Unsaved changes
+
+Changes which are not saved on iCOMpadre yet are kept in your browser. If the browser is closed (or crashes) before you save, the studio offers to restore them the next time you open it.
 
 ## Sharing Recipies
 

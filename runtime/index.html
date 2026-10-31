@@ -24,8 +24,29 @@
         position: relative;
     }
 
+    @media (prefers-color-scheme: dark) {
+      body {
+        background-color: #1e1e1e;
+        color: #dddddd;
+      }
+
+      #progress-container svg {
+        filter: invert(1);
+      }
+    }
+
     #progress-container {
-      padding: 50 px;
+      padding: 50px;
+    }
+
+    #loadingError {
+      color: #c62828;
+      max-width: 400px;
+    }
+
+    #loadingError button {
+      margin-top: 10px;
+      font: inherit;
     }
 
     #progress-container svg {
@@ -51,7 +72,7 @@
     }
 
     .zoomin-animation {
-        animation: zoomin 2s ease-in-out forwards;
+        animation: zoomin 1s ease-in-out forwards;
     }
 
   </style>
@@ -92,22 +113,46 @@
             const xhr = new XMLHttpRequest();
             document.getElementById('loadingFileName').innerHTML = "loading <br/>" + file.name;
             xhr.open('GET', file.url, true);
+            xhr.timeout = 15000; // a slow SD card must not keep the loader waiting forever
 
             xhr.onload = function() {
                 if (xhr.status === 200) {
                     console.log(file.name + ' loaded successfully');
                     resolve(file.url);
                 } else {
-                    reject('Error loading ' + file.name);
+                    reject('Error ' + xhr.status + ' loading ' + file.url);
                 }
             };
 
             xhr.onerror = function() {
-                reject('Network error loading ' + file.name);
+                reject('Network error loading ' + file.url);
+            };
+
+            xhr.ontimeout = function() {
+                reject('Timeout loading ' + file.url);
             };
 
             xhr.send();
         });
+    }
+
+    /*
+    * Tells the user that the studio can't be started, instead of waiting forever
+    */
+    function showLoadingError(message)
+    {
+        const target = document.getElementById('loadingFileName');
+        target.textContent = '';
+
+        const error = document.createElement('div');
+        error.id = 'loadingError';
+        error.append('The studio could not be loaded:', document.createElement('br'), message);
+
+        const retry = document.createElement('button');
+        retry.textContent = 'Try again';
+        retry.onclick = function() { window.location.reload(); };
+
+        target.append(error, retry);
     }
     
     /*
@@ -136,8 +181,8 @@
         {
           document.body.classList.add('zoomin-animation');
           setTimeout(() => {
-            window.location.href = './studio/index.html'; 
-          }, 2000);
+            window.location.href = './studio/index.html';
+          }, 1000);
         }
     }
 
@@ -151,8 +196,11 @@
             {"name":"default blocks",         "url":"studio/blockly/blocks_compressed.js"},
             {"name":"english language files", "url":"studio/blockly/en.js"},
             {"name":"compiler",               "url":"studio/blockly/lua_compressed.js"},
+            {"name":"file download",          "url":"studio/filesaver.js"},
+            {"name":"styles",                 "url":"studio/studio.css"},
             {"name":"images",                 "url":"studio/blockly/sprites.png"},
             {"name":"images",                 "url":"studio/img/close.svg"},
+            {"name":"images",                 "url":"studio/img/code.svg"},
             {"name":"images",                 "url":"studio/img/copy.svg"},
             {"name":"images",                 "url":"studio/img/export.svg"},
             {"name":"images",                 "url":"studio/img/import.svg"},
@@ -174,7 +222,7 @@
                 updateProgress(filesToLoad.length, loadedFiles);
             } catch (error) {
                 console.error(error);
-                break; // Stoppt die Schleife im Fehlerfall
+                showLoadingError(error);
                 return false;
             }
         }
