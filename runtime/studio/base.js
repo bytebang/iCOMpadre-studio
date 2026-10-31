@@ -633,7 +633,7 @@ serial.action("configserial");
 /* **************************************************************** */
 /*         STORAGE: Files and remembered values on the SD card      */
 /* **************************************************************** */
-// The firmware provides readFile, writeFile, appendFile, fileExists and deleteFile.
+// The firmware provides the standard lua libraries io and os (only os.remove, os.rename, os.clock).
 // They only work in the directory /data of the SD card and accept plain file names
 // (letters, digits, _ - . and up to 32 characters). On errors they return nil and a message.
 
@@ -670,12 +670,41 @@ Studio.luaFunction("storageLiteral", [
   "  return 'nil'",
   "end"]);
 
+// Returns the content of a file, or nil and an error message
+Studio.luaFunction("storageRead", [
+  "function storageRead(name)",
+  "  local file, err = io.open(name, 'r')",
+  "  if not file then return nil, err end",
+  "  local text = file:read('a')",
+  "  file:close()",
+  "  return text",
+  "end"]);
+
+// Writes (mode 'w') or appends (mode 'a') a text to a file, returns true or nil and an error message
+Studio.luaFunction("storageWrite", [
+  "function storageWrite(name, text, mode)",
+  "  local file, err = io.open(name, mode or 'w')",
+  "  if not file then return nil, err end",
+  "  local ok, werr = file:write(tostring(text))",
+  "  file:close()",
+  "  if not ok then return nil, werr end",
+  "  return true",
+  "end"]);
+
+// True if the file exists
+Studio.luaFunction("storageExists", [
+  "function storageExists(name)",
+  "  local file = io.open(name, 'r')",
+  "  if file then file:close() end",
+  "  return file ~= nil",
+  "end"]);
+
 // The remembered values, loaded once from /data/memory.lua
 Studio.luaFunction("kvLoad", [
   "function kvLoad()",
   "  if _kvStore == nil then",
   "    _kvStore = {}",
-  "    local text = readFile('memory.lua')",
+  "    local text = storageRead('memory.lua')",
   "    local chunk = text and load(text)",
   "    if chunk then",
   "      local ok, store = pcall(chunk)",
@@ -683,7 +712,7 @@ Studio.luaFunction("kvLoad", [
   "    end",
   "  end",
   "  return _kvStore",
-  "end"]);
+  "end"], ["storageRead"]);
 
 // Writes all remembered values to /data/memory.lua
 Studio.luaFunction("kvSave", [
@@ -696,8 +725,8 @@ Studio.luaFunction("kvSave", [
   "    lines[#lines + 1] = '  [' .. storageLiteral(k) .. '] = ' .. storageLiteral(_kvStore[k]) .. ','",
   "  end",
   "  lines[#lines + 1] = '}'",
-  "  return storageCheck(writeFile('memory.lua', table.concat(lines, '\\n') .. '\\n'))",
-  "end"], ["storageCheck", "storageLiteral"]);
+  "  return storageCheck(storageWrite('memory.lua', table.concat(lines, '\\n') .. '\\n'))",
+  "end"], ["storageCheck", "storageLiteral", "storageWrite"]);
 
 // Remembers a value under a name. The SD card is only written if the value has changed.
 Studio.luaFunction("kvSet", [
@@ -720,8 +749,8 @@ Studio.luaFunction("kvGet", [
 // Appends a line to a file
 Studio.luaFunction("storageAppendLine", [
   "function storageAppendLine(name, text)",
-  "  return storageCheck(appendFile(name, tostring(text) .. '\\n'))",
-  "end"], ["storageCheck"]);
+  "  return storageCheck(storageWrite(name, tostring(text) .. '\\n', 'a'))",
+  "end"], ["storageCheck", "storageWrite"]);
 
 // Converts a list into a CSV line (values with comma or quotes are quoted)
 Studio.luaFunction("storageCsvLine", [
@@ -735,11 +764,18 @@ Studio.luaFunction("storageCsvLine", [
   "  return table.concat(fields, ',')",
   "end"]);
 
-// Returns the lines of a file as list (empty if the file does not exist)
+// Returns the lines of a file as list (empty if the file does not exist).
+// Reads line by line, so also big files work.
 Studio.luaFunction("storageLines", [
   "function storageLines(name)",
   "  local lines = {}",
-  "  for line in string.gmatch(readFile(name) or '', '[^\\r\\n]+') do lines[#lines + 1] = line end",
+  "  local file = io.open(name, 'r')",
+  "  if not file then return lines end",
+  "  for line in file:lines() do",
+  "    line = string.gsub(line, '\\r$', '')",
+  "    if line ~= '' then lines[#lines + 1] = line end",
+  "  end",
+  "  file:close()",
   "  return lines",
   "end"]);
 
@@ -854,7 +890,7 @@ storage.action("storage_append_csv", storageDefault({"FILE": "log.csv"}));
 
 //-------------------------------------------------------------------
 // Replaces the content of a file with a text.
-// Lua: writeFile("notes.txt", text)
+// Lua: storageWrite("notes.txt", text, "w")
 Blockly.Blocks['storage_write_file'] = {
   init: function() {
     this.jsonInit({
@@ -872,17 +908,17 @@ Blockly.Blocks['storage_write_file'] = {
 };
 
 Blockly.Lua['storage_write_file'] = function(block) {
-  Studio.use('storageCheck');
+  Studio.use(['storageCheck', 'storageWrite']);
   var text = Blockly.Lua.valueToCode(block, 'TEXT', Blockly.Lua.ORDER_NONE) || "''";
   var file = Blockly.Lua.valueToCode(block, 'FILE', Blockly.Lua.ORDER_NONE) || "''";
-  return 'storageCheck(writeFile(' + file + ', tostring(' + text + ')))\n';
+  return 'storageCheck(storageWrite(' + file + ', ' + text + ', "w"))\n';
 };
 
 storage.action("storage_write_file", storageDefault({"TEXT": "Hello", "FILE": "notes.txt"}));
 
 //-------------------------------------------------------------------
 // Deletes a file.
-// Lua: deleteFile("log.csv")
+// Lua: os.remove("log.csv")
 Blockly.Blocks['storage_delete_file'] = {
   init: function() {
     this.jsonInit({
@@ -900,7 +936,7 @@ Blockly.Blocks['storage_delete_file'] = {
 
 Blockly.Lua['storage_delete_file'] = function(block) {
   var file = Blockly.Lua.valueToCode(block, 'FILE', Blockly.Lua.ORDER_NONE) || "''";
-  return 'deleteFile(' + file + ')\n';
+  return 'os.remove(' + file + ')\n';
 };
 
 storage.action("storage_delete_file", storageDefault({"FILE": "log.csv"}));
@@ -958,8 +994,8 @@ Blockly.Lua['storage_file_lines'] = function(block) {
 storage.property("storage_file_lines", storageDefault({"FILE": "log.txt"}));
 
 //-------------------------------------------------------------------
-// Returns the content of a file as text (max. 16 KB).
-// Lua: (readFile("notes.txt") or "")
+// Returns the content of a file as text.
+// Lua: (storageRead("notes.txt") or "")
 Blockly.Blocks['storage_read_file'] = {
   init: function() {
     this.jsonInit({
@@ -969,20 +1005,21 @@ Blockly.Blocks['storage_read_file'] = {
       ],
       "inputsInline": true,
       "output": "String",
-      "tooltip": "Returns the content of the file as text (up to 16 KB). The text is empty if the file does not exist"
+      "tooltip": "Returns the content of the file as text. The text is empty if the file does not exist"
     });
   }
 };
 
 Blockly.Lua['storage_read_file'] = function(block) {
+  Studio.use('storageRead');
   var file = Blockly.Lua.valueToCode(block, 'FILE', Blockly.Lua.ORDER_NONE) || "''";
-  return ['(readFile(' + file + ') or "")', Blockly.Lua.ORDER_HIGH];
+  return ['(storageRead(' + file + ') or "")', Blockly.Lua.ORDER_HIGH];
 };
 
 storage.property("storage_read_file", storageDefault({"FILE": "notes.txt"}));
 
 //-------------------------------------------------------------------
-// Lua: fileExists("log.csv")
+// Lua: storageExists("log.csv")
 Blockly.Blocks['storage_file_exists'] = {
   init: function() {
     this.jsonInit({
@@ -998,8 +1035,9 @@ Blockly.Blocks['storage_file_exists'] = {
 };
 
 Blockly.Lua['storage_file_exists'] = function(block) {
+  Studio.use('storageExists');
   var file = Blockly.Lua.valueToCode(block, 'FILE', Blockly.Lua.ORDER_NONE) || "''";
-  return ['(fileExists(' + file + ') == true)', Blockly.Lua.ORDER_HIGH];
+  return ['storageExists(' + file + ')', Blockly.Lua.ORDER_HIGH];
 };
 
 storage.property("storage_file_exists", storageDefault({"FILE": "log.csv"}));

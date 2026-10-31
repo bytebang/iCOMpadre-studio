@@ -372,7 +372,7 @@ Writes a text into a file. The old content of the file is replaced.
 
 ??? info "Lua code"
     ```lua
-    writeFile("notes.txt", "Hello")
+    storageWrite("notes.txt", "Hello", "w")   -- io.open, file:write, file:close
     ```
 
 ### Delete file {#storage_delete_file}
@@ -383,7 +383,7 @@ Deletes a file, e.g. to start a new log.
 
 ??? info "Lua code"
     ```lua
-    deleteFile("log.csv")
+    os.remove("log.csv")
     ```
 
 ### Recall {#storage_recall}
@@ -414,11 +414,11 @@ Reads a file and returns its lines as a [list](lists.md). The list is empty if t
 
 ![Text of file block](img/storage_read_file.png){ width="133" }
 
-Returns the whole content of a file as text (up to 16 KB). The text is empty if the file does not exist.
+Returns the whole content of a file as text. The text is empty if the file does not exist.
 
 ??? info "Lua code"
     ```lua
-    (readFile("notes.txt") or "")
+    (storageRead("notes.txt") or "")   -- io.open, file:read("a"), file:close
     ```
 
 ### File exists? {#storage_file_exists}
@@ -429,7 +429,7 @@ Returns the whole content of a file as text (up to 16 KB). The text is empty if 
 
 ??? info "Lua code"
     ```lua
-    (fileExists("log.csv") == true)
+    storageExists("log.csv")
     ```
 
 ---
