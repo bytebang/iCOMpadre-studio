@@ -124,7 +124,7 @@ Studio.luaFunction("bcdToNumber", [
 /* **************************************************************** */
 
 // Executed once when the device starts.
-// Lua: function onStartUp() ... end
+// Lua: function onStartup() ... end
 Blockly.Blocks['onstartup'] = {
   init: function() {
     this.appendDummyInput()
@@ -137,7 +137,7 @@ Blockly.Blocks['onstartup'] = {
 
 Blockly.Lua['onstartup'] = function(block) {
   var statements_actions = Blockly.Lua.statementToCode(block, 'actions');
-  return 'function onStartUp()\n' + statements_actions + 'end';
+  return 'function onStartup()\n' + statements_actions + 'end';
 };
 
 program.event("onstartup");

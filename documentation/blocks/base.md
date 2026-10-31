@@ -27,7 +27,7 @@ The blocks in here are executed **once**, when iCOMpadre starts. Use it to give 
 
 ??? info "Lua code"
     ```lua
-    function onStartUp()
+    function onStartup()
       level = 0
     end
     ```
