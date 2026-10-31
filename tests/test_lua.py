@@ -129,9 +129,9 @@ def main():
             got = list(got.values())
         checks.check(label, got == expected, repr(got))
 
-    helper("IC-705 DTCS data 023 TX reverse", ["ic705DtcsData"], "ic705DtcsData(23, 0x10)", [0x10, 0, 0x23])
-    helper("IC-705 menu command 0312", ["numberToBcd", "ic705MenuCmd"], "ic705MenuCmd(312)", [0x1A, 0x05, 0x03, 0x12])
-    helper("IC-705 CW pitch 600 Hz is 0128", ["numberToBcd", "ic705Level"], "ic705Level(600, 300, 900)", [0x01, 0x28])
+    helper("IC-705 DTCS data 023 TX reverse", ["icomDtcsData"], "icomDtcsData(23, 0x10)", [0x10, 0, 0x23])
+    helper("IC-705 menu command 0312", ["numberToBcd", "icomMenuCmd"], "icomMenuCmd(312)", [0x1A, 0x05, 0x03, 0x12])
+    helper("IC-705 CW pitch 600 Hz is 0128", ["numberToBcd", "icomLevel"], "icomLevel(600, 300, 900)", [0x01, 0x28])
 
     # 4. what the action blocks send
     def sends(label, block, expected):

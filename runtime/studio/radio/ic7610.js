@@ -41,12 +41,16 @@ Icom.radio({
                                         ["45 dB", "0x45"]]},
   "agc": {"page": 4, "options": [["FAST", "0x01"], ["MID", "0x02"], ["SLOW", "0x03"]]},
   "squelchStatus": {"page": 3},
+  "toneSquelchStatus": {"page": 3},
+  "choices": {"page": 4, "options": ["dsp_filter_type", "notch_width", "ssb_tx_bandwidth", "break_in"]},
 
   // Transmit
   "transmit": {"page": 9},
   "rfPower": {"page": 3},
   "micGain": {"page": 3},
   "tone": {"page": 13},
+  "compLevel": {"page": 3},
+  "tsql": {"page": 8},
 
   // Meters
   "sMeter": {"page": 3, "s9": 120, "plus60": 241},
@@ -55,6 +59,8 @@ Icom.radio({
   "alc": {"page": 4, "points": [[0, 0], [120, 100]]},
   "voltage": {"page": 4, "points": [[0, 0], [151, 10], [211, 16]]},
   "current": {"page": 4, "points": [[0, 0], [77, 10], [165, 20], [241, 30]]},
+  "overflow": {"page": 4},
+  "compMeter": {"page": 4, "points": [[0, 0], [130, 15], [241, 30]]},
 
   // CW & Voice
   "cw": {"page": 10},
@@ -62,6 +68,8 @@ Icom.radio({
   // The command table lists 28 without the sub command 00, the IC-705, IC-7851 and IC-9700 use 28 00
   "voiceMemory": {"page": 9},
   "announce": {"page": 3},
+  "cwPitch": {"page": 3},
+  "breakInDelay": {"page": 3},
 
   // GPS & Time
   "clock": {"page": 7, "date": "0x01, 0x58", "time": "0x01, 0x59"},
@@ -72,5 +80,7 @@ Icom.radio({
                                        ["Repeater Tone", "0x42"], ["Tone Squelch", "0x43"], ["DIGI-SEL", "0x4E"],
                                        ["Twin Peak Filter", "0x4F"], ["IP Plus", "0x65"], ["Dial Lock", "0x50"]]},
   "brightness": {"page": 3},
-  "power": {"page": 4}
+  "power": {"page": 4},
+  "levels": {"page": 3, "options": ["nr", "nb", "pbt1", "pbt2", "notch", "monitor", "vox", "antivox"]},
+  "menu": {"page": 4}
 });

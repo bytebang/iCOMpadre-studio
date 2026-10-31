@@ -88,7 +88,7 @@ Example: *On change of* the operating mode, print the new mode. The mode is prin
 
 ??? info "Lua code"
     ```lua
-    local actValue = getOperatingModeString(readResultOfCommand(sendCommand({0x04})))
+    local actValue = icomName(icomQuery({0x04}), {[0] = "LSB", [1] = "USB", ...}, "Unknown")   -- Operating Mode of the IC-705
     if(_G.lastValue ~= actValue ) then _G.lastValue = actValue
       print(actValue)
     end

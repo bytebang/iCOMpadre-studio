@@ -23,6 +23,27 @@
 //
 // Every entry has the page of the CI-V reference guide where the command is described. The pages are
 // used in the documentation of the blocks (documentation/blocks/radio/<prefix>.md).
+//
+// The entries (all optional except prefix and name):
+//   prefix, name, address, reference, note   block types, category, default CI-V address, reference guide, note for the docs
+//   frequency, modes, dataMode, tuningSteps   05/03, 06/04 (options), 1A 06, 10 (options)
+//   vfo                                       07 (options; separate: one block per option, 3rd entry is the suffix)
+//   equalize, exchange, dualwatch             07 A0/B1 and B0 (code, what), 07 C0/C1/C2
+//   split, memory, rit, scan                  0F (options), 08 (min, max), 21 01/21 00 (offsetPage), 0E (options)
+//   afLevel, rfGain, squelchLevel             14 01/02/03 (input: name of the input, LEVEL)
+//   preamp, attenuator, agc                   16 02, 11, 16 12 (options; field, message, tooltip, default, onValue)
+//   squelchStatus, toneSquelchStatus          15 01 (sub), 15 05
+//   choices                                   16 xx with more than on/off: names of CHOICES or own entries
+//   transmit, rfPower, rfPowerSteps, micGain  1C 00, 14 0A (input) or steps [name, value, highest value], 14 0B
+//   tone, tsql, dtcs, csql, compLevel         1B 00, 1B 01, 1B 02, 1B 07, 14 0E
+//   sMeter, swr, powerOutput, alc, voltage,   15 02 (s9, plus60), 15 12/11/13/15/16/14 (points of the scale;
+//   current, compMeter                        unit "W" for the power output)
+//   battery, overflow                         1A 0B, 15 07
+//   cw, keyingSpeed, voiceMemory, announce    17, 14 0C, 28 00, 13
+//   cwPitch, breakInDelay                     14 09, 14 0F
+//   position, clock                           23 00 (label, text), 1A 05 (date, time: the numbers of the settings)
+//   functions, brightness, power              16 xx on/off (options), 14 19, 18
+//   levels, menu                              14 xx in one block: names of LEVELS or own [name, sub], 1A 05 + number
 
 /**
  * Creates the blocks of Icom radios. The only global this file adds.
@@ -35,6 +56,33 @@ var Icom = (function() {
 
   // The groups of a radio category, in the order of the toolbox (the same as for the IC-705)
   var GROUPS = ["Frequency & Mode", "Receiver", "Transmit", "Meters", "CW & Voice", "GPS & Time", "Settings"];
+
+  // The usual settings of command 16 with more than on/off. A radio lists the ones it has in spec.choices by name.
+  var CHOICES = {
+    "dsp_filter_type": {"label": "DSP Filter Type", "sub": "0x56", "group": "Receiver",
+                        "options": [["SHARP", "0x00"], ["SOFT", "0x01"]], "tooltip": "Sets the shape of the DSP IF filter in the operating band"},
+    "notch_width": {"label": "Manual Notch Width", "sub": "0x57", "group": "Receiver",
+                    "options": [["WIDE", "0x00"], ["MID", "0x01"], ["NAR", "0x02"]], "tooltip": "Sets the width of the manual notch filter"},
+    "digital_squelch": {"label": "Digital Squelch", "sub": "0x5B", "group": "Receiver",
+                        "options": [["OFF", "0x00"], ["DSQL", "0x01"], ["CSQL", "0x02"]],
+                        "tooltip": "Sets the digital call sign squelch (DSQL) or the digital code squelch (CSQL). DV mode only"},
+    "tone_function": {"label": "Tone Function", "sub": "0x5D", "group": "Transmit",
+                      "options": [["OFF", "0x00"], ["TONE", "0x01"], ["TSQL", "0x02"], ["DTCS", "0x03"], ["DTCS(T)", "0x06"],
+                                  ["TONE(T)/DTCS(R)", "0x07"], ["DTCS(T)/TSQL(R)", "0x08"], ["TONE(T)/TSQL(R)", "0x09"]],
+                      "tooltip": "Selects the repeater tone, tone squelch or DTCS function (FM mode)"},
+    "ssb_tx_bandwidth": {"label": "SSB TX Bandwidth", "sub": "0x58", "group": "Transmit",
+                         "options": [["WIDE", "0x00"], ["MID", "0x01"], ["NAR", "0x02"]], "tooltip": "Selects the SSB transmit bandwidth"},
+    "break_in": {"label": "Break-In", "sub": "0x47", "group": "CW & Voice",
+                 "options": [["OFF", "0x00"], ["semi", "0x01"], ["full", "0x02"]], "tooltip": "Sets the CW break-in function: off, semi or full break-in"},
+    "gps_tx_mode": {"label": "GPS TX Mode", "sub": "0x5C", "group": "GPS & Time",
+                    "options": [["OFF", "0x00"], ["D-PRS", "0x01"], ["NMEA", "0x02"]], "tooltip": "Selects which position data is transmitted in DV mode"}
+  };
+
+  // The usual levels 0 ~ 100 % of command 14 for the block "Set Level". A radio lists the ones it has in spec.levels by name.
+  var LEVELS = {
+    "nr": ["NR level", "0x06"], "nb": ["NB level", "0x12"], "pbt1": ["inner PBT (PBT1)", "0x07"], "pbt2": ["outer PBT (PBT2)", "0x08"],
+    "notch": ["manual notch position", "0x0D"], "monitor": ["monitor level", "0x15"], "vox": ["VOX gain", "0x16"], "antivox": ["anti-VOX gain", "0x17"]
+  };
 
   /* **************************************************************** */
   /*                          LUA FUNCTIONS                           */
@@ -250,6 +298,46 @@ var Icom = (function() {
     'end'
   ], ['icomQuery']);
 
+  // Converts a value between min and max into the 2 byte BCD level 0000 ~ 0255
+  Studio.luaFunction('icomLevel', [
+    'function icomLevel(value, min, max)',
+    '  value = math.max(min, math.min(max, value))',
+    '  return numberToBcd(math.floor((value - min) * 255 / (max - min) + 0.5), 2)',
+    'end'
+  ], ['numberToBcd']);
+
+  // Reads a level 0000 ~ 0255 and converts it into a value between min and max, rounded to 0.1
+  Studio.luaFunction('icomReadLevel', [
+    'function icomReadLevel(cmd, min, max)',
+    '  return math.floor((min + icomReadNumber(cmd) * (max - min) / 255) * 10 + 0.5) / 10',
+    'end'
+  ], ['icomReadNumber']);
+
+  // Data of the DTCS code (e.g. 23 for code 023) and the polarity (command 1B 02)
+  Studio.luaFunction('icomDtcsData', [
+    'function icomDtcsData(code, polarity)',
+    '  local s = string.format("%03d", math.max(0, math.min(777, math.floor(code))))',
+    '  return {polarity, tonumber(s:sub(1, 1)), tonumber(s:sub(2, 2)) * 16 + tonumber(s:sub(3, 3))}',
+    'end'
+  ]);
+
+  // Reads the DTCS code (e.g. 23 for code 023), 0 if there is no answer yet
+  Studio.luaFunction('icomReadDtcs', [
+    'function icomReadDtcs()',
+    '  local d = icomQuery({0x1B, 0x02})',
+    '  if #d < 3 then return 0 end',
+    '  return (d[2] % 16) * 100 + math.floor(d[3] / 16) * 10 + d[3] % 16',
+    'end'
+  ], ['icomQuery']);
+
+  // The command of a menu setting: 1A 05 + the number of the setting as 2 bytes BCD, e.g. 0029
+  Studio.luaFunction('icomMenuCmd', [
+    'function icomMenuCmd(item)',
+    '  local b = numberToBcd(item, 2)',
+    '  return {0x1A, 0x05, b[1], b[2]}',
+    'end'
+  ], ['numberToBcd']);
+
   // Maidenhead locator (6 characters) of a position, e.g. JN77rb
   Studio.luaFunction('icomLocator', [
     'function icomLocator(lat, lon)',
@@ -330,6 +418,20 @@ var Icom = (function() {
   {
     var p = spec.prefix;
     var category = Studio.category(spec.name, "radio");
+
+    // Choices and levels can be given by their name in CHOICES and LEVELS
+    if (spec.choices)
+    {
+      spec.choices.options = spec.choices.options.map(function(choice) {
+        return typeof choice == 'string' ? Object.assign({"suffix": choice}, CHOICES[choice]) : choice;
+      });
+    }
+    if (spec.levels)
+    {
+      spec.levels.options = spec.levels.options.map(function(level) {
+        return typeof level == 'string' ? LEVELS[level] : level;
+      });
+    }
     var groups = {};
     var registered = {"spec": spec, "blocks": []};
     radios.push(registered);
@@ -370,7 +472,8 @@ var Icom = (function() {
                               "civ": doc ? doc.civ : null, "page": doc ? doc.page : null});
     }
 
-    // Defines a level 0 ~ 100 % (command 14 xx): a set block and a read block
+    // Defines a level 0 ~ 100 % (command 14 xx): a set block and a read block.
+    // entry.input is the name of the input of the set block (LEVEL if it is missing)
     function level(entry, sub, suffix, label, text)
     {
       if (!entry)
@@ -378,16 +481,17 @@ var Icom = (function() {
         return;
       }
       var cmd = '{0x14, ' + sub + '}';
+      var input = entry.input || 'LEVEL';
       define(entry.group, 'action', 'set_' + suffix, {
         "message0": "Set " + label + " to %1 %%",
-        "args0": [{"type": "input_value", "name": "LEVEL", "check": "Number"}],
+        "args0": [{"type": "input_value", "name": input, "check": "Number"}],
         "inputsInline": true,
         "tooltip": "Sets the " + text + " (in %)"
       }, function(block) {
         Studio.use(['icomPercent']);
-        return 'sendCommand(' + cmd + ', icomPercent(' + value(block, 'LEVEL') + '))\n';
+        return 'sendCommand(' + cmd + ', icomPercent(' + value(block, input) + '))\n';
       }, function(block) {
-        checkRange(block, 'LEVEL', 0, 100, label + " must be between 0 and 100%");
+        checkRange(block, input, 0, 100, label + " must be between 0 and 100%");
       }, {"civ": "14 " + civBytes(sub) + " + 0000 ~ 0255", "page": entry.page});
 
       define(entry.group, 'property', 'get_' + suffix, {
@@ -473,7 +577,19 @@ var Icom = (function() {
       }, null, {"civ": "10 + step", "page": spec.tuningSteps.page});
     }
 
-    if (spec.vfo)
+    // One block per VFO (e.g. "Select VFO A"), if the options have a third entry: the suffix of the block type
+    if (spec.vfo && spec.vfo.separate)
+    {
+      spec.vfo.options.forEach(function(option) {
+        define("Frequency & Mode", 'action', 'select_vfo_' + option[2], {
+          "message0": "Select " + option[0],
+          "tooltip": "Selects " + option[0]
+        }, function(block) {
+          return 'sendCommand({0x07, ' + option[1] + '})\n';
+        }, null, {"civ": "07 " + civBytes(option[1]), "page": spec.vfo.page});
+      });
+    }
+    else if (spec.vfo)
     {
       define("Frequency & Mode", 'action', 'select_vfo', {
         "message0": "Select %1",
@@ -653,31 +769,60 @@ var Icom = (function() {
     level(spec.rfGain && Object.assign({"group": "Receiver"}, spec.rfGain), "0x02", "rf_gain", "RF Gain", "RF gain");
     level(spec.squelchLevel && Object.assign({"group": "Receiver"}, spec.squelchLevel), "0x03", "squelch_level", "Squelch Level", "squelch level");
 
-    // A setting with a dropdown (command 11 or 16 xx): a set block and a read block which returns the name
+    // A setting with a dropdown (command 11 or 16 xx): a set block and a read block which returns the name.
+    // Optional entries: group, field (name of the dropdown, VALUE), message and tooltip of the set block,
+    // default (name if the answer is unknown, ""), onValue (the read block is "Is ... on?" and true for this value)
     function setting(entry, cmd, suffix, label, text)
     {
       if (!entry)
       {
         return;
       }
-      define("Receiver", 'action', 'set_' + suffix, {
-        "message0": "Set " + label + " to %1",
-        "args0": [{"type": "field_dropdown", "name": "VALUE", "options": entry.options}],
-        "tooltip": "Sets the " + text + ": " + optionNames(entry.options)
+      var group = entry.group || "Receiver";
+      var field = entry.field || 'VALUE';
+      define(group, 'action', 'set_' + suffix, {
+        "message0": entry.message || "Set " + label + " to %1",
+        "args0": [{"type": "field_dropdown", "name": field, "options": entry.options}],
+        "tooltip": entry.tooltip || "Sets the " + text + ": " + optionNames(entry.options)
       }, function(block) {
-        return 'sendCommand(' + cmd + ', {' + block.getFieldValue('VALUE') + '})\n';
+        return 'sendCommand(' + cmd + ', {' + block.getFieldValue(field) + '})\n';
       }, null, {"civ": civBytes(cmd.slice(1, -1)) + " + " + entry.options.map(function(o) { return civBytes(o[1]) + " (" + o[0] + ")"; }).join(" / "),
                 "page": entry.page});
 
-      define("Receiver", 'property', 'get_' + suffix, {
+      if (entry.onValue)
+      {
+        define(group, 'property', 'is_' + suffix + '_on', {
+          "message0": "Is " + label + " on?",
+          "output": "Boolean",
+          "tooltip": "True if the " + text + " is on"
+        }, function(block) {
+          Studio.use(['icomReadByte']);
+          return ['icomReadByte(' + cmd + ') == ' + entry.onValue, lua.Order.RELATIONAL];
+        }, null, {"civ": civBytes(cmd.slice(1, -1)) + " -> " + entry.options.map(function(o) { return civBytes(o[1]); }).join(" / "),
+                  "page": entry.page});
+        return;
+      }
+
+      define(group, 'property', 'get_' + suffix, {
         "message0": label,
         "output": "String",
         "tooltip": "Reads the " + text + ": " + optionNames(entry.options)
       }, function(block) {
         Studio.use(['icomName', 'icomQuery']);
-        return ['icomName(icomQuery(' + cmd + '), ' + nameTable(entry.options) + ', "")', lua.Order.HIGH];
+        return ['icomName(icomQuery(' + cmd + '), ' + nameTable(entry.options) + ', "' + (entry.default || '') + '")', lua.Order.HIGH];
       }, null, {"civ": civBytes(cmd.slice(1, -1)) + " -> " + entry.options.map(function(o) { return civBytes(o[1]); }).join(" / "),
                 "page": entry.page});
+    }
+
+    // The settings of command 16 with more than on/off (spec.choices) which belong into the group
+    function choices(group)
+    {
+      (spec.choices ? spec.choices.options : []).forEach(function(choice) {
+        if (choice.group == group)
+        {
+          setting(Object.assign({"page": spec.choices.page}, choice), '{0x16, ' + choice.sub + '}', choice.suffix, choice.label, choice.label);
+        }
+      });
     }
 
     setting(spec.preamp, '{0x16, 0x02}', 'preamp', 'Preamp', 'preamplifier');
@@ -695,6 +840,20 @@ var Icom = (function() {
         Studio.use(['icomReadOn']);
         return ['icomReadOn({0x15, ' + squelchSub + '})', lua.Order.HIGH];
       }, null, {"civ": "15 " + civBytes(squelchSub) + " -> 00 (closed) / 01 (open)", "page": spec.squelchStatus.page});
+    }
+
+    choices("Receiver");
+
+    if (spec.toneSquelchStatus)
+    {
+      define("Receiver", 'property', 'is_tone_squelch_open', {
+        "message0": "Is Tone Squelch open?",
+        "output": "Boolean",
+        "tooltip": "True if the tone squelch (or DTCS, DSQL, CSQL) is open, i.e. a matching signal is received"
+      }, function(block) {
+        Studio.use(['icomReadOn']);
+        return ['icomReadOn({0x15, 0x05})', lua.Order.HIGH];
+      }, null, {"civ": "15 05 -> 00 (closed) / 01 (open)", "page": spec.toneSquelchStatus.page});
     }
 
     /* ------------------------------ TRANSMIT ------------------------------ */
@@ -773,6 +932,108 @@ var Icom = (function() {
       }, null, {"civ": "1C 00 -> 00 (RX) / 01 (TX)", "page": spec.transmit.page});
     }
 
+    // A level 0000 ~ 0255 (command 14 xx) which stands for a value between min and max, e.g. 300 ~ 900 Hz.
+    // A set block with the input "input" and a read block. integer: the read block rounds to whole numbers
+    function scaled(entry, group, sub, suffix, label, input, min, max, unit, text, integer)
+    {
+      if (!entry)
+      {
+        return;
+      }
+      var cmd = '{0x14, ' + sub + '}';
+      define(group, 'action', 'set_' + suffix, {
+        "message0": "Set " + label + " to %1" + (unit ? " " + unit : ""),
+        "args0": [{"type": "input_value", "name": input, "check": "Number"}],
+        "inputsInline": true,
+        "tooltip": "Sets the " + text + " (" + min + " ~ " + max + (unit ? " " + unit : "") + ")"
+      }, function(block) {
+        Studio.use(['icomLevel']);
+        return 'sendCommand(' + cmd + ', icomLevel(' + value(block, input) + ', ' + min + ', ' + max + '))\n';
+      }, function(block) {
+        checkRange(block, input, min, max, "The " + text + " must be between " + min + " and " + max + (unit ? " " + unit : ""));
+      }, {"civ": "14 " + civBytes(sub) + " + 0000 = " + min + " ~ 0255 = " + max + (unit ? " " + unit : ""), "page": entry.page});
+
+      define(group, 'property', 'get_' + suffix, {
+        "message0": label,
+        "output": "Number",
+        "tooltip": "Reads the " + text + (unit ? " (in " + unit + ")" : " (" + min + " ~ " + max + ")")
+      }, function(block) {
+        if (integer)
+        {
+          Studio.use(['icomReadNumber']);
+          return ['math.floor(' + min + ' + icomReadNumber(' + cmd + ') * ' + (max - min) + ' / 255 + 0.5)', lua.Order.HIGH];
+        }
+        Studio.use(['icomReadLevel']);
+        return ['icomReadLevel(' + cmd + ', ' + min + ', ' + max + ')', lua.Order.HIGH];
+      }, null, {"civ": "14 " + civBytes(sub) + " -> 0000 = " + min + " ~ 0255 = " + max + (unit ? " " + unit : ""), "page": entry.page});
+    }
+
+    choices("Transmit");
+    scaled(spec.compLevel, "Transmit", "0x0E", "comp_level", "Compressor Level", "LEVEL", 0, 10, "", "level of the speech compressor");
+
+    if (spec.tsql)
+    {
+      define("Transmit", 'action', 'set_tsql_frequency', {
+        "message0": "Set Tone Squelch to %1 Hz",
+        "args0": [{"type": "input_value", "name": "TONE", "check": "Number"}],
+        "inputsInline": true,
+        "tooltip": "Sets the frequency of the tone squelch (CTCSS), e.g. 88.5 Hz"
+      }, function(block) {
+        Studio.use(['numberToBcd']);
+        return 'sendCommand({0x1B, 0x01}, numberToBcd(math.floor(' + value(block, 'TONE', lua.Order.MULTIPLICATIVE) + ' * 10 + 0.5), 3))\n';
+      }, function(block) {
+        checkRange(block, 'TONE', 67, 254.1, "The tone squelch frequency must be between 67.0 and 254.1 Hz");
+      }, {"civ": "1B 01 + 3 bytes BCD in 0.1 Hz", "page": spec.tsql.page});
+    }
+
+    if (spec.dtcs)
+    {
+      define("Transmit", 'action', 'set_dtcs_code', {
+        "message0": "Set DTCS Code to %1 polarity %2",
+        "args0": [
+          {"type": "input_value", "name": "CODE", "check": "Number"},
+          {
+            "type": "field_dropdown",
+            "name": "POLARITY",
+            "options": [["normal", "0x00"], ["TX reverse", "0x10"], ["RX reverse", "0x01"], ["TX and RX reverse", "0x11"]]
+          }
+        ],
+        "inputsInline": true,
+        "tooltip": "Sets the DTCS code (e.g. 23 for code 023, digits 0 ~ 7) and its polarity"
+      }, function(block) {
+        Studio.use(['icomDtcsData']);
+        return 'sendCommand({0x1B, 0x02}, icomDtcsData(' + value(block, 'CODE') + ', ' + block.getFieldValue('POLARITY') + '))\n';
+      }, function(block) {
+        var input = block.getInputTargetBlock('CODE');
+        var code = (input && input.type == 'math_number') ? input.getFieldValue('NUM') : null;
+        block.setWarningText(code !== null && !/^[0-7]{1,3}$/.test(code) ? "A DTCS code has up to 3 digits from 0 to 7, e.g. 23" : null);
+      }, {"civ": "1B 02 + polarity, 0 + first digit, second + third digit", "page": spec.dtcs.page});
+
+      define("Transmit", 'property', 'get_dtcs_code', {
+        "message0": "DTCS Code",
+        "output": "Number",
+        "tooltip": "Reads the DTCS code, e.g. 23 for code 023"
+      }, function(block) {
+        Studio.use(['icomReadDtcs']);
+        return ['icomReadDtcs()', lua.Order.HIGH];
+      }, null, {"civ": "1B 02 -> polarity, 0 + first digit, second + third digit", "page": spec.dtcs.page});
+    }
+
+    if (spec.csql)
+    {
+      define("Transmit", 'action', 'set_csql_code', {
+        "message0": "Set Digital Code Squelch to %1",
+        "args0": [{"type": "input_value", "name": "CODE", "check": "Number"}],
+        "inputsInline": true,
+        "tooltip": "Sets the code of the digital code squelch (CSQL) in DV mode (0 ~ 99)"
+      }, function(block) {
+        Studio.use(['numberToBcd']);
+        return 'sendCommand({0x1B, 0x07}, numberToBcd(' + value(block, 'CODE') + ', 1))\n';
+      }, function(block) {
+        checkRange(block, 'CODE', 0, 99, "The code must be between 0 and 99");
+      }, {"civ": "1B 07 + 00 ~ 99", "page": spec.csql.page});
+    }
+
     /* ------------------------------ METERS ------------------------------ */
 
     if (spec.sMeter)
@@ -806,6 +1067,32 @@ var Icom = (function() {
     meter(spec.alc, "0x13", "get_alc", "ALC", " %", "Reads the ALC meter while transmitting (in %, 100 = end of the ALC zone)");
     meter(spec.voltage, "0x15", "get_supply_voltage", "Supply Voltage", " V", "Reads the supply voltage of the final amplifier (in V)");
     meter(spec.current, "0x16", "get_supply_current", "Supply Current", " A", "Reads the current drawn by the final amplifier (in A)");
+
+    if (spec.battery)
+    {
+      define("Meters", 'property', 'is_on_battery', {
+        "message0": "Is on Battery?",
+        "output": "Boolean",
+        "tooltip": "True if the radio is powered by its battery pack, false with an external power supply"
+      }, function(block) {
+        Studio.use(['icomReadOn']);
+        return ['icomReadOn({0x1A, 0x0B})', lua.Order.HIGH];
+      }, null, {"civ": "1A 0B -> 00 (external power supply) / 01 (battery pack)", "page": spec.battery.page});
+    }
+
+    if (spec.overflow)
+    {
+      define("Meters", 'property', 'is_overflow', {
+        "message0": "Is Overflow?",
+        "output": "Boolean",
+        "tooltip": "True if the OVF indicator is on, i.e. the receiver is overloaded by a strong signal"
+      }, function(block) {
+        Studio.use(['icomReadOn']);
+        return ['icomReadOn({0x15, 0x07})', lua.Order.HIGH];
+      }, null, {"civ": "15 07 -> 00 (OVF off) / 01 (OVF on)", "page": spec.overflow.page});
+    }
+
+    meter(spec.compMeter, "0x14", "get_comp_meter", "Compression", " dB", "Reads the COMP meter while transmitting with the speech compressor (in dB)");
 
     /* ------------------------------ CW & VOICE ------------------------------ */
 
@@ -881,12 +1168,16 @@ var Icom = (function() {
       }, null, {"civ": "14 0C -> 0000 = 6 WPM ~ 0255 = 48 WPM", "page": spec.keyingSpeed.page});
     }
 
+    choices("CW & Voice");
+    scaled(spec.cwPitch, "CW & Voice", "0x09", "cw_pitch", "CW Pitch", "PITCH", 300, 900, "Hz", "CW pitch", true);
+    scaled(spec.breakInDelay, "CW & Voice", "0x0F", "break_in_delay", "Break-In Delay", "DELAY", 2, 13, "dots", "delay of the semi break-in");
+
     /* ------------------------------ GPS & TIME ------------------------------ */
 
     if (spec.position)
     {
       define("GPS & Time", 'property', 'get_gps_position', {
-        "message0": "Position %1",
+        "message0": (spec.position.label || "Position") + " %1",
         "args0": [{
           "type": "field_dropdown",
           "name": "VALUE",
@@ -951,6 +1242,8 @@ var Icom = (function() {
       }, null, null);
     }
 
+    choices("GPS & Time");
+
     /* ------------------------------ SETTINGS ------------------------------ */
 
     if (spec.functions)
@@ -992,6 +1285,72 @@ var Icom = (function() {
         Studio.use(['icomReadByte']);
         return ['icomReadByte({0x16, ' + block.getFieldValue('FUNCTION') + '}) ~= 0', lua.Order.RELATIONAL];
       }, null, {"civ": "16 xx -> 00 (off) / 01 (on)", "page": spec.functions.page});
+    }
+
+    // More levels 0 ~ 100 % of command 14 in one block with a dropdown (e.g. NR level, VOX gain)
+    if (spec.levels)
+    {
+      var levels = spec.levels.options;
+      define("Settings", 'action', 'set_level', {
+        "message0": "Set %1 to %2 %%",
+        "args0": [
+          {"type": "field_dropdown", "name": "LEVEL", "options": levels},
+          {"type": "input_value", "name": "VALUE", "check": "Number"}
+        ],
+        "inputsInline": true,
+        "tooltip": "Sets a level in %. For a PBT or a notch position 50 % is the center"
+      }, function(block) {
+        Studio.use(['icomPercent']);
+        return 'sendCommand({0x14, ' + block.getFieldValue('LEVEL') + '}, icomPercent(' + value(block, 'VALUE') + '))\n';
+      }, function(block) {
+        checkRange(block, 'VALUE', 0, 100, "The level must be between 0 and 100%");
+      }, {"civ": "14 + " + levels.map(function(o) { return civBytes(o[1]) + " (" + o[0] + ")"; }).join(" / ") + " + 0000 ~ 0255",
+          "page": spec.levels.page});
+
+      define("Settings", 'property', 'get_level', {
+        "message0": "%1",
+        "args0": [{"type": "field_dropdown", "name": "LEVEL", "options": levels}],
+        "output": "Number",
+        "tooltip": "Reads a level (in %)"
+      }, function(block) {
+        Studio.use(['icomReadPercent']);
+        return ['icomReadPercent({0x14, ' + block.getFieldValue('LEVEL') + '})', lua.Order.HIGH];
+      }, null, {"civ": "14 xx -> 0000 ~ 0255", "page": spec.levels.page});
+    }
+
+    // Any setting of the menu, by the number of the setting in the CI-V reference guide
+    if (spec.menu)
+    {
+      define("Settings", 'action', 'set_menu', {
+        "message0": "Set Menu Setting %1 to %2 %3",
+        "args0": [
+          {"type": "input_value", "name": "ITEM", "check": "Number"},
+          {"type": "input_value", "name": "VALUE", "check": "Number"},
+          {"type": "field_dropdown", "name": "BYTES", "options": [["as 00 ~ 99", "1"], ["as 0000 ~ 9999", "2"]]}
+        ],
+        "inputsInline": true,
+        "tooltip": "Changes a setting of the menu (command 1A 05). The number of the setting and the format of its value " +
+                   "(00 ~ 99 or 0000 ~ 9999) are in the CI-V reference guide of the radio"
+      }, function(block) {
+        Studio.use(['icomMenuCmd', 'numberToBcd']);
+        return 'sendCommand(icomMenuCmd(' + value(block, 'ITEM') + '), numberToBcd(' + value(block, 'VALUE') + ', ' +
+               block.getFieldValue('BYTES') + '))\n';
+      }, function(block) {
+        checkRange(block, 'ITEM', 1, 9999, "The number of the setting must be between 1 and 9999");
+      }, {"civ": "1A 05 + number of the setting (2 bytes BCD) + value (BCD)", "page": spec.menu.page});
+
+      define("Settings", 'property', 'get_menu', {
+        "message0": "Menu Setting %1",
+        "args0": [{"type": "input_value", "name": "ITEM", "check": "Number"}],
+        "inputsInline": true,
+        "output": "Number",
+        "tooltip": "Reads a setting of the menu (command 1A 05) as number"
+      }, function(block) {
+        Studio.use(['icomMenuCmd', 'icomReadNumber']);
+        return ['icomReadNumber(icomMenuCmd(' + value(block, 'ITEM') + '))', lua.Order.HIGH];
+      }, function(block) {
+        checkRange(block, 'ITEM', 1, 9999, "The number of the setting must be between 1 and 9999");
+      }, {"civ": "1A 05 + number of the setting (2 bytes BCD) -> value (BCD)", "page": spec.menu.page});
     }
 
     // Register the groups in the toolbox, in the usual order. Within a group: actions, properties, helpers

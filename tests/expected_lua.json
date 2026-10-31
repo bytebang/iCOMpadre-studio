@@ -185,365 +185,363 @@
    "uses": []
   },
   "ic705_get_af_level": {
-   "code": "ic705ReadPercent({0x14, 0x01})",
+   "code": "icomReadPercent({0x14, 0x01})",
    "uses": [
     "bcdToNumber",
-    "ic705Query",
-    "ic705ReadNumber",
-    "ic705ReadPercent"
+    "icomQuery",
+    "icomReadNumber",
+    "icomReadPercent"
    ]
   },
   "ic705_get_agc": {
-   "code": "({\"FAST\", \"MID\", \"SLOW\"})[ic705ReadByte({0x16, 0x12})] or \"\"",
+   "code": "icomName(icomQuery({0x16, 0x12}), {[1] = \"FAST\", [2] = \"MID\", [3] = \"SLOW\"}, \"\")",
    "uses": [
-    "ic705Query",
-    "ic705ReadByte"
+    "icomName",
+    "icomQuery"
    ]
   },
   "ic705_get_alc": {
-   "code": "ic705Meter({0x15, 0x13}, {{0, 0}, {120, 100}})",
+   "code": "icomMeter({0x15, 0x13}, {{0, 0}, {120, 100}})",
    "uses": [
     "bcdToNumber",
-    "ic705Meter",
-    "ic705Query",
-    "ic705ReadNumber",
-    "ic705Scale"
+    "icomMeter",
+    "icomQuery",
+    "icomReadNumber",
+    "icomScale"
    ]
   },
   "ic705_get_break_in": {
-   "code": "ic705ReadName({0x16, 0x47}, {[0] = \"OFF\", [1] = \"semi\", [2] = \"full\"})",
+   "code": "icomName(icomQuery({0x16, 0x47}), {[0] = \"OFF\", [1] = \"semi\", [2] = \"full\"}, \"\")",
    "uses": [
-    "ic705Query",
-    "ic705ReadName"
+    "icomName",
+    "icomQuery"
    ]
   },
   "ic705_get_break_in_delay": {
-   "code": "ic705ReadLevel({0x14, 0x0F}, 2, 13)",
+   "code": "icomReadLevel({0x14, 0x0F}, 2, 13)",
    "uses": [
     "bcdToNumber",
-    "ic705Query",
-    "ic705ReadLevel",
-    "ic705ReadNumber"
+    "icomQuery",
+    "icomReadLevel",
+    "icomReadNumber"
    ]
   },
   "ic705_get_clock": {
-   "code": "ic705Clock(\"time\")",
+   "code": "icomClock({0x1A, 0x05, 0x01, 0x65}, {0x1A, 0x05, 0x01, 0x66}, \"time\")",
    "uses": [
-    "ic705Clock",
-    "ic705Query"
+    "icomClock",
+    "icomQuery"
    ]
   },
   "ic705_get_comp_level": {
-   "code": "ic705ReadLevel({0x14, 0x0E}, 0, 10)",
+   "code": "icomReadLevel({0x14, 0x0E}, 0, 10)",
    "uses": [
     "bcdToNumber",
-    "ic705Query",
-    "ic705ReadLevel",
-    "ic705ReadNumber"
+    "icomQuery",
+    "icomReadLevel",
+    "icomReadNumber"
    ]
   },
   "ic705_get_comp_meter": {
-   "code": "ic705Meter({0x15, 0x14}, {{0, 0}, {130, 15}, {210, 25.5}})",
+   "code": "icomMeter({0x15, 0x14}, {{0, 0}, {130, 15}, {210, 25.5}})",
    "uses": [
     "bcdToNumber",
-    "ic705Meter",
-    "ic705Query",
-    "ic705ReadNumber",
-    "ic705Scale"
+    "icomMeter",
+    "icomQuery",
+    "icomReadNumber",
+    "icomScale"
    ]
   },
   "ic705_get_cw_pitch": {
-   "code": "math.floor(300 + ic705ReadNumber({0x14, 0x09}) * 600 / 255 + 0.5)",
+   "code": "math.floor(300 + icomReadNumber({0x14, 0x09}) * 600 / 255 + 0.5)",
    "uses": [
     "bcdToNumber",
-    "ic705Query",
-    "ic705ReadNumber"
+    "icomQuery",
+    "icomReadNumber"
    ]
   },
   "ic705_get_digital_squelch": {
-   "code": "ic705ReadName({0x16, 0x5B}, {[0] = \"OFF\", [1] = \"DSQL\", [2] = \"CSQL\"})",
+   "code": "icomName(icomQuery({0x16, 0x5B}), {[0] = \"OFF\", [1] = \"DSQL\", [2] = \"CSQL\"}, \"\")",
    "uses": [
-    "ic705Query",
-    "ic705ReadName"
+    "icomName",
+    "icomQuery"
    ]
   },
   "ic705_get_dsp_filter_type": {
-   "code": "ic705ReadName({0x16, 0x56}, {[0] = \"SHARP\", [1] = \"SOFT\"})",
+   "code": "icomName(icomQuery({0x16, 0x56}), {[0] = \"SHARP\", [1] = \"SOFT\"}, \"\")",
    "uses": [
-    "ic705Query",
-    "ic705ReadName"
+    "icomName",
+    "icomQuery"
    ]
   },
   "ic705_get_dtcs_code": {
-   "code": "ic705ReadDtcs()",
+   "code": "icomReadDtcs()",
    "uses": [
-    "ic705Query",
-    "ic705ReadDtcs"
+    "icomQuery",
+    "icomReadDtcs"
    ]
   },
   "ic705_get_gps_position": {
-   "code": "ic705GpsValue(\"lat\")",
+   "code": "icomGpsValue(\"lat\")",
    "uses": [
-    "ic705Gps",
-    "ic705GpsValue",
-    "ic705Query"
+    "icomGps",
+    "icomGpsValue",
+    "icomQuery"
    ]
   },
   "ic705_get_gps_time": {
-   "code": "ic705GpsTime(\"text\")",
+   "code": "icomGpsTime(\"text\")",
    "uses": [
-    "ic705Gps",
-    "ic705GpsTime",
-    "ic705Query",
-    "ic705UnixTime"
+    "icomGps",
+    "icomGpsTime",
+    "icomQuery",
+    "icomUnixTime"
    ]
   },
   "ic705_get_gps_tx_mode": {
-   "code": "ic705ReadName({0x16, 0x5C}, {[0] = \"OFF\", [1] = \"D-PRS\", [2] = \"NMEA\"})",
+   "code": "icomName(icomQuery({0x16, 0x5C}), {[0] = \"OFF\", [1] = \"D-PRS\", [2] = \"NMEA\"}, \"\")",
    "uses": [
-    "ic705Query",
-    "ic705ReadName"
+    "icomName",
+    "icomQuery"
    ]
   },
   "ic705_get_keying_speed": {
-   "code": "math.floor(6 + ic705ReadNumber({0x14, 0x0C}) * 42 / 255 + 0.5)",
+   "code": "math.floor(6 + icomReadNumber({0x14, 0x0C}) * 42 / 255 + 0.5)",
    "uses": [
     "bcdToNumber",
-    "ic705Query",
-    "ic705ReadNumber"
+    "icomQuery",
+    "icomReadNumber"
    ]
   },
   "ic705_get_lcd_brightness": {
-   "code": "ic705ReadPercent({0x14, 0x19})",
+   "code": "icomReadPercent({0x14, 0x19})",
    "uses": [
     "bcdToNumber",
-    "ic705Query",
-    "ic705ReadNumber",
-    "ic705ReadPercent"
+    "icomQuery",
+    "icomReadNumber",
+    "icomReadPercent"
    ]
   },
   "ic705_get_level": {
-   "code": "ic705ReadPercent({0x14, 0x06})",
+   "code": "icomReadPercent({0x14, 0x06})",
    "uses": [
     "bcdToNumber",
-    "ic705Query",
-    "ic705ReadNumber",
-    "ic705ReadPercent"
+    "icomQuery",
+    "icomReadNumber",
+    "icomReadPercent"
    ]
   },
   "ic705_get_menu": {
-   "code": "ic705ReadNumber(ic705MenuCmd(0))",
+   "code": "icomReadNumber(icomMenuCmd(0))",
    "uses": [
     "bcdToNumber",
-    "ic705MenuCmd",
-    "ic705Query",
-    "ic705ReadNumber",
+    "icomMenuCmd",
+    "icomQuery",
+    "icomReadNumber",
     "numberToBcd"
    ]
   },
   "ic705_get_mic_gain": {
-   "code": "ic705ReadPercent({0x14, 0x0B})",
+   "code": "icomReadPercent({0x14, 0x0B})",
    "uses": [
     "bcdToNumber",
-    "ic705Query",
-    "ic705ReadNumber",
-    "ic705ReadPercent"
+    "icomQuery",
+    "icomReadNumber",
+    "icomReadPercent"
    ]
   },
   "ic705_get_notch_width": {
-   "code": "ic705ReadName({0x16, 0x57}, {[0] = \"WIDE\", [1] = \"MID\", [2] = \"NAR\"})",
+   "code": "icomName(icomQuery({0x16, 0x57}), {[0] = \"WIDE\", [1] = \"MID\", [2] = \"NAR\"}, \"\")",
    "uses": [
-    "ic705Query",
-    "ic705ReadName"
+    "icomName",
+    "icomQuery"
    ]
   },
   "ic705_get_operating_frequency": {
-   "code": "ic705ReadFrequency()",
+   "code": "icomReadFrequency()",
    "uses": [
     "frequencyAsNumber",
-    "ic705Query",
-    "ic705ReadFrequency"
+    "icomQuery",
+    "icomReadFrequency"
    ]
   },
   "ic705_get_operating_mode": {
-   "code": "getOperatingModeString(ic705Query({0x04}))",
+   "code": "icomName(icomQuery({0x04}), {[0] = \"LSB\", [1] = \"USB\", [2] = \"AM\", [3] = \"CW\", [4] = \"RTTY\", [5] = \"FM\", [6] = \"WFM\", [7] = \"CW-R\", [8] = \"RTTY-R\", [23] = \"DV\"}, \"Unknown\")",
    "uses": [
-    "getOperatingModeString",
-    "ic705Query"
+    "icomName",
+    "icomQuery"
    ]
   },
   "ic705_get_power_output": {
-   "code": "ic705Meter({0x15, 0x11}, {{0, 0}, {143, 50}, {213, 100}})",
+   "code": "icomMeter({0x15, 0x11}, {{0, 0}, {143, 50}, {213, 100}})",
    "uses": [
     "bcdToNumber",
-    "ic705Meter",
-    "ic705Query",
-    "ic705ReadNumber",
-    "ic705Scale"
+    "icomMeter",
+    "icomQuery",
+    "icomReadNumber",
+    "icomScale"
    ]
   },
   "ic705_get_preamp": {
-   "code": "({[0] = \"OFF\", [1] = \"P.AMP1\", [2] = \"P.AMP2\"})[ic705ReadByte({0x16, 0x02})] or \"OFF\"",
+   "code": "icomName(icomQuery({0x16, 0x02}), {[0] = \"OFF\", [1] = \"P.AMP1\", [2] = \"P.AMP2\"}, \"OFF\")",
    "uses": [
-    "ic705Query",
-    "ic705ReadByte"
+    "icomName",
+    "icomQuery"
    ]
   },
   "ic705_get_rf_gain": {
-   "code": "ic705ReadPercent({0x14, 0x02})",
+   "code": "icomReadPercent({0x14, 0x02})",
    "uses": [
     "bcdToNumber",
-    "ic705Query",
-    "ic705ReadNumber",
-    "ic705ReadPercent"
+    "icomQuery",
+    "icomReadNumber",
+    "icomReadPercent"
    ]
   },
   "ic705_get_rf_power": {
-   "code": "ic705ReadPercent({0x14, 0x0A})",
+   "code": "icomReadPercent({0x14, 0x0A})",
    "uses": [
     "bcdToNumber",
-    "ic705Query",
-    "ic705ReadNumber",
-    "ic705ReadPercent"
+    "icomQuery",
+    "icomReadNumber",
+    "icomReadPercent"
    ]
   },
   "ic705_get_s_meter": {
-   "code": "math.min(9, ic705Meter({0x15, 0x02}, {{0, 0}, {120, 9}}))",
+   "code": "math.min(9, icomMeter({0x15, 0x02}, {{0, 0}, {120, 9}}))",
    "uses": [
     "bcdToNumber",
-    "ic705Meter",
-    "ic705Query",
-    "ic705ReadNumber",
-    "ic705Scale"
+    "icomMeter",
+    "icomQuery",
+    "icomReadNumber",
+    "icomScale"
    ]
   },
   "ic705_get_squelch_level": {
-   "code": "ic705ReadPercent({0x14, 0x03})",
+   "code": "icomReadPercent({0x14, 0x03})",
    "uses": [
     "bcdToNumber",
-    "ic705Query",
-    "ic705ReadNumber",
-    "ic705ReadPercent"
+    "icomQuery",
+    "icomReadNumber",
+    "icomReadPercent"
    ]
   },
   "ic705_get_ssb_tx_bandwidth": {
-   "code": "ic705ReadName({0x16, 0x58}, {[0] = \"WIDE\", [1] = \"MID\", [2] = \"NAR\"})",
+   "code": "icomName(icomQuery({0x16, 0x58}), {[0] = \"WIDE\", [1] = \"MID\", [2] = \"NAR\"}, \"\")",
    "uses": [
-    "ic705Query",
-    "ic705ReadName"
+    "icomName",
+    "icomQuery"
    ]
   },
   "ic705_get_supply_current": {
-   "code": "ic705Meter({0x15, 0x16}, {{0, 0}, {121, 2}, {241, 4}})",
+   "code": "icomMeter({0x15, 0x16}, {{0, 0}, {121, 2}, {241, 4}})",
    "uses": [
     "bcdToNumber",
-    "ic705Meter",
-    "ic705Query",
-    "ic705ReadNumber",
-    "ic705Scale"
+    "icomMeter",
+    "icomQuery",
+    "icomReadNumber",
+    "icomScale"
    ]
   },
   "ic705_get_supply_voltage": {
-   "code": "ic705Meter({0x15, 0x15}, {{0, 0}, {75, 5}, {241, 16}})",
+   "code": "icomMeter({0x15, 0x15}, {{0, 0}, {75, 5}, {241, 16}})",
    "uses": [
     "bcdToNumber",
-    "ic705Meter",
-    "ic705Query",
-    "ic705ReadNumber",
-    "ic705Scale"
+    "icomMeter",
+    "icomQuery",
+    "icomReadNumber",
+    "icomScale"
    ]
   },
   "ic705_get_swr_meter_level": {
-   "code": "ic705Meter({0x15, 0x12}, {{0, 1.0}, {48, 1.5}, {80, 2.0}, {120, 3.0}})",
+   "code": "icomMeter({0x15, 0x12}, {{0, 1}, {48, 1.5}, {80, 2}, {120, 3}})",
    "uses": [
     "bcdToNumber",
-    "ic705Meter",
-    "ic705Query",
-    "ic705ReadNumber",
-    "ic705Scale"
+    "icomMeter",
+    "icomQuery",
+    "icomReadNumber",
+    "icomScale"
    ]
   },
   "ic705_get_tone_function": {
-   "code": "ic705ReadName({0x16, 0x5D}, {[0] = \"OFF\", [1] = \"TONE\", [2] = \"TSQL\", [3] = \"DTCS\", [6] = \"DTCS(T)\", [7] = \"TONE(T)/DTCS(R)\", [8] = \"DTCS(T)/TSQL(R)\", [9] = \"TONE(T)/TSQL(R)\"})",
+   "code": "icomName(icomQuery({0x16, 0x5D}), {[0] = \"OFF\", [1] = \"TONE\", [2] = \"TSQL\", [3] = \"DTCS\", [6] = \"DTCS(T)\", [7] = \"TONE(T)/DTCS(R)\", [8] = \"DTCS(T)/TSQL(R)\", [9] = \"TONE(T)/TSQL(R)\"}, \"\")",
    "uses": [
-    "ic705Query",
-    "ic705ReadName"
+    "icomName",
+    "icomQuery"
    ]
   },
   "ic705_is_attenuator_on": {
-   "code": "ic705ReadByte({0x11}) == 0x20",
+   "code": "icomReadByte({0x11}) == 0x20",
    "uses": [
-    "ic705Query",
-    "ic705ReadByte"
+    "icomQuery",
+    "icomReadByte"
    ]
   },
   "ic705_is_data_mode": {
-   "code": "ic705ReadOn({0x1A, 0x06})",
+   "code": "icomReadByte({0x1A, 0x06}) ~= 0",
    "uses": [
-    "ic705Query",
-    "ic705ReadByte",
-    "ic705ReadOn"
+    "icomQuery",
+    "icomReadByte"
    ]
   },
   "ic705_is_function_on": {
-   "code": "ic705ReadOn({0x16, 0x22})",
+   "code": "icomReadByte({0x16, 0x22}) ~= 0",
    "uses": [
-    "ic705Query",
-    "ic705ReadByte",
-    "ic705ReadOn"
+    "icomQuery",
+    "icomReadByte"
    ]
   },
   "ic705_is_on_battery": {
-   "code": "ic705ReadOn({0x1A, 0x0B})",
+   "code": "icomReadOn({0x1A, 0x0B})",
    "uses": [
-    "ic705Query",
-    "ic705ReadByte",
-    "ic705ReadOn"
+    "icomQuery",
+    "icomReadByte",
+    "icomReadOn"
    ]
   },
   "ic705_is_overflow": {
-   "code": "ic705ReadOn({0x15, 0x07})",
+   "code": "icomReadOn({0x15, 0x07})",
    "uses": [
-    "ic705Query",
-    "ic705ReadByte",
-    "ic705ReadOn"
+    "icomQuery",
+    "icomReadByte",
+    "icomReadOn"
    ]
   },
   "ic705_is_split": {
-   "code": "ic705ReadByte({0x0F}) == 1",
+   "code": "icomReadByte({0x0F}) == 1",
    "uses": [
-    "ic705Query",
-    "ic705ReadByte"
+    "icomQuery",
+    "icomReadByte"
    ]
   },
   "ic705_is_squelch_open": {
-   "code": "ic705ReadOn({0x15, 0x01})",
+   "code": "icomReadOn({0x15, 0x01})",
    "uses": [
-    "ic705Query",
-    "ic705ReadByte",
-    "ic705ReadOn"
+    "icomQuery",
+    "icomReadByte",
+    "icomReadOn"
    ]
   },
   "ic705_is_tone_squelch_open": {
-   "code": "ic705ReadOn({0x15, 0x05})",
+   "code": "icomReadOn({0x15, 0x05})",
    "uses": [
-    "ic705Query",
-    "ic705ReadByte",
-    "ic705ReadOn"
+    "icomQuery",
+    "icomReadByte",
+    "icomReadOn"
    ]
   },
   "ic705_is_transmitting": {
-   "code": "ic705ReadOn({0x1C, 0x00})",
+   "code": "icomReadOn({0x1C, 0x00})",
    "uses": [
-    "ic705Query",
-    "ic705ReadByte",
-    "ic705ReadOn"
+    "icomQuery",
+    "icomReadByte",
+    "icomReadOn"
    ]
   },
   "ic705_locator": {
-   "code": "ic705Locator(0, 0)",
+   "code": "icomLocator(0, 0)",
    "uses": [
-    "ic705Locator"
+    "icomLocator"
    ]
   },
   "ic705_play_voice_memory": {
@@ -569,15 +567,15 @@
    "uses": []
   },
   "ic705_send_cw": {
-   "code": "sendCommand({0x17}, ic705TextBytes(''))\n",
+   "code": "sendCommand({0x17}, icomTextBytes(''))\n",
    "uses": [
-    "ic705TextBytes"
+    "icomTextBytes"
    ]
   },
   "ic705_set_af_level": {
-   "code": "sendCommand({0x14, 0x01}, ic705Percent(0))\n",
+   "code": "sendCommand({0x14, 0x01}, icomPercent(0))\n",
    "uses": [
-    "ic705Percent",
+    "icomPercent",
     "numberToBcd"
    ]
   },
@@ -586,7 +584,7 @@
    "uses": []
   },
   "ic705_set_attenuator": {
-   "code": "sendCommand({0x11, 0x20})\n",
+   "code": "sendCommand({0x11}, {0x20})\n",
    "uses": []
   },
   "ic705_set_break_in": {
@@ -594,16 +592,16 @@
    "uses": []
   },
   "ic705_set_break_in_delay": {
-   "code": "sendCommand({0x14, 0x0F}, ic705Level(0, 2, 13))\n",
+   "code": "sendCommand({0x14, 0x0F}, icomLevel(0, 2, 13))\n",
    "uses": [
-    "ic705Level",
+    "icomLevel",
     "numberToBcd"
    ]
   },
   "ic705_set_comp_level": {
-   "code": "sendCommand({0x14, 0x0E}, ic705Level(0, 0, 10))\n",
+   "code": "sendCommand({0x14, 0x0E}, icomLevel(0, 0, 10))\n",
    "uses": [
-    "ic705Level",
+    "icomLevel",
     "numberToBcd"
    ]
   },
@@ -614,9 +612,9 @@
    ]
   },
   "ic705_set_cw_pitch": {
-   "code": "sendCommand({0x14, 0x09}, ic705Level(0, 300, 900))\n",
+   "code": "sendCommand({0x14, 0x09}, icomLevel(0, 300, 900))\n",
    "uses": [
-    "ic705Level",
+    "icomLevel",
     "numberToBcd"
    ]
   },
@@ -633,9 +631,9 @@
    "uses": []
   },
   "ic705_set_dtcs_code": {
-   "code": "sendCommand({0x1B, 0x02}, ic705DtcsData(0, 0x00))\n",
+   "code": "sendCommand({0x1B, 0x02}, icomDtcsData(0, 0x00))\n",
    "uses": [
-    "ic705DtcsData"
+    "icomDtcsData"
    ]
   },
   "ic705_set_frequency": {
@@ -649,37 +647,37 @@
    "uses": []
   },
   "ic705_set_keying_speed": {
-   "code": "sendCommand({0x14, 0x0C}, ic705Wpm(0))\n",
+   "code": "sendCommand({0x14, 0x0C}, icomWpm(0))\n",
    "uses": [
-    "ic705Wpm",
+    "icomWpm",
     "numberToBcd"
    ]
   },
   "ic705_set_lcd_brightness": {
-   "code": "sendCommand({0x14, 0x19}, ic705Percent(0))\n",
+   "code": "sendCommand({0x14, 0x19}, icomPercent(0))\n",
    "uses": [
-    "ic705Percent",
+    "icomPercent",
     "numberToBcd"
    ]
   },
   "ic705_set_level": {
-   "code": "sendCommand({0x14, 0x06}, ic705Percent(0))\n",
+   "code": "sendCommand({0x14, 0x06}, icomPercent(0))\n",
    "uses": [
-    "ic705Percent",
+    "icomPercent",
     "numberToBcd"
    ]
   },
   "ic705_set_menu": {
-   "code": "sendCommand(ic705MenuCmd(0), numberToBcd(0, 1))\n",
+   "code": "sendCommand(icomMenuCmd(0), numberToBcd(0, 1))\n",
    "uses": [
-    "ic705MenuCmd",
+    "icomMenuCmd",
     "numberToBcd"
    ]
   },
   "ic705_set_mic_gain": {
-   "code": "sendCommand({0x14, 0x0B}, ic705Percent(0))\n",
+   "code": "sendCommand({0x14, 0x0B}, icomPercent(0))\n",
    "uses": [
-    "ic705Percent",
+    "icomPercent",
     "numberToBcd"
    ]
   },
@@ -700,16 +698,16 @@
    "uses": []
   },
   "ic705_set_rf_gain": {
-   "code": "sendCommand({0x14, 0x02}, ic705Percent(0))\n",
+   "code": "sendCommand({0x14, 0x02}, icomPercent(0))\n",
    "uses": [
-    "ic705Percent",
+    "icomPercent",
     "numberToBcd"
    ]
   },
   "ic705_set_rf_power": {
-   "code": "sendCommand({0x14, 0x0A}, ic705Percent(0))\n",
+   "code": "sendCommand({0x14, 0x0A}, icomPercent(0))\n",
    "uses": [
-    "ic705Percent",
+    "icomPercent",
     "numberToBcd"
    ]
   },
@@ -718,10 +716,10 @@
    "uses": []
   },
   "ic705_set_rit_offset": {
-   "code": "sendCommand({0x21, 0x00}, ic705RitData(0))\n",
+   "code": "sendCommand({0x21, 0x00}, icomRitData(0))\n",
    "uses": [
     "frequencyToBcd",
-    "ic705RitData"
+    "icomRitData"
    ]
   },
   "ic705_set_split": {
@@ -729,9 +727,9 @@
    "uses": []
   },
   "ic705_set_squelch_level": {
-   "code": "sendCommand({0x14, 0x03}, ic705Percent(0))\n",
+   "code": "sendCommand({0x14, 0x03}, icomPercent(0))\n",
    "uses": [
-    "ic705Percent",
+    "icomPercent",
     "numberToBcd"
    ]
   },
@@ -791,12 +789,38 @@
     "icomQuery"
    ]
   },
+  "ic718_get_break_in_delay": {
+   "code": "icomReadLevel({0x14, 0x0F}, 2, 13)",
+   "uses": [
+    "bcdToNumber",
+    "icomQuery",
+    "icomReadLevel",
+    "icomReadNumber"
+   ]
+  },
+  "ic718_get_cw_pitch": {
+   "code": "math.floor(300 + icomReadNumber({0x14, 0x09}) * 600 / 255 + 0.5)",
+   "uses": [
+    "bcdToNumber",
+    "icomQuery",
+    "icomReadNumber"
+   ]
+  },
   "ic718_get_keying_speed": {
    "code": "math.floor(6 + icomReadNumber({0x14, 0x0C}) * 42 / 255 + 0.5)",
    "uses": [
     "bcdToNumber",
     "icomQuery",
     "icomReadNumber"
+   ]
+  },
+  "ic718_get_level": {
+   "code": "icomReadPercent({0x14, 0x06})",
+   "uses": [
+    "bcdToNumber",
+    "icomQuery",
+    "icomReadNumber",
+    "icomReadPercent"
    ]
   },
   "ic718_get_mic_gain": {
@@ -914,6 +938,20 @@
    "code": "sendCommand({0x11}, {0x00})\n",
    "uses": []
   },
+  "ic718_set_break_in_delay": {
+   "code": "sendCommand({0x14, 0x0F}, icomLevel(0, 2, 13))\n",
+   "uses": [
+    "icomLevel",
+    "numberToBcd"
+   ]
+  },
+  "ic718_set_cw_pitch": {
+   "code": "sendCommand({0x14, 0x09}, icomLevel(0, 300, 900))\n",
+   "uses": [
+    "icomLevel",
+    "numberToBcd"
+   ]
+  },
   "ic718_set_frequency": {
    "code": "sendCommand({0x05}, frequencyToBcd(0 * 1, 5))\n",
    "uses": [
@@ -924,6 +962,13 @@
    "code": "sendCommand({0x14, 0x0C}, icomWpm(0))\n",
    "uses": [
     "icomWpm",
+    "numberToBcd"
+   ]
+  },
+  "ic718_set_level": {
+   "code": "sendCommand({0x14, 0x06}, icomPercent(0))\n",
+   "uses": [
+    "icomPercent",
     "numberToBcd"
    ]
   },
@@ -1016,10 +1061,60 @@
     "icomQuery"
    ]
   },
+  "ic7610_get_break_in": {
+   "code": "icomName(icomQuery({0x16, 0x47}), {[0] = \"OFF\", [1] = \"semi\", [2] = \"full\"}, \"\")",
+   "uses": [
+    "icomName",
+    "icomQuery"
+   ]
+  },
+  "ic7610_get_break_in_delay": {
+   "code": "icomReadLevel({0x14, 0x0F}, 2, 13)",
+   "uses": [
+    "bcdToNumber",
+    "icomQuery",
+    "icomReadLevel",
+    "icomReadNumber"
+   ]
+  },
   "ic7610_get_clock": {
    "code": "icomClock({0x1A, 0x05, 0x01, 0x58}, {0x1A, 0x05, 0x01, 0x59}, \"time\")",
    "uses": [
     "icomClock",
+    "icomQuery"
+   ]
+  },
+  "ic7610_get_comp_level": {
+   "code": "icomReadLevel({0x14, 0x0E}, 0, 10)",
+   "uses": [
+    "bcdToNumber",
+    "icomQuery",
+    "icomReadLevel",
+    "icomReadNumber"
+   ]
+  },
+  "ic7610_get_comp_meter": {
+   "code": "icomMeter({0x15, 0x14}, {{0, 0}, {130, 15}, {241, 30}})",
+   "uses": [
+    "bcdToNumber",
+    "icomMeter",
+    "icomQuery",
+    "icomReadNumber",
+    "icomScale"
+   ]
+  },
+  "ic7610_get_cw_pitch": {
+   "code": "math.floor(300 + icomReadNumber({0x14, 0x09}) * 600 / 255 + 0.5)",
+   "uses": [
+    "bcdToNumber",
+    "icomQuery",
+    "icomReadNumber"
+   ]
+  },
+  "ic7610_get_dsp_filter_type": {
+   "code": "icomName(icomQuery({0x16, 0x56}), {[0] = \"SHARP\", [1] = \"SOFT\"}, \"\")",
+   "uses": [
+    "icomName",
     "icomQuery"
    ]
   },
@@ -1040,6 +1135,25 @@
     "icomReadPercent"
    ]
   },
+  "ic7610_get_level": {
+   "code": "icomReadPercent({0x14, 0x06})",
+   "uses": [
+    "bcdToNumber",
+    "icomQuery",
+    "icomReadNumber",
+    "icomReadPercent"
+   ]
+  },
+  "ic7610_get_menu": {
+   "code": "icomReadNumber(icomMenuCmd(0))",
+   "uses": [
+    "bcdToNumber",
+    "icomMenuCmd",
+    "icomQuery",
+    "icomReadNumber",
+    "numberToBcd"
+   ]
+  },
   "ic7610_get_mic_gain": {
    "code": "icomReadPercent({0x14, 0x0B})",
    "uses": [
@@ -1047,6 +1161,13 @@
     "icomQuery",
     "icomReadNumber",
     "icomReadPercent"
+   ]
+  },
+  "ic7610_get_notch_width": {
+   "code": "icomName(icomQuery({0x16, 0x57}), {[0] = \"WIDE\", [1] = \"MID\", [2] = \"NAR\"}, \"\")",
+   "uses": [
+    "icomName",
+    "icomQuery"
    ]
   },
   "ic7610_get_operating_frequency": {
@@ -1118,6 +1239,13 @@
     "icomReadPercent"
    ]
   },
+  "ic7610_get_ssb_tx_bandwidth": {
+   "code": "icomName(icomQuery({0x16, 0x58}), {[0] = \"WIDE\", [1] = \"MID\", [2] = \"NAR\"}, \"\")",
+   "uses": [
+    "icomName",
+    "icomQuery"
+   ]
+  },
   "ic7610_get_supply_current": {
    "code": "icomMeter({0x15, 0x16}, {{0, 0}, {77, 10}, {165, 20}, {241, 30}})",
    "uses": [
@@ -1170,6 +1298,14 @@
     "icomReadByte"
    ]
   },
+  "ic7610_is_overflow": {
+   "code": "icomReadOn({0x15, 0x07})",
+   "uses": [
+    "icomQuery",
+    "icomReadByte",
+    "icomReadOn"
+   ]
+  },
   "ic7610_is_split": {
    "code": "icomReadByte({0x0F}) == 1",
    "uses": [
@@ -1179,6 +1315,14 @@
   },
   "ic7610_is_squelch_open": {
    "code": "icomReadOn({0x15, 0x01})",
+   "uses": [
+    "icomQuery",
+    "icomReadByte",
+    "icomReadOn"
+   ]
+  },
+  "ic7610_is_tone_squelch_open": {
+   "code": "icomReadOn({0x15, 0x05})",
    "uses": [
     "icomQuery",
     "icomReadByte",
@@ -1232,8 +1376,37 @@
    "code": "sendCommand({0x11}, {0x00})\n",
    "uses": []
   },
+  "ic7610_set_break_in": {
+   "code": "sendCommand({0x16, 0x47}, {0x00})\n",
+   "uses": []
+  },
+  "ic7610_set_break_in_delay": {
+   "code": "sendCommand({0x14, 0x0F}, icomLevel(0, 2, 13))\n",
+   "uses": [
+    "icomLevel",
+    "numberToBcd"
+   ]
+  },
+  "ic7610_set_comp_level": {
+   "code": "sendCommand({0x14, 0x0E}, icomLevel(0, 0, 10))\n",
+   "uses": [
+    "icomLevel",
+    "numberToBcd"
+   ]
+  },
+  "ic7610_set_cw_pitch": {
+   "code": "sendCommand({0x14, 0x09}, icomLevel(0, 300, 900))\n",
+   "uses": [
+    "icomLevel",
+    "numberToBcd"
+   ]
+  },
   "ic7610_set_data_mode": {
    "code": "sendCommand({0x1A, 0x06}, {0x01, 0x01})\n",
+   "uses": []
+  },
+  "ic7610_set_dsp_filter_type": {
+   "code": "sendCommand({0x16, 0x56}, {0x00})\n",
    "uses": []
   },
   "ic7610_set_dualwatch": {
@@ -1260,12 +1433,30 @@
     "numberToBcd"
    ]
   },
+  "ic7610_set_level": {
+   "code": "sendCommand({0x14, 0x06}, icomPercent(0))\n",
+   "uses": [
+    "icomPercent",
+    "numberToBcd"
+   ]
+  },
+  "ic7610_set_menu": {
+   "code": "sendCommand(icomMenuCmd(0), numberToBcd(0, 1))\n",
+   "uses": [
+    "icomMenuCmd",
+    "numberToBcd"
+   ]
+  },
   "ic7610_set_mic_gain": {
    "code": "sendCommand({0x14, 0x0B}, icomPercent(0))\n",
    "uses": [
     "icomPercent",
     "numberToBcd"
    ]
+  },
+  "ic7610_set_notch_width": {
+   "code": "sendCommand({0x16, 0x57}, {0x00})\n",
+   "uses": []
   },
   "ic7610_set_operating_mode": {
    "code": "sendCommand({0x06}, {0x00})\n",
@@ -1315,6 +1506,10 @@
     "numberToBcd"
    ]
   },
+  "ic7610_set_ssb_tx_bandwidth": {
+   "code": "sendCommand({0x16, 0x58}, {0x00})\n",
+   "uses": []
+  },
   "ic7610_set_tone_frequency": {
    "code": "sendCommand({0x1B, 0x00}, numberToBcd(math.floor(0 * 10 + 0.5), 3))\n",
    "uses": [
@@ -1324,6 +1519,12 @@
   "ic7610_set_transmit": {
    "code": "sendCommand({0x1C, 0x00}, {0x01})\n",
    "uses": []
+  },
+  "ic7610_set_tsql_frequency": {
+   "code": "sendCommand({0x1B, 0x01}, numberToBcd(math.floor(0 * 10 + 0.5), 3))\n",
+   "uses": [
+    "numberToBcd"
+   ]
   },
   "ic7610_set_tuning_step": {
    "code": "sendCommand({0x10, 0x00})\n",
@@ -1378,10 +1579,60 @@
     "icomQuery"
    ]
   },
+  "ic7851_get_break_in": {
+   "code": "icomName(icomQuery({0x16, 0x47}), {[0] = \"OFF\", [1] = \"semi\", [2] = \"full\"}, \"\")",
+   "uses": [
+    "icomName",
+    "icomQuery"
+   ]
+  },
+  "ic7851_get_break_in_delay": {
+   "code": "icomReadLevel({0x14, 0x0F}, 2, 13)",
+   "uses": [
+    "bcdToNumber",
+    "icomQuery",
+    "icomReadLevel",
+    "icomReadNumber"
+   ]
+  },
   "ic7851_get_clock": {
    "code": "icomClock({0x1A, 0x05, 0x00, 0x95}, {0x1A, 0x05, 0x00, 0x96}, \"time\")",
    "uses": [
     "icomClock",
+    "icomQuery"
+   ]
+  },
+  "ic7851_get_comp_level": {
+   "code": "icomReadLevel({0x14, 0x0E}, 0, 10)",
+   "uses": [
+    "bcdToNumber",
+    "icomQuery",
+    "icomReadLevel",
+    "icomReadNumber"
+   ]
+  },
+  "ic7851_get_comp_meter": {
+   "code": "icomMeter({0x15, 0x14}, {{0, 0}, {130, 15}, {241, 30}})",
+   "uses": [
+    "bcdToNumber",
+    "icomMeter",
+    "icomQuery",
+    "icomReadNumber",
+    "icomScale"
+   ]
+  },
+  "ic7851_get_cw_pitch": {
+   "code": "math.floor(300 + icomReadNumber({0x14, 0x09}) * 600 / 255 + 0.5)",
+   "uses": [
+    "bcdToNumber",
+    "icomQuery",
+    "icomReadNumber"
+   ]
+  },
+  "ic7851_get_dsp_filter_type": {
+   "code": "icomName(icomQuery({0x16, 0x56}), {[0] = \"SHARP\", [1] = \"SOFT\"}, \"\")",
+   "uses": [
+    "icomName",
     "icomQuery"
    ]
   },
@@ -1402,6 +1653,25 @@
     "icomReadPercent"
    ]
   },
+  "ic7851_get_level": {
+   "code": "icomReadPercent({0x14, 0x06})",
+   "uses": [
+    "bcdToNumber",
+    "icomQuery",
+    "icomReadNumber",
+    "icomReadPercent"
+   ]
+  },
+  "ic7851_get_menu": {
+   "code": "icomReadNumber(icomMenuCmd(0))",
+   "uses": [
+    "bcdToNumber",
+    "icomMenuCmd",
+    "icomQuery",
+    "icomReadNumber",
+    "numberToBcd"
+   ]
+  },
   "ic7851_get_mic_gain": {
    "code": "icomReadPercent({0x14, 0x0B})",
    "uses": [
@@ -1409,6 +1679,13 @@
     "icomQuery",
     "icomReadNumber",
     "icomReadPercent"
+   ]
+  },
+  "ic7851_get_notch_width": {
+   "code": "icomName(icomQuery({0x16, 0x57}), {[0] = \"WIDE\", [1] = \"MID\", [2] = \"NAR\"}, \"\")",
+   "uses": [
+    "icomName",
+    "icomQuery"
    ]
   },
   "ic7851_get_operating_frequency": {
@@ -1480,6 +1757,13 @@
     "icomReadPercent"
    ]
   },
+  "ic7851_get_ssb_tx_bandwidth": {
+   "code": "icomName(icomQuery({0x16, 0x58}), {[0] = \"WIDE\", [1] = \"MID\", [2] = \"NAR\"}, \"\")",
+   "uses": [
+    "icomName",
+    "icomQuery"
+   ]
+  },
   "ic7851_get_supply_current": {
    "code": "icomMeter({0x15, 0x16}, {{0, 0}, {165, 10}, {241, 15}})",
    "uses": [
@@ -1547,6 +1831,14 @@
     "icomReadOn"
    ]
   },
+  "ic7851_is_tone_squelch_open": {
+   "code": "icomReadOn({0x15, 0x05})",
+   "uses": [
+    "icomQuery",
+    "icomReadByte",
+    "icomReadOn"
+   ]
+  },
   "ic7851_is_transmitting": {
    "code": "icomReadOn({0x1C, 0x00})",
    "uses": [
@@ -1594,8 +1886,37 @@
    "code": "sendCommand({0x11}, {0x00})\n",
    "uses": []
   },
+  "ic7851_set_break_in": {
+   "code": "sendCommand({0x16, 0x47}, {0x00})\n",
+   "uses": []
+  },
+  "ic7851_set_break_in_delay": {
+   "code": "sendCommand({0x14, 0x0F}, icomLevel(0, 2, 13))\n",
+   "uses": [
+    "icomLevel",
+    "numberToBcd"
+   ]
+  },
+  "ic7851_set_comp_level": {
+   "code": "sendCommand({0x14, 0x0E}, icomLevel(0, 0, 10))\n",
+   "uses": [
+    "icomLevel",
+    "numberToBcd"
+   ]
+  },
+  "ic7851_set_cw_pitch": {
+   "code": "sendCommand({0x14, 0x09}, icomLevel(0, 300, 900))\n",
+   "uses": [
+    "icomLevel",
+    "numberToBcd"
+   ]
+  },
   "ic7851_set_data_mode": {
    "code": "sendCommand({0x1A, 0x06}, {0x01, 0x01})\n",
+   "uses": []
+  },
+  "ic7851_set_dsp_filter_type": {
+   "code": "sendCommand({0x16, 0x56}, {0x00})\n",
    "uses": []
   },
   "ic7851_set_dualwatch": {
@@ -1622,12 +1943,30 @@
     "numberToBcd"
    ]
   },
+  "ic7851_set_level": {
+   "code": "sendCommand({0x14, 0x06}, icomPercent(0))\n",
+   "uses": [
+    "icomPercent",
+    "numberToBcd"
+   ]
+  },
+  "ic7851_set_menu": {
+   "code": "sendCommand(icomMenuCmd(0), numberToBcd(0, 1))\n",
+   "uses": [
+    "icomMenuCmd",
+    "numberToBcd"
+   ]
+  },
   "ic7851_set_mic_gain": {
    "code": "sendCommand({0x14, 0x0B}, icomPercent(0))\n",
    "uses": [
     "icomPercent",
     "numberToBcd"
    ]
+  },
+  "ic7851_set_notch_width": {
+   "code": "sendCommand({0x16, 0x57}, {0x00})\n",
+   "uses": []
   },
   "ic7851_set_operating_mode": {
    "code": "sendCommand({0x06}, {0x00})\n",
@@ -1676,6 +2015,10 @@
     "icomPercent",
     "numberToBcd"
    ]
+  },
+  "ic7851_set_ssb_tx_bandwidth": {
+   "code": "sendCommand({0x16, 0x58}, {0x00})\n",
+   "uses": []
   },
   "ic7851_set_tone_frequency": {
    "code": "sendCommand({0x1B, 0x00}, numberToBcd(math.floor(0 * 10 + 0.5), 3))\n",
@@ -1874,11 +2217,75 @@
     "icomQuery"
    ]
   },
+  "ic9700_get_break_in": {
+   "code": "icomName(icomQuery({0x16, 0x47}), {[0] = \"OFF\", [1] = \"semi\", [2] = \"full\"}, \"\")",
+   "uses": [
+    "icomName",
+    "icomQuery"
+   ]
+  },
+  "ic9700_get_break_in_delay": {
+   "code": "icomReadLevel({0x14, 0x0F}, 2, 13)",
+   "uses": [
+    "bcdToNumber",
+    "icomQuery",
+    "icomReadLevel",
+    "icomReadNumber"
+   ]
+  },
   "ic9700_get_clock": {
    "code": "icomClock({0x1A, 0x05, 0x01, 0x79}, {0x1A, 0x05, 0x01, 0x80}, \"time\")",
    "uses": [
     "icomClock",
     "icomQuery"
+   ]
+  },
+  "ic9700_get_comp_level": {
+   "code": "icomReadLevel({0x14, 0x0E}, 0, 10)",
+   "uses": [
+    "bcdToNumber",
+    "icomQuery",
+    "icomReadLevel",
+    "icomReadNumber"
+   ]
+  },
+  "ic9700_get_comp_meter": {
+   "code": "icomMeter({0x15, 0x14}, {{0, 0}, {130, 15}, {210, 25.5}})",
+   "uses": [
+    "bcdToNumber",
+    "icomMeter",
+    "icomQuery",
+    "icomReadNumber",
+    "icomScale"
+   ]
+  },
+  "ic9700_get_cw_pitch": {
+   "code": "math.floor(300 + icomReadNumber({0x14, 0x09}) * 600 / 255 + 0.5)",
+   "uses": [
+    "bcdToNumber",
+    "icomQuery",
+    "icomReadNumber"
+   ]
+  },
+  "ic9700_get_digital_squelch": {
+   "code": "icomName(icomQuery({0x16, 0x5B}), {[0] = \"OFF\", [1] = \"DSQL\", [2] = \"CSQL\"}, \"\")",
+   "uses": [
+    "icomName",
+    "icomQuery"
+   ]
+  },
+  "ic9700_get_dsp_filter_type": {
+   "code": "icomName(icomQuery({0x16, 0x56}), {[0] = \"SHARP\", [1] = \"SOFT\"}, \"\")",
+   "uses": [
+    "icomName",
+    "icomQuery"
+   ]
+  },
+  "ic9700_get_dtcs_code": {
+   "code": "icomReadDtcs()",
+   "uses": [
+    "icomQuery",
+    "icomReadDtcs"
    ]
   },
   "ic9700_get_gps_position": {
@@ -1898,6 +2305,13 @@
     "icomUnixTime"
    ]
   },
+  "ic9700_get_gps_tx_mode": {
+   "code": "icomName(icomQuery({0x16, 0x5C}), {[0] = \"OFF\", [1] = \"D-PRS\", [2] = \"NMEA\"}, \"\")",
+   "uses": [
+    "icomName",
+    "icomQuery"
+   ]
+  },
   "ic9700_get_keying_speed": {
    "code": "math.floor(6 + icomReadNumber({0x14, 0x0C}) * 42 / 255 + 0.5)",
    "uses": [
@@ -1915,6 +2329,25 @@
     "icomReadPercent"
    ]
   },
+  "ic9700_get_level": {
+   "code": "icomReadPercent({0x14, 0x06})",
+   "uses": [
+    "bcdToNumber",
+    "icomQuery",
+    "icomReadNumber",
+    "icomReadPercent"
+   ]
+  },
+  "ic9700_get_menu": {
+   "code": "icomReadNumber(icomMenuCmd(0))",
+   "uses": [
+    "bcdToNumber",
+    "icomMenuCmd",
+    "icomQuery",
+    "icomReadNumber",
+    "numberToBcd"
+   ]
+  },
   "ic9700_get_mic_gain": {
    "code": "icomReadPercent({0x14, 0x0B})",
    "uses": [
@@ -1922,6 +2355,13 @@
     "icomQuery",
     "icomReadNumber",
     "icomReadPercent"
+   ]
+  },
+  "ic9700_get_notch_width": {
+   "code": "icomName(icomQuery({0x16, 0x57}), {[0] = \"WIDE\", [1] = \"MID\", [2] = \"NAR\"}, \"\")",
+   "uses": [
+    "icomName",
+    "icomQuery"
    ]
   },
   "ic9700_get_operating_frequency": {
@@ -1993,6 +2433,13 @@
     "icomReadPercent"
    ]
   },
+  "ic9700_get_ssb_tx_bandwidth": {
+   "code": "icomName(icomQuery({0x16, 0x58}), {[0] = \"WIDE\", [1] = \"MID\", [2] = \"NAR\"}, \"\")",
+   "uses": [
+    "icomName",
+    "icomQuery"
+   ]
+  },
   "ic9700_get_supply_current": {
    "code": "icomMeter({0x15, 0x16}, {{0, 0}, {121, 10}, {241, 20}})",
    "uses": [
@@ -2023,6 +2470,13 @@
     "icomScale"
    ]
   },
+  "ic9700_get_tone_function": {
+   "code": "icomName(icomQuery({0x16, 0x5D}), {[0] = \"OFF\", [1] = \"TONE\", [2] = \"TSQL\", [3] = \"DTCS\", [6] = \"DTCS(T)\", [7] = \"TONE(T)/DTCS(R)\", [8] = \"DTCS(T)/TSQL(R)\", [9] = \"TONE(T)/TSQL(R)\"}, \"\")",
+   "uses": [
+    "icomName",
+    "icomQuery"
+   ]
+  },
   "ic9700_is_data_mode": {
    "code": "icomReadByte({0x1A, 0x06}) ~= 0",
    "uses": [
@@ -2037,6 +2491,14 @@
     "icomReadByte"
    ]
   },
+  "ic9700_is_overflow": {
+   "code": "icomReadOn({0x15, 0x07})",
+   "uses": [
+    "icomQuery",
+    "icomReadByte",
+    "icomReadOn"
+   ]
+  },
   "ic9700_is_split": {
    "code": "icomReadByte({0x0F}) == 1",
    "uses": [
@@ -2046,6 +2508,14 @@
   },
   "ic9700_is_squelch_open": {
    "code": "icomReadOn({0x15, 0x01})",
+   "uses": [
+    "icomQuery",
+    "icomReadByte",
+    "icomReadOn"
+   ]
+  },
+  "ic9700_is_tone_squelch_open": {
+   "code": "icomReadOn({0x15, 0x05})",
    "uses": [
     "icomQuery",
     "icomReadByte",
@@ -2105,15 +2575,64 @@
    "code": "sendCommand({0x11}, {0x00})\n",
    "uses": []
   },
+  "ic9700_set_break_in": {
+   "code": "sendCommand({0x16, 0x47}, {0x00})\n",
+   "uses": []
+  },
+  "ic9700_set_break_in_delay": {
+   "code": "sendCommand({0x14, 0x0F}, icomLevel(0, 2, 13))\n",
+   "uses": [
+    "icomLevel",
+    "numberToBcd"
+   ]
+  },
+  "ic9700_set_comp_level": {
+   "code": "sendCommand({0x14, 0x0E}, icomLevel(0, 0, 10))\n",
+   "uses": [
+    "icomLevel",
+    "numberToBcd"
+   ]
+  },
+  "ic9700_set_csql_code": {
+   "code": "sendCommand({0x1B, 0x07}, numberToBcd(0, 1))\n",
+   "uses": [
+    "numberToBcd"
+   ]
+  },
+  "ic9700_set_cw_pitch": {
+   "code": "sendCommand({0x14, 0x09}, icomLevel(0, 300, 900))\n",
+   "uses": [
+    "icomLevel",
+    "numberToBcd"
+   ]
+  },
   "ic9700_set_data_mode": {
    "code": "sendCommand({0x1A, 0x06}, {0x01, 0x01})\n",
    "uses": []
+  },
+  "ic9700_set_digital_squelch": {
+   "code": "sendCommand({0x16, 0x5B}, {0x00})\n",
+   "uses": []
+  },
+  "ic9700_set_dsp_filter_type": {
+   "code": "sendCommand({0x16, 0x56}, {0x00})\n",
+   "uses": []
+  },
+  "ic9700_set_dtcs_code": {
+   "code": "sendCommand({0x1B, 0x02}, icomDtcsData(0, 0x00))\n",
+   "uses": [
+    "icomDtcsData"
+   ]
   },
   "ic9700_set_frequency": {
    "code": "sendCommand({0x05}, frequencyToBcd(0 * 1, 5))\n",
    "uses": [
     "frequencyToBcd"
    ]
+  },
+  "ic9700_set_gps_tx_mode": {
+   "code": "sendCommand({0x16, 0x5C}, {0x00})\n",
+   "uses": []
   },
   "ic9700_set_keying_speed": {
    "code": "sendCommand({0x14, 0x0C}, icomWpm(0))\n",
@@ -2129,12 +2648,30 @@
     "numberToBcd"
    ]
   },
+  "ic9700_set_level": {
+   "code": "sendCommand({0x14, 0x06}, icomPercent(0))\n",
+   "uses": [
+    "icomPercent",
+    "numberToBcd"
+   ]
+  },
+  "ic9700_set_menu": {
+   "code": "sendCommand(icomMenuCmd(0), numberToBcd(0, 1))\n",
+   "uses": [
+    "icomMenuCmd",
+    "numberToBcd"
+   ]
+  },
   "ic9700_set_mic_gain": {
    "code": "sendCommand({0x14, 0x0B}, icomPercent(0))\n",
    "uses": [
     "icomPercent",
     "numberToBcd"
    ]
+  },
+  "ic9700_set_notch_width": {
+   "code": "sendCommand({0x16, 0x57}, {0x00})\n",
+   "uses": []
   },
   "ic9700_set_operating_mode": {
    "code": "sendCommand({0x06}, {0x00})\n",
@@ -2184,15 +2721,29 @@
     "numberToBcd"
    ]
   },
+  "ic9700_set_ssb_tx_bandwidth": {
+   "code": "sendCommand({0x16, 0x58}, {0x00})\n",
+   "uses": []
+  },
   "ic9700_set_tone_frequency": {
    "code": "sendCommand({0x1B, 0x00}, numberToBcd(math.floor(0 * 10 + 0.5), 3))\n",
    "uses": [
     "numberToBcd"
    ]
   },
+  "ic9700_set_tone_function": {
+   "code": "sendCommand({0x16, 0x5D}, {0x00})\n",
+   "uses": []
+  },
   "ic9700_set_transmit": {
    "code": "sendCommand({0x1C, 0x00}, {0x01})\n",
    "uses": []
+  },
+  "ic9700_set_tsql_frequency": {
+   "code": "sendCommand({0x1B, 0x01}, numberToBcd(math.floor(0 * 10 + 0.5), 3))\n",
+   "uses": [
+    "numberToBcd"
+   ]
   },
   "ic9700_set_tuning_step": {
    "code": "sendCommand({0x10, 0x00})\n",
@@ -2594,42 +3145,22 @@
   "first_index": "function first_index(t, elem)\n  for k, v in ipairs(t) do\n    if v == elem then\n      return k\n    end\n  end\n  return 0\nend",
   "frequencyAsNumber": "function frequencyAsNumber(tbl)\n  value = ''\n  for i, name in ipairs(tbl) do\n    value = string.format('%02x', name) .. value\n  end\n  return tonumber(value);\nend",
   "frequencyToBcd": "function frequencyToBcd(freq, tblsize)\n  freq = math.floor(freq + 0.5)\n  local bcdTable = {}\n  while freq > 0 do\n    local nibble = freq % 10\n    table.insert(bcdTable, 1, nibble)\n    freq = math.floor(freq / 10)\n  end\n  if #bcdTable % 2 == 1 then\n    table.insert(bcdTable, 1, 0)\n  end\n  local finalTable = {}\n  for i = 1, #bcdTable, 2 do\n    local nibble1 = bcdTable[i+1]\n    local nibble2 = bcdTable[i]\n    local bcdValue = nibble2 * 16 + nibble1\n    table.insert(finalTable, 1, bcdValue)\n  end\n  if tblsize ~= nil then\n    while #finalTable < tblsize do\n      table.insert(finalTable, 0x00)\n    end\n  end\n  return finalTable\nend",
-  "getOperatingModeString": "function getOperatingModeString(responseTable)\n  if responseTable == nil or responseTable[1] == nil then\n    return \"Unknown\"\n  end\n  local reponseByte = string.format(\"0x%02x\", responseTable[1])\n  local modeMap = {\n    [\"0x00\"] = 'LSB',\n    [\"0x01\"] = 'USB',\n    [\"0x02\"] = 'AM',\n    [\"0x03\"] = 'CW',\n    [\"0x04\"] = 'RTTY',\n    [\"0x05\"] = 'FM',\n    [\"0x06\"] = 'WFM',\n    [\"0x07\"] = 'CW-R',\n    [\"0x08\"] = 'RTTY-R',\n    [\"0x17\"] = 'DV'\n  }\n  return modeMap[reponseByte] or \"Unknown\"\nend",
-  "ic705Clock": "function ic705Clock(part)\n  local d = ic705Query({0x1A, 0x05, 0x01, 0x65})\n  local t = ic705Query({0x1A, 0x05, 0x01, 0x66})\n  local function bcd(b) return math.floor(b / 16) * 10 + b % 16 end\n  local c = {year = 0, month = 0, day = 0, hour = 0, minute = 0}\n  if #d >= 4 then\n    c.year = bcd(d[1]) * 100 + bcd(d[2])\n    c.month = bcd(d[3])\n    c.day = bcd(d[4])\n  end\n  if #t >= 2 then\n    c.hour = bcd(t[1])\n    c.minute = bcd(t[2])\n  end\n  if part == \"time\" then return string.format(\"%02d:%02d\", c.hour, c.minute) end\n  if part == \"date\" then return string.format(\"%04d-%02d-%02d\", c.year, c.month, c.day) end\n  return c[part]\nend",
-  "ic705DtcsData": "function ic705DtcsData(code, polarity)\n  local s = string.format(\"%03d\", math.max(0, math.min(777, math.floor(code))))\n  return {polarity, tonumber(s:sub(1, 1)), tonumber(s:sub(2, 2)) * 16 + tonumber(s:sub(3, 3))}\nend",
-  "ic705Gps": "function ic705Gps()\n  local d = ic705Query({0x23}, {0x00})   -- d[1] is the sub command 00\n  if #d < 28 then return nil end\n  local function bcd(i, n)\n    local v = 0\n    for k = i, i + n - 1 do v = v * 100 + math.floor(d[k] / 16) * 10 + d[k] % 16 end\n    return v\n  end\n  local g = {}\n  g.lat = bcd(2, 1) + (bcd(3, 1) + bcd(4, 1) / 100 + math.floor(d[5] / 16) / 1000) / 60\n  if d[6] % 16 == 0 then g.lat = -g.lat end   -- 0 = south\n  g.lon = (d[7] % 16) * 100 + bcd(8, 1) + (bcd(9, 1) + bcd(10, 1) / 100 + math.floor(d[11] / 16) / 1000) / 60\n  if d[12] % 16 == 0 then g.lon = -g.lon end  -- 0 = west\n  g.alt = 0\n  if d[13] ~= 0xFF then                       -- FF = no altitude\n    g.alt = bcd(13, 3) / 10\n    if d[16] % 16 == 1 then g.alt = -g.alt end\n  end\n  g.course = bcd(17, 2)\n  g.speed = bcd(19, 3) / 10\n  g.year = bcd(22, 2)\n  g.month = bcd(24, 1)\n  g.day = bcd(25, 1)\n  g.hour = bcd(26, 1)\n  g.minute = bcd(27, 1)\n  g.second = bcd(28, 1)\n  return g\nend",
-  "ic705GpsTime": "function ic705GpsTime(part)\n  local g = ic705Gps()\n  if g == nil then\n    if part == \"text\" then return \"\" end\n    return 0\n  end\n  if part == \"unix\" then return ic705UnixTime(g.year, g.month, g.day, g.hour, g.minute, g.second) end\n  if part == \"text\" then\n    return string.format(\"%04d-%02d-%02d %02d:%02d:%02d\", g.year, g.month, g.day, g.hour, g.minute, g.second)\n  end\n  return g[part]\nend",
-  "ic705GpsValue": "function ic705GpsValue(name)\n  local g = ic705Gps()\n  if g == nil then return 0 end\n  return g[name]\nend",
-  "ic705Level": "function ic705Level(value, min, max)\n  value = math.max(min, math.min(max, value))\n  return numberToBcd(math.floor((value - min) * 255 / (max - min) + 0.5), 2)\nend",
-  "ic705Locator": "function ic705Locator(lat, lon)\n  lon = lon + 180\n  lat = lat + 90\n  local A, a = string.byte(\"A\"), string.byte(\"a\")\n  return string.char(A + math.floor(lon / 20), A + math.floor(lat / 10))\n      .. math.floor((lon % 20) / 2) .. math.floor(lat % 10)\n      .. string.char(a + math.floor((lon % 2) * 12), a + math.floor((lat % 1) * 24))\nend",
-  "ic705MenuCmd": "function ic705MenuCmd(item)\n  local b = numberToBcd(item, 2)\n  return {0x1A, 0x05, b[1], b[2]}\nend",
-  "ic705Meter": "function ic705Meter(cmd, points)\n  return math.floor(ic705Scale(ic705ReadNumber(cmd), points) * 10 + 0.5) / 10\nend",
-  "ic705Percent": "function ic705Percent(percent)\n  percent = math.max(0, math.min(100, percent))\n  return numberToBcd(math.floor(percent * 255 / 100 + 0.5), 2)\nend",
-  "ic705Query": "function ic705Query(cmd, data)\n  local key\n  if data then key = sendCommand(cmd, data) else key = sendCommand(cmd) end\n  if key == nil then return {} end\n  return readResultOfCommand(key) or {}\nend",
-  "ic705ReadByte": "function ic705ReadByte(cmd, data)\n  return ic705Query(cmd, data)[1] or 0\nend",
-  "ic705ReadDtcs": "function ic705ReadDtcs()\n  local d = ic705Query({0x1B, 0x02})\n  if #d < 3 then return 0 end\n  return (d[2] % 16) * 100 + math.floor(d[3] / 16) * 10 + d[3] % 16\nend",
-  "ic705ReadFrequency": "function ic705ReadFrequency()\n  local d = ic705Query({0x03})\n  if #d == 0 then return 0 end\n  return frequencyAsNumber(d)\nend",
-  "ic705ReadLevel": "function ic705ReadLevel(cmd, min, max)\n  return math.floor((min + ic705ReadNumber(cmd) * (max - min) / 255) * 10 + 0.5) / 10\nend",
-  "ic705ReadName": "function ic705ReadName(cmd, names)\n  local d = ic705Query(cmd)\n  if d[1] == nil then return \"\" end\n  return names[d[1]] or \"\"\nend",
-  "ic705ReadNumber": "function ic705ReadNumber(cmd, data)\n  local d = ic705Query(cmd, data)\n  if #d == 0 then return 0 end\n  return bcdToNumber(d) or 0\nend",
-  "ic705ReadOn": "function ic705ReadOn(cmd)\n  return ic705ReadByte(cmd) == 1\nend",
-  "ic705ReadPercent": "function ic705ReadPercent(cmd)\n  return math.floor(ic705ReadNumber(cmd) * 100 / 255 + 0.5)\nend",
-  "ic705RitData": "function ic705RitData(hz)\n  hz = math.floor(hz + 0.5)\n  local sign = 0\n  if hz < 0 then sign = 1; hz = -hz end\n  local t = frequencyToBcd(math.min(hz, 9999), 2)\n  table.insert(t, sign)\n  return t\nend",
-  "ic705Scale": "function ic705Scale(raw, points)\n  for i = 2, #points do\n    if raw <= points[i][1] or i == #points then\n      local x0, y0, x1, y1 = points[i-1][1], points[i-1][2], points[i][1], points[i][2]\n      return y0 + (raw - x0) * (y1 - y0) / (x1 - x0)\n    end\n  end\n  return points[1][2]\nend",
-  "ic705TextBytes": "function ic705TextBytes(text)\n  local t = {}\n  text = tostring(text)\n  for i = 1, math.min(#text, 30) do\n    t[i] = string.byte(text, i)\n  end\n  return t\nend",
-  "ic705UnixTime": "function ic705UnixTime(y, m, d, hour, minute, second)\n  if m <= 2 then y = y - 1; m = m + 12 end\n  local days = 365 * y + math.floor(y / 4) - math.floor(y / 100) + math.floor(y / 400)\n  days = days + math.floor((153 * (m - 3) + 2) / 5) + d - 719469\n  return days * 86400 + hour * 3600 + minute * 60 + second\nend",
-  "ic705Wpm": "function ic705Wpm(wpm)\n  wpm = math.max(6, math.min(48, wpm))\n  return numberToBcd(math.floor((wpm - 6) * 255 / 42 + 0.5), 2)\nend",
   "icomClock": "function icomClock(dateCmd, timeCmd, part)\n  local d = icomQuery(dateCmd)\n  local t = icomQuery(timeCmd)\n  local function bcd(b) return math.floor(b / 16) * 10 + b % 16 end\n  local c = {year = 0, month = 0, day = 0, hour = 0, minute = 0}\n  if #d >= 4 then\n    c.year = bcd(d[1]) * 100 + bcd(d[2])\n    c.month = bcd(d[3])\n    c.day = bcd(d[4])\n  end\n  if #t >= 2 then\n    c.hour = bcd(t[1])\n    c.minute = bcd(t[2])\n  end\n  if part == \"time\" then return string.format(\"%02d:%02d\", c.hour, c.minute) end\n  if part == \"date\" then return string.format(\"%04d-%02d-%02d\", c.year, c.month, c.day) end\n  return c[part]\nend",
+  "icomDtcsData": "function icomDtcsData(code, polarity)\n  local s = string.format(\"%03d\", math.max(0, math.min(777, math.floor(code))))\n  return {polarity, tonumber(s:sub(1, 1)), tonumber(s:sub(2, 2)) * 16 + tonumber(s:sub(3, 3))}\nend",
   "icomGps": "function icomGps()\n  local d = icomQuery({0x23}, {0x00})   -- d[1] is the sub command 00\n  if #d < 28 then return nil end\n  local function bcd(i, n)\n    local v = 0\n    for k = i, i + n - 1 do v = v * 100 + math.floor(d[k] / 16) * 10 + d[k] % 16 end\n    return v\n  end\n  local g = {}\n  g.lat = bcd(2, 1) + (bcd(3, 1) + bcd(4, 1) / 100 + math.floor(d[5] / 16) / 1000) / 60\n  if d[6] % 16 == 0 then g.lat = -g.lat end   -- 0 = south\n  g.lon = (d[7] % 16) * 100 + bcd(8, 1) + (bcd(9, 1) + bcd(10, 1) / 100 + math.floor(d[11] / 16) / 1000) / 60\n  if d[12] % 16 == 0 then g.lon = -g.lon end  -- 0 = west\n  g.alt = 0\n  if d[13] ~= 0xFF then                       -- FF = no altitude\n    g.alt = bcd(13, 3) / 10\n    if d[16] % 16 == 1 then g.alt = -g.alt end\n  end\n  g.course = bcd(17, 2)\n  g.speed = bcd(19, 3) / 10\n  g.year = bcd(22, 2)\n  g.month = bcd(24, 1)\n  g.day = bcd(25, 1)\n  g.hour = bcd(26, 1)\n  g.minute = bcd(27, 1)\n  g.second = bcd(28, 1)\n  return g\nend",
   "icomGpsTime": "function icomGpsTime(part)\n  local g = icomGps()\n  if g == nil then\n    if part == \"text\" then return \"\" end\n    return 0\n  end\n  if part == \"unix\" then return icomUnixTime(g.year, g.month, g.day, g.hour, g.minute, g.second) end\n  if part == \"text\" then\n    return string.format(\"%04d-%02d-%02d %02d:%02d:%02d\", g.year, g.month, g.day, g.hour, g.minute, g.second)\n  end\n  return g[part]\nend",
   "icomGpsValue": "function icomGpsValue(name)\n  local g = icomGps()\n  if g == nil then return 0 end\n  return g[name]\nend",
+  "icomLevel": "function icomLevel(value, min, max)\n  value = math.max(min, math.min(max, value))\n  return numberToBcd(math.floor((value - min) * 255 / (max - min) + 0.5), 2)\nend",
   "icomLocator": "function icomLocator(lat, lon)\n  lon = lon + 180\n  lat = lat + 90\n  local A, a = string.byte(\"A\"), string.byte(\"a\")\n  return string.char(A + math.floor(lon / 20), A + math.floor(lat / 10))\n      .. math.floor((lon % 20) / 2) .. math.floor(lat % 10)\n      .. string.char(a + math.floor((lon % 2) * 12), a + math.floor((lat % 1) * 24))\nend",
+  "icomMenuCmd": "function icomMenuCmd(item)\n  local b = numberToBcd(item, 2)\n  return {0x1A, 0x05, b[1], b[2]}\nend",
   "icomMeter": "function icomMeter(cmd, points)\n  return math.floor(icomScale(icomReadNumber(cmd), points) * 10 + 0.5) / 10\nend",
   "icomName": "function icomName(d, names, default)\n  if d[1] == nil then return default end\n  local name = d[2] and names[d[1] * 256 + d[2]]\n  return name or names[d[1]] or default\nend",
   "icomPercent": "function icomPercent(percent)\n  percent = math.max(0, math.min(100, percent))\n  return numberToBcd(math.floor(percent * 255 / 100 + 0.5), 2)\nend",
   "icomQuery": "function icomQuery(cmd, data)\n  local key\n  if data then key = sendCommand(cmd, data) else key = sendCommand(cmd) end\n  if key == nil then return {} end\n  return readResultOfCommand(key) or {}\nend",
   "icomReadByte": "function icomReadByte(cmd, data)\n  return icomQuery(cmd, data)[1] or 0\nend",
+  "icomReadDtcs": "function icomReadDtcs()\n  local d = icomQuery({0x1B, 0x02})\n  if #d < 3 then return 0 end\n  return (d[2] % 16) * 100 + math.floor(d[3] / 16) * 10 + d[3] % 16\nend",
   "icomReadFrequency": "function icomReadFrequency()\n  local d = icomQuery({0x03})\n  if #d == 0 then return 0 end\n  return frequencyAsNumber(d)\nend",
+  "icomReadLevel": "function icomReadLevel(cmd, min, max)\n  return math.floor((min + icomReadNumber(cmd) * (max - min) / 255) * 10 + 0.5) / 10\nend",
   "icomReadNumber": "function icomReadNumber(cmd, data)\n  local d = icomQuery(cmd, data)\n  if #d == 0 then return 0 end\n  return bcdToNumber(d) or 0\nend",
   "icomReadOn": "function icomReadOn(cmd)\n  return icomReadByte(cmd) == 1\nend",
   "icomReadPercent": "function icomReadPercent(cmd)\n  return math.floor(icomReadNumber(cmd) * 100 / 255 + 0.5)\nend",

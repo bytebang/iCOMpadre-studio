@@ -38,12 +38,19 @@ Icom.radio({
   "attenuator": {"page": 4, "options": [["OFF", "0x00"], ["10 dB", "0x10"]]},
   "agc": {"page": 5, "options": [["FAST", "0x01"], ["MID", "0x02"], ["SLOW", "0x03"]]},
   "squelchStatus": {"page": 4},
+  "toneSquelchStatus": {"page": 4},
+  "choices": {"page": 5, "options": ["dsp_filter_type", "notch_width", "digital_squelch", "tone_function", "ssb_tx_bandwidth",
+                                     "break_in", "gps_tx_mode"]},
 
   // Transmit
   "transmit": {"page": 11},
   "rfPower": {"page": 4},
   "micGain": {"page": 4},
   "tone": {"page": 11},
+  "compLevel": {"page": 4},
+  "tsql": {"page": 11},
+  "dtcs": {"page": 11},
+  "csql": {"page": 11},
 
   // Meters
   "sMeter": {"page": 4, "s9": 120, "plus60": 241},
@@ -52,12 +59,16 @@ Icom.radio({
   "alc": {"page": 5, "points": [[0, 0], [120, 100]]},
   "voltage": {"page": 5, "points": [[0, 0], [13, 10], [241, 16]]},
   "current": {"page": 5, "points": [[0, 0], [121, 10], [241, 20]]},
+  "overflow": {"page": 4},
+  "compMeter": {"page": 5, "points": [[0, 0], [130, 15], [210, 25.5]]},
 
   // CW & Voice
   "cw": {"page": 5},
   "keyingSpeed": {"page": 4},
   "voiceMemory": {"page": 12},
   "announce": {"page": 4},
+  "cwPitch": {"page": 4},
+  "breakInDelay": {"page": 4},
 
   // GPS & Time
   "position": {"page": 24, "text": "Reads the position of the external GPS receiver, or the manually entered position"},
@@ -66,8 +77,11 @@ Icom.radio({
   // Settings
   "functions": {"page": 5, "options": [["Noise Blanker", "0x22"], ["Noise Reduction", "0x40"], ["Auto Notch", "0x41"],
                                        ["Manual Notch", "0x48"], ["Speech Compressor", "0x44"], ["Monitor", "0x45"], ["VOX", "0x46"],
-                                       ["Repeater Tone", "0x42"], ["Tone Squelch", "0x43"], ["AFC", "0x4A"], ["Dualwatch", "0x59"],
-                                       ["Satellite Mode", "0x5A"], ["IP Plus", "0x65"], ["Dial Lock", "0x50"]]},
+                                       ["Repeater Tone", "0x42"], ["Tone Squelch", "0x43"], ["DTCS", "0x4B"], ["Twin Peak Filter", "0x4F"],
+                                       ["AFC", "0x4A"], ["Dualwatch", "0x59"], ["Satellite Mode", "0x5A"], ["IP Plus", "0x65"],
+                                       ["Dial Lock", "0x50"]]},
   "brightness": {"page": 4},
-  "power": {"page": 5}
+  "power": {"page": 5},
+  "levels": {"page": 4, "options": ["nr", "nb", "pbt1", "pbt2", "notch", "monitor", "vox", "antivox"]},
+  "menu": {"page": 5}
 });

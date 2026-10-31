@@ -37,12 +37,15 @@ Icom.radio({
                                              ["15 dB", "0x15"], ["18 dB", "0x18"], ["21 dB", "0x21"]]},
   "agc": {"page": "18-4", "options": [["OFF", "0x00"], ["FAST", "0x01"], ["MID", "0x02"], ["SLOW", "0x03"]]},
   "squelchStatus": {"page": "18-4"},
+  "toneSquelchStatus": {"page": "18-4"},
+  "choices": {"page": "18-4", "options": ["dsp_filter_type", "notch_width", "ssb_tx_bandwidth", "break_in"]},
 
   // Transmit
   "transmit": {"page": "18-10"},
   "rfPower": {"page": "18-3"},
   "micGain": {"page": "18-3"},
   "tone": {"page": "18-10"},
+  "compLevel": {"page": "18-3"},
 
   // Meters
   "sMeter": {"page": "18-4", "s9": 120, "plus60": 241},
@@ -51,12 +54,15 @@ Icom.radio({
   "alc": {"page": "18-4", "points": [[0, 0], [120, 100]]},
   "voltage": {"page": "18-4", "points": [[151, 44], [180, 48], [211, 52]]},
   "current": {"page": "18-4", "points": [[0, 0], [165, 10], [241, 15]]},
+  "compMeter": {"page": "18-4", "points": [[0, 0], [130, 15], [241, 30]]},
 
   // CW & Voice
   "cw": {"page": "18-4"},
   "keyingSpeed": {"page": "18-3"},
   "voiceMemory": {"page": "18-10"},
   "announce": {"page": "18-3"},
+  "cwPitch": {"page": "18-3"},
+  "breakInDelay": {"page": "18-3"},
 
   // GPS & Time
   "clock": {"page": "18-6", "date": "0x00, 0x95", "time": "0x00, 0x96"},
@@ -67,5 +73,7 @@ Icom.radio({
                                             ["Repeater Tone", "0x42"], ["Tone Squelch", "0x43"], ["VSC", "0x4C"], ["DIGI-SEL", "0x4E"],
                                             ["Twin Peak Filter", "0x4F"], ["Dial Lock", "0x50"]]},
   "brightness": {"page": "18-3"},
-  "power": {"page": "18-4"}
+  "power": {"page": "18-4"},
+  "levels": {"page": "18-3", "options": ["nr", "nb", "pbt1", "pbt2", "notch", "monitor", "vox", "antivox"]},
+  "menu": {"page": "18-5"}
 });

@@ -43,8 +43,11 @@ Icom.radio({
 
   // CW & Voice
   "keyingSpeed": {"page": 58},
+  "cwPitch": {"page": 58},
+  "breakInDelay": {"page": 58},
 
   // Settings
   "functions": {"page": 58, "options": [["Noise Blanker", "0x22"], ["Noise Reduction", "0x40"], ["Auto Notch", "0x41"],
-                                        ["Speech Compressor", "0x44"], ["VOX", "0x46"]]}
+                                        ["Speech Compressor", "0x44"], ["VOX", "0x46"]]},
+  "levels": {"page": 58, "options": ["nr"]}
 });

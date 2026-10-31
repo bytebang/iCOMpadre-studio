@@ -20,9 +20,8 @@ runtime/
     ├── base.js           blocks for the iCOMpadre hardware + common lua helper functions
     ├── radio.js          template for a new radio (not loaded)
     ├── radio/
-    │   ├── ic705.js      blocks for the ICOM IC-705
     │   ├── icom.js       Icom.radio(): creates the blocks of a radio from a description of its CI-V commands
-    │   └── ic7610.js ... descriptions of the IC-7610, IC-7851, IC-9700, IC-718, IC-78, IC-2730 and IC-A120E
+    │   └── ic705.js ...  descriptions of the IC-705, IC-7610, IC-7851, IC-9700, IC-718, IC-78, IC-2730 and IC-A120E
     ├── studio.css
     ├── filesaver.js      download of files (export)
     ├── img/              toolbar icons
@@ -69,7 +68,7 @@ They are described in the iCOMpadre documentation, chapter *operating modes / ru
 Things to know when talking to a radio:
 
 * `sendCommand(cmd, data)` only accepts tables of numbers. Data has to be the **second** table, never a table inside the command table.
-* `sendCommand` does not wait for the answer. `readResultOfCommand(cmd)` returns the data of the **last** answer to `cmd`, or `nil` if there was none yet. Read blocks must handle `nil` (see `ic705Query` in `radio/ic705.js`).
+* `sendCommand` does not wait for the answer. `readResultOfCommand(cmd)` returns the data of the **last** answer to `cmd`, or `nil` if there was none yet. Read blocks must handle `nil` (see `icomQuery` in `radio/icom.js`).
 * Answers are matched by their command bytes, and the CI-V library decides how many bytes belong to the command: 2 bytes for `07 0E 13 14 15 16 19 1A 1B 1C 1E 21 27`, 4 bytes for `1A 05`, 1 byte for all others. A command like `23 00` therefore has to be sent as `sendCommand({0x23}, {0x00})`, otherwise its answer is never found.
 * Values in the CI-V reference guides are BCD: `0x14` means *14*, not *20*. Levels "0000 ~ 0255" are 2 bytes BCD, most significant byte first. Frequencies are BCD with the least significant byte first.
 
@@ -100,7 +99,7 @@ Blockly.Lua.forBlock['ic705_set_af_level'] = function(block) {
 * An optional second parameter is merged into the toolbox entry, e.g. to give inputs default values:
   `storage.action("storage_append_line", {"inputs": {"FILE": {"shadow": {"type": "text", "fields": {"TEXT": "log.txt"}}}}})`.
 * `Studio.use()` throws if a function is not registered. Registering the same name twice logs a warning.
-* A lua function that calls other registered functions lists them as third parameter, e.g. `Studio.luaFunction("ic705Percent", [...], ["numberToBcd"])`. `Studio.use()` adds them as well.
+* A lua function that calls other registered functions lists them as third parameter, e.g. `Studio.luaFunction("icomPercent", [...], ["numberToBcd"])`. `Studio.use()` adds them as well.
 * Common helper functions are registered in `base.js`: `pretty`, `map`, `frequencyAsNumber`, `frequencyToBcd`, `numberToBcd`, `bcdToNumber`.
 
 ## Adding a radio
@@ -108,15 +107,16 @@ Blockly.Lua.forBlock['ic705_set_af_level'] = function(block) {
 Most Icom radios understand the same CI-V commands as the IC-705 and differ only in details (modes, attenuator steps,
 meter scales, memory channels, ...). For them it is enough to **describe** the radio:
 
-1. Copy `runtime/studio/radio/ic7610.js` (it uses every entry) to `runtime/studio/radio/<radio>.js`.
+1. Copy `runtime/studio/radio/ic9700.js` (it uses almost every entry) to `runtime/studio/radio/<radio>.js`.
 2. Go through the command table of the CI-V reference guide and adapt the entries: change the options and the page numbers,
    remove the entries of commands the radio doesn't have. `Icom.radio()` only creates blocks for the entries which are there.
-   Every entry is explained in `runtime/studio/radio/icom.js`.
-3. Include the file in `runtime/studio/index.html` below `radio/icom.js`, and add it to the `filesToLoad` list in `runtime/index.html`.
+   Every entry is explained in `runtime/studio/radio/icom.js`. The usual settings with more than on/off (`choices`) and the usual levels
+   (`levels`) are given by their name, see `CHOICES` and `LEVELS` there.
+3. Include the file in `runtime/studio/index.html` below `radio/icom.js` (the order of the files is the order in the toolbox), and add it to the `filesToLoad` list in `runtime/index.html`.
 4. Write `documentation/blocks/radio/<radio>.md` (the existing ones show the structure: one section per block, with the CI-V command and the page)
    and add the radio to `documentation/blocks/index.md`.
 
-Blocks which `Icom.radio()` can't create (like the GPS of the IC-705 or the battery) are written by hand:
+A command which several radios have belongs into `Icom.radio()` as a new entry. Blocks which only make sense for one radio can also be written by hand:
 
 1. Copy `runtime/studio/radio.js` to `runtime/studio/radio/<radio>.js`, e.g. `radio/ic7300.js`.
 2. Replace `myradio` / `My Radio` with the name of the radio and remove the example blocks you don't need.
