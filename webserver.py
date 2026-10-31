@@ -15,7 +15,7 @@ if not sys.version_info.major == 3 and sys.version_info.minor >= 6:
 class MyHttpRequestHandler(http.server.SimpleHTTPRequestHandler):
     def do_PUT(self):
         filename = os.path.basename(self.path)
-        if filename.endswith(".lua"):
+        if filename.endswith((".lua", ".json")):
             file_length = int(self.headers['Content-Length'])
             with open(filename, 'wb') as output_file:
                 output_file.write(self.rfile.read(file_length))
@@ -23,6 +23,8 @@ class MyHttpRequestHandler(http.server.SimpleHTTPRequestHandler):
             self.end_headers()
             reply_body = 'Saved "%s"\n' % filename
             self.wfile.write(reply_body.encode('utf-8'))
+        else:
+            self.send_error(403, 'Only .lua and .json files can be uploaded')
 
     def do_GET(self):
         time.sleep(0.2)
