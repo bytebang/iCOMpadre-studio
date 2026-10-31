@@ -1,0 +1,32 @@
+{
+ "blocks": {
+  "languageVersion": 0,
+  "blocks": [
+   {
+    "type": "onstartup",
+    "id": "IAR]]4UfH@Ax7o04}M@Q",
+    "x": 20,
+    "y": 20,
+    "inputs": {
+     "actions": {
+      "block": {
+       "type": "text_print",
+       "id": "688Y49#|V3GC9/nahTuO",
+       "inputs": {
+        "TEXT": {
+         "block": {
+          "type": "text",
+          "id": ";,WsF6tgJ|u2O=PT$sZ~",
+          "fields": {
+           "TEXT": "Hello iCOMpadre"
+          }
+         }
+        }
+       }
+      }
+     }
+    }
+   }
+  ]
+ }
+}

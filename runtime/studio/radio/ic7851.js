@@ -3,7 +3,7 @@
 // The CI-V commands are described in chapter 18 "Control command" of the "IC-7850/IC-7851 instruction manual"
 // (datasheets/radio-docs/IC-7851), the page numbers refer to it.
 //
-// Documentation of the blocks: documentation/blocks/radio/ic7851.md
+// Documentation of the blocks: documentation/radio/ic7851.md
 
 Icom.radio({
   "prefix": "ic7851",

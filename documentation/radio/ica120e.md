@@ -9,15 +9,13 @@ The blocks of the category *IC-A120E* control the ICOM IC-A120E. They are groupe
 | [Transmit](#transmit) | transmitting |
 | [Settings](#settings) | power on/off |
 
-!!! note "Reading values from the radio"
-    Blocks that read a value ask the radio and use its **last answer**. Right after the start there is no answer yet:
-    numbers are then 0, yes/no questions are *false* and texts are empty. Use them in [Periodically](../base.md#periodically), where they are asked again and again.
+Blocks that read a value use the **last answer** of the radio, see [Reading values from the radio](../blocks.md#reading-values).
 
 !!! warning "Connect to the radio first"
     By default iCOMpadre talks to an IC-705 via Bluetooth. Put the block
-    [Connect to IC-A120E via cable](../base.md#connect_radio) into [OnStartup](../base.md#onstartup),
+    [Connect to IC-A120E via cable](../base/radio.md#connect_radio) into [OnStartup](../base/program.md#onstartup),
     and connect the REMOTE jack of the radio to iCOMpadre with a mono cable. The block uses the default CI-V address of the IC-A120E (92h);
-    if you changed it in the menu of the radio, use [Connect to CI-V address](../base.md#connect_address) instead.
+    if you changed it in the menu of the radio, use [Connect to CI-V address](../base/radio.md#connect_address) instead.
     The baud rate of the block has to match the CI-V baud rate of the radio (or set the radio to *Auto*).
 
 The CI-V commands and page numbers refer to the *IC-A120E Bedienungsanleitung (German), chapter 10*.

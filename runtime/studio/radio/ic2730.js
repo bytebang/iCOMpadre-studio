@@ -4,7 +4,7 @@
 // (datasheets/radio-docs/IC-2730_Web_ENG_0.pdf), the page numbers refer to it.
 // The IC-2730 has no CI-V commands for the memory channels or the scan.
 //
-// Documentation of the blocks: documentation/blocks/radio/ic2730.md
+// Documentation of the blocks: documentation/radio/ic2730.md
 
 Icom.radio({
   "prefix": "ic2730",

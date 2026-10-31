@@ -18,7 +18,7 @@
 //
 // Conventions instead of configuration:
 // - the colour of a block is the style of its group (or category), see STYLES
-// - the help link of a block points to the documentation of its file
+// - the help link of a block points to the documentation of its file (or of its group, if the group has an own page)
 //
 // See DEVELOPING.md for a step by step guide on how to add a new radio.
 
@@ -54,8 +54,8 @@ var Studio = (function() {
     Blockly.Themes.Classic.setCategoryStyle(style + "_category", {"colour": STYLES[style]});
   });
 
-  // The documentation mirrors the block files: radio/ic705.js -> blocks/radio/ic705.md
-  var HELP_ROOT = "../userguide/studio/blocks/";
+  // The documentation mirrors the block files: radio/ic705.js -> radio/ic705.md, base.js with its group "program" -> base/program.md
+  var HELP_ROOT = "../userguide/studio/";
 
   var contributions = [];   // categories and separators in registration order
   var luaFunctions = {};    // name -> array of lua source lines
@@ -137,9 +137,10 @@ var Studio = (function() {
 
     if (allowGroups)
     {
-      handle.group = function(name, style) {
+      handle.group = function(name, style, page) {
         checkStyle(style);
-        var group = createContainer(name, style || container.style, container.helpPage);
+        var helpPage = (page && container.helpPage) ? container.helpPage + page + "/" : container.helpPage;
+        var group = createContainer(name, style || container.style, helpPage);
         container.groups.push(group);
         return createHandle(group, false);
       };
@@ -157,7 +158,9 @@ var Studio = (function() {
    * @property {function(string, Object=): CategoryHandle} action   adds an action block (changes something on the radio)
    * @property {function(string, Object=): CategoryHandle} property adds a property block (reads a value from the radio)
    * @property {function(string, Object=): CategoryHandle} helper   adds a helper block (conversions, utilities)
-   * @property {function(string, string=): CategoryHandle} [group] adds a sub category with its own style (only on categories)
+   * @property {function(string, string=, string=): CategoryHandle} [group] adds a sub category with its own style (only on categories).
+   *           The optional third parameter gives the group an own documentation page below the one of the category,
+   *           e.g. base.group("Pins", "pins", "pins") -> ../userguide/studio/base/pins/#<blocktype>
    */
 
   /**
@@ -167,7 +170,7 @@ var Studio = (function() {
    *
    * All blocks of the category get the colour of its style (radio blocks use "radio").
    * Blocks without an own helpUrl link to the documentation of the file which created the category:
-   * radio/ic705.js -> ../userguide/studio/blocks/radio/ic705/#<blocktype>
+   * radio/ic705.js -> ../userguide/studio/radio/ic705/#<blocktype>
    * @param {string} name the name shown in the toolbox, e.g. "IC-705"
    * @param {string=} style one of the keys of STYLES: program, radio, pins, serial, storage, helpers
    * @returns {CategoryHandle} handle to add blocks or groups to the category

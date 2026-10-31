@@ -12,7 +12,7 @@ Click on the gear icon of a function to add inputs. They can be used like [varia
 
 ## To do something {#procedures_defnoreturn}
 
-![Function block](img/procedures_defnoreturn.png){ width="180" }
+![Function block](../img/procedures_defnoreturn.png){ width="180" }
 
 Defines a function which executes the blocks in it. Replace *do something* with a name that tells what the function does.
 
@@ -29,7 +29,7 @@ Example: a function *warn* which prints "Attention!".
 
 ## To do something and return {#procedures_defreturn}
 
-![Function with result block](img/procedures_defreturn.png){ width="188" }
+![Function with result block](../img/procedures_defreturn.png){ width="188" }
 
 Defines a function which calculates a value. The value at *return* is the result of the function.
 
@@ -46,7 +46,7 @@ Example: a function *toKHz* with the input *freq*, which returns *freq ÷ 1000*.
 
 ## If return {#procedures_ifreturn}
 
-![If return block](img/procedures_ifreturn.png){ width="146" }
+![If return block](../img/procedures_ifreturn.png){ width="146" }
 
 Can only be used inside a function. If the condition is true, the function ends right here and returns the given value.
 
@@ -66,7 +66,7 @@ Example: *if* freq < 10000000 *return* "low band".
 
 ## Call function {#procedures_callnoreturn}
 
-![Call function block](img/procedures_callnoreturn.png){ width="117" }
+![Call function block](../img/procedures_callnoreturn.png){ width="117" }
 
 Executes a function that was defined with [to do something](#procedures_defnoreturn). The block has the name of the function.
 
@@ -83,7 +83,7 @@ Executes a function that was defined with [to do something](#procedures_defnoret
 
 ## Call function with result {#procedures_callreturn}
 
-![Call function with result block](img/procedures_callreturn.png){ width="125" }
+![Call function with result block](../img/procedures_callreturn.png){ width="125" }
 
 Executes a function that was defined with [to do something and return](#procedures_defreturn), and provides its result, so it can be plugged into other blocks.
 

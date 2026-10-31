@@ -1,0 +1,69 @@
+{
+ "blocks": {
+  "languageVersion": 0,
+  "blocks": [
+   {
+    "type": "periodically",
+    "id": "YtGWaQ);G~W6D1%L$M6W",
+    "x": 20,
+    "y": 20,
+    "inputs": {
+     "actions": {
+      "block": {
+       "type": "text_print",
+       "id": "wX~u?+$aV1mDg2+L)61;",
+       "inputs": {
+        "TEXT": {
+         "block": {
+          "type": "text_join",
+          "id": "dXiv)v@v`~/j-Ujyiv2J",
+          "extraState": {
+           "itemCount": 2
+          },
+          "inputs": {
+           "ADD0": {
+            "block": {
+             "type": "text",
+             "id": "VV_})e+0*N?9y7y(oPr*",
+             "fields": {
+              "TEXT": "Frequency in MHz: "
+             }
+            }
+           },
+           "ADD1": {
+            "block": {
+             "type": "ic705_get_operating_frequency",
+             "id": "`rq@iMfEa}6Su+#L`hcp",
+             "fields": {
+              "unit": "1e6"
+             }
+            }
+           }
+          }
+         }
+        }
+       },
+       "next": {
+        "block": {
+         "type": "wait",
+         "id": "qZO3Q,).U^`R|(gmeE(I",
+         "inputs": {
+          "timeout": {
+           "block": {
+            "type": "math_number",
+            "id": "Upse@[8ut$RJps*RTIBM",
+            "fields": {
+             "NUM": 1000
+            }
+           }
+          }
+         }
+        }
+       }
+      }
+     }
+    }
+   }
+  ]
+ }
+}

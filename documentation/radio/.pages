@@ -1,0 +1,10 @@
+# the order of the toolbox (script tags in runtime/studio/index.html)
+nav:
+  - ic705.md
+  - ic7610.md
+  - ic7851.md
+  - ic9700.md
+  - ic718.md
+  - ic78.md
+  - ic2730.md
+  - ica120e.md

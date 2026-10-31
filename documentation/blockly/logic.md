@@ -7,7 +7,7 @@ They are mostly used as condition of an [if block](control.md#controls_if).
 
 ## Compare {#logic_compare}
 
-![Compare block](img/logic_compare.png){ width="123" }
+![Compare block](../img/logic_compare.png){ width="123" }
 
 Compares two values and answers with *true* or *false*. Choose the comparison in the middle:
 
@@ -35,7 +35,7 @@ Numbers can only be compared with numbers, and texts with texts. Only `=` and `â
 
 ## And / Or {#logic_operation}
 
-![And / Or block](img/logic_operation.png){ width="139" }
+![And / Or block](../img/logic_operation.png){ width="139" }
 
 Combines two conditions into one.
 
@@ -62,7 +62,7 @@ Example: *AF Level > 80* **and** *mode = FM*.
 
 ## True / False {#logic_boolean}
 
-![True / False block](img/logic_boolean.png){ width="79" }
+![True / False block](../img/logic_boolean.png){ width="79" }
 
 The fixed value *true* or *false*. Use it to set a [variable](variables.md) or to switch a pin on (*true*) or off (*false*).
 
@@ -75,7 +75,7 @@ The fixed value *true* or *false*. Use it to set a [variable](variables.md) or t
 
 ## Not {#logic_negate}
 
-![Not block](img/logic_negate.png){ width="65" }
+![Not block](../img/logic_negate.png){ width="65" }
 
 Turns *true* into *false* and *false* into *true*. Use it to check that something is **not** the case.
 

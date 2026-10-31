@@ -3,7 +3,7 @@
 // The CI-V commands are described in chapter 10 "CI-V-Informationen" of the German "IC-A120E Bedienungsanleitung"
 // (datasheets/radio-docs/IC-A120E_IM_D_full_20170920.pdf), the page numbers refer to it.
 //
-// Documentation of the blocks: documentation/blocks/radio/ica120e.md
+// Documentation of the blocks: documentation/radio/ica120e.md
 
 Icom.radio({
   "prefix": "ica120e",

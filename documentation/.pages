@@ -1,0 +1,10 @@
+# Order and titles of the studio pages in the userguide (mkdocs-awesome-pages-plugin)
+nav:
+  - index.md
+  - editor.md
+  - tutorial.md
+  - blocks.md
+  - Blockly: blockly
+  - iCOMpadre: base
+  - Radios: radio
+  - about.md

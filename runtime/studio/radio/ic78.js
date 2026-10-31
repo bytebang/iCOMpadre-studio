@@ -6,7 +6,7 @@
 // levels 0000 ~ 0255 and the S-meter scale (0000 = S0, 0120 = S9, 0241 = S9+60 dB).
 // The IC-78 has no CI-V commands for the VFO, split, transmitting or the RF power.
 //
-// Documentation of the blocks: documentation/blocks/radio/ic78.md
+// Documentation of the blocks: documentation/radio/ic78.md
 
 Icom.radio({
   "prefix": "ic78",

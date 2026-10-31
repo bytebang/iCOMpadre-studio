@@ -3,7 +3,7 @@
 // The CI-V commands are described in the "IC-7610 CI-V reference guide" (datasheets/radio-docs/IC-7610),
 // the page numbers refer to it.
 //
-// Documentation of the blocks: documentation/blocks/radio/ic7610.md
+// Documentation of the blocks: documentation/radio/ic7610.md
 
 Icom.radio({
   "prefix": "ic7610",

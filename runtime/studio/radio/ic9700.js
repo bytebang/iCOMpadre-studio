@@ -3,7 +3,7 @@
 // The CI-V commands are described in the "IC-9700 CI-V reference guide" (datasheets/radio-docs/IC-9700),
 // the page numbers refer to it.
 //
-// Documentation of the blocks: documentation/blocks/radio/ic9700.md
+// Documentation of the blocks: documentation/radio/ic9700.md
 
 Icom.radio({
   "prefix": "ic9700",

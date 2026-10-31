@@ -22,7 +22,7 @@
 //   });
 //
 // Every entry has the page of the CI-V reference guide where the command is described. The pages are
-// used in the documentation of the blocks (documentation/blocks/radio/<prefix>.md).
+// used in the documentation of the blocks (documentation/radio/<prefix>.md).
 //
 // The entries (all optional except prefix and name):
 //   prefix, name, address, reference, note   block types, category, default CI-V address, reference guide, note for the docs

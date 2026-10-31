@@ -1,0 +1,63 @@
+{
+ "blocks": {
+  "languageVersion": 0,
+  "blocks": [
+   {
+    "type": "periodically",
+    "id": "mZ5U=fT~:s93@tNi[UmS",
+    "x": 20,
+    "y": 20,
+    "inputs": {
+     "actions": {
+      "block": {
+       "type": "onchangeof",
+       "id": "x,yuFEMRoOw$IQUIzS6J",
+       "inputs": {
+        "expr": {
+         "block": {
+          "type": "ic705_get_operating_mode",
+          "id": "7Rhc#T+1geDFt)Ku9lgd"
+         }
+        },
+        "statements": {
+         "block": {
+          "type": "text_print",
+          "id": "Q(N4I1|PeT!r[IqaMR7g",
+          "inputs": {
+           "TEXT": {
+            "block": {
+             "type": "text_join",
+             "id": "_yW_ifdx]!5Vi,Z+b)`.",
+             "extraState": {
+              "itemCount": 2
+             },
+             "inputs": {
+              "ADD0": {
+               "block": {
+                "type": "text",
+                "id": "DeP2e##/;PN{Z{OUsIp*",
+                "fields": {
+                 "TEXT": "New mode: "
+                }
+               }
+              },
+              "ADD1": {
+               "block": {
+                "type": "ic705_get_operating_mode",
+                "id": "P7K)Xx00u?]_C|dfP(D8"
+               }
+              }
+             }
+            }
+           }
+          }
+         }
+        }
+       }
+      }
+     }
+    }
+   }
+  ]
+ }
+}

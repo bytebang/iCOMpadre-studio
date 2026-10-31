@@ -9,7 +9,7 @@ A list holds several values in a fixed order. For iCOMpadre lists are especially
 
 ## Create list with {#lists_create_with}
 
-![Create list block](img/lists_create_with.png){ width="165" }
+![Create list block](../img/lists_create_with.png){ width="165" }
 
 Creates a list from the values plugged into it. Click on the gear icon to add or remove places.
 
@@ -24,7 +24,7 @@ Example: *create list with* 20, 1 is the CI-V command for the AF level.
 
 ## Length of {#lists_length}
 
-![Length of list block](img/lists_length.png){ width="101" }
+![Length of list block](../img/lists_length.png){ width="101" }
 
 The number of items in a list.
 
@@ -37,7 +37,7 @@ The number of items in a list.
 
 ## Is empty {#lists_isEmpty}
 
-![List is empty block](img/lists_isEmpty.png){ width="122" }
+![List is empty block](../img/lists_isEmpty.png){ width="122" }
 
 *True* if the list has no items.
 
@@ -50,7 +50,7 @@ The number of items in a list.
 
 ## Find occurrence of item {#lists_indexOf}
 
-![Find item block](img/lists_indexOf.png){ width="346" }
+![Find item block](../img/lists_indexOf.png){ width="346" }
 
 Searches the list for a value and returns its position: the *first* or the *last* place where it is found. Returns 0 if the value is not in the list.
 
@@ -63,7 +63,7 @@ Searches the list for a value and returns its position: the *first* or the *last
 
 ## Get item {#lists_getIndex}
 
-![Get item block](img/lists_getIndex.png){ width="227" }
+![Get item block](../img/lists_getIndex.png){ width="227" }
 
 Reads an item from the list.
 
@@ -85,7 +85,7 @@ Example: *in list* answer *get #* 1 returns the first number of an answer of the
 
 ## Set item {#lists_setIndex}
 
-![Set item block](img/lists_setIndex.png){ width="274" }
+![Set item block](../img/lists_setIndex.png){ width="274" }
 
 Changes a list.
 
@@ -102,7 +102,7 @@ Changes a list.
 
 ## Get sub-list {#lists_getSublist}
 
-![Get sub-list block](img/lists_getSublist.png){ width="367" }
+![Get sub-list block](../img/lists_getSublist.png){ width="367" }
 
 Returns a new list with a part of the items, e.g. all items *from #* 2 *to last*. The original list stays unchanged.
 
@@ -115,7 +115,7 @@ Returns a new list with a part of the items, e.g. all items *from #* 2 *to last*
 
 ## Make list from text {#lists_split}
 
-![Make list from text block](img/lists_split.png){ width="335" }
+![Make list from text block](../img/lists_split.png){ width="335" }
 
 Converts between texts and lists:
 

@@ -1,0 +1,201 @@
+{
+ "blocks": {
+  "languageVersion": 0,
+  "blocks": [
+   {
+    "type": "onstartup",
+    "id": "4-r[NJI`Ca.$f;rCSdXS",
+    "x": 20,
+    "y": 20,
+    "inputs": {
+     "actions": {
+      "block": {
+       "type": "variables_set",
+       "id": "*IH[+o0byie*s5=X`+b3",
+       "fields": {
+        "VAR": {
+         "id": "count"
+        }
+       },
+       "inputs": {
+        "VALUE": {
+         "block": {
+          "type": "math_number",
+          "id": "RHQ,YZj$Qd;6f8~KXE*i",
+          "fields": {
+           "NUM": 0
+          }
+         }
+        }
+       },
+       "next": {
+        "block": {
+         "type": "variables_set",
+         "id": "g_Y[iSE3dY8`ae1HST9m",
+         "fields": {
+          "VAR": {
+           "id": "wasTransmitting"
+          }
+         },
+         "inputs": {
+          "VALUE": {
+           "block": {
+            "type": "logic_boolean",
+            "id": "oA|^/%ARESqG*T}Uh`?,",
+            "fields": {
+             "BOOL": "FALSE"
+            }
+           }
+          }
+         }
+        }
+       }
+      }
+     }
+    }
+   },
+   {
+    "type": "periodically",
+    "id": "5vV,5Zr;ChSZcPamA?!a",
+    "x": 20,
+    "y": 150,
+    "inputs": {
+     "actions": {
+      "block": {
+       "type": "controls_if",
+       "id": "^W27ZR/Ec]t~f8#J8B1b",
+       "inputs": {
+        "IF0": {
+         "block": {
+          "type": "logic_operation",
+          "id": "?bojvL)%}yd;k*=/H%D9",
+          "fields": {
+           "OP": "AND"
+          },
+          "inputs": {
+           "A": {
+            "block": {
+             "type": "ic705_is_transmitting",
+             "id": "jM~2)ae86]%a|=fWP1#6"
+            }
+           },
+           "B": {
+            "block": {
+             "type": "logic_negate",
+             "id": "*T@%JoHtAWR*5qmdO6|K",
+             "inputs": {
+              "BOOL": {
+               "block": {
+                "type": "variables_get",
+                "id": ":P+i]b+8C(|O0Q+h$Jfz",
+                "fields": {
+                 "VAR": {
+                  "id": "wasTransmitting"
+                 }
+                }
+               }
+              }
+             }
+            }
+           }
+          }
+         }
+        },
+        "DO0": {
+         "block": {
+          "type": "math_change",
+          "id": "~T/5ro6qFEXHFVI%G/FM",
+          "fields": {
+           "VAR": {
+            "id": "count"
+           }
+          },
+          "inputs": {
+           "DELTA": {
+            "block": {
+             "type": "math_number",
+             "id": "a9BoB+=_#J{xzSWq3!]Y",
+             "fields": {
+              "NUM": 1
+             }
+            }
+           }
+          },
+          "next": {
+           "block": {
+            "type": "text_print",
+            "id": "3=HfuPm3FnlKQDSN(fy-",
+            "inputs": {
+             "TEXT": {
+              "block": {
+               "type": "text_join",
+               "id": "^,i7KTL1qzgv`=lS4sub",
+               "extraState": {
+                "itemCount": 2
+               },
+               "inputs": {
+                "ADD0": {
+                 "block": {
+                  "type": "text",
+                  "id": "o[=LohK{M76eW}!RRPw^",
+                  "fields": {
+                   "TEXT": "Transmissions: "
+                  }
+                 }
+                },
+                "ADD1": {
+                 "block": {
+                  "type": "variables_get",
+                  "id": "iM]VwHK2;|HKjxdI3%Qs",
+                  "fields": {
+                   "VAR": {
+                    "id": "count"
+                   }
+                  }
+                 }
+                }
+               }
+              }
+             }
+            }
+           }
+          }
+         }
+        }
+       },
+       "next": {
+        "block": {
+         "type": "variables_set",
+         "id": "7g|erAiVSi|[XM6f*USW",
+         "fields": {
+          "VAR": {
+           "id": "wasTransmitting"
+          }
+         },
+         "inputs": {
+          "VALUE": {
+           "block": {
+            "type": "ic705_is_transmitting",
+            "id": "~`%2Cil+QjAQ4V`_R(pJ"
+           }
+          }
+         }
+        }
+       }
+      }
+     }
+    }
+   }
+  ]
+ },
+ "variables": [
+  {
+   "name": "count",
+   "id": "count"
+  },
+  {
+   "name": "wasTransmitting",
+   "id": "wasTransmitting"
+  }
+ ]
+}

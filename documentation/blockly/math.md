@@ -6,7 +6,7 @@ Math blocks calculate with numbers, e.g. to convert a value or to keep it within
 
 ## Number {#math_number}
 
-![Number block](img/math_number.png){ width="45" }
+![Number block](../img/math_number.png){ width="45" }
 
 A fixed number. Click on it to change it. Decimals are written with a point: `3.3`.
 
@@ -22,7 +22,7 @@ A fixed number. Click on it to change it. Decimals are written with a point: `3.
 
 ## Arithmetic {#math_arithmetic}
 
-![Arithmetic block](img/math_arithmetic.png){ width="123" }
+![Arithmetic block](../img/math_arithmetic.png){ width="123" }
 
 Calculates with two numbers. Choose the operation in the middle: `+` plus, `-` minus, `×` times, `÷` divided by, `^` to the power of.
 
@@ -40,7 +40,7 @@ Example: *frequency + 1000* is the frequency 1 kHz higher.
 
 ## Constrain {#math_constrain}
 
-![Constrain block](img/math_constrain.png){ width="258" }
+![Constrain block](../img/math_constrain.png){ width="258" }
 
 Keeps a number between *low* and *high*: smaller values become *low*, bigger values become *high*, all others stay as they are.
 
@@ -55,7 +55,7 @@ Example: *constrain* RF Gain *low* 0 *high* 30 makes sure that the RF gain is ne
 
 ## Remainder of {#math_modulo}
 
-![Remainder block](img/math_modulo.png){ width="198" }
+![Remainder block](../img/math_modulo.png){ width="198" }
 
 The remainder of a division: 17 ÷ 5 is 3, remainder **2**.
 
@@ -70,7 +70,7 @@ Example: the remainder of a counter ÷ 10 is 0 every 10th time, which is handy t
 
 ## Sum of list {#math_on_list}
 
-![Sum of list block](img/math_on_list.png){ width="133" }
+![Sum of list block](../img/math_on_list.png){ width="133" }
 
 Calculates one value from all numbers of a [list](lists.md):
 
@@ -101,7 +101,7 @@ Calculates one value from all numbers of a [list](lists.md):
 
 ## Is even {#math_number_property}
 
-![Is even block](img/math_number_property.png){ width="136" }
+![Is even block](../img/math_number_property.png){ width="136" }
 
 Checks a number and answers with *true* or *false*. You can check whether it is *even*, *odd*, *prime*, *whole*, *positive*, *negative* or *divisible by* another number.
 
@@ -116,7 +116,7 @@ Checks a number and answers with *true* or *false*. You can check whether it is 
 
 ## Constant {#math_constant}
 
-![Constant block](img/math_constant.png){ width="63" }
+![Constant block](../img/math_constant.png){ width="63" }
 
 A mathematical constant: π (3.141…), e (2.718…), φ (1.618…), sqrt(2) (1.414…), sqrt(½) (0.707…) or ∞ (infinity).
 
@@ -129,7 +129,7 @@ A mathematical constant: π (3.141…), e (2.718…), φ (1.618…), sqrt(2) (1.
 
 ## Square root {#math_single}
 
-![Square root block](img/math_single.png){ width="135" }
+![Square root block](../img/math_single.png){ width="135" }
 
 Applies a function to a number:
 

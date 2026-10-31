@@ -3,7 +3,7 @@
 // 1. Copy this file to radio/<radio>.js (e.g. radio/ic7300.js)
 // 2. Replace "myradio" / "My Radio" with the name of your radio
 // 3. Include the file in studio/index.html (after base.js) and in the preloader list of ../index.html
-// 4. Document the blocks in documentation/blocks/radio/<radio>.md (same name as this file)
+// 4. Document the blocks in documentation/radio/<radio>.md (same name as this file)
 //
 // Conventions:
 // - Block types are prefixed with the radio: "myradio_set_af_level"
@@ -11,7 +11,7 @@
 // - Every generator states the CI-V command it sends (see the CI-V reference guide of the radio)
 // - Don't set a colour: all blocks of the category get the colour of the style "radio"
 // - Don't set a helpUrl: every block links automatically to the heading with its block type
-//   in documentation/blocks/radio/<radio>.md, e.g. "## Set AF Level {#myradio_set_af_level}"
+//   in documentation/radio/<radio>.md, e.g. "## Set AF Level {#myradio_set_af_level}"
 
 // Register the contribution of this file
 var myradio = Studio.category("My Radio", "radio");

@@ -1,0 +1,9 @@
+# the order of the toolbox
+nav:
+  - logic.md
+  - control.md
+  - math.md
+  - lists.md
+  - text.md
+  - variables.md
+  - functions.md

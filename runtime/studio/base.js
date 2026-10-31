@@ -5,16 +5,16 @@
 // sendCommand, readResultOfCommand, wait, millis, configSerial,
 // setDigitalOutput, readDigitalInput, setAnalogOutput, readAnalogInput, readTouchInput
 //
-// Documentation of the blocks: documentation/blocks/base.md
+// Documentation of the blocks: documentation/base/<group>.md, one page per group
 
-// Register the contribution of this file: one category with a group (and colour) per topic
+// Register the contribution of this file: one category with a group (colour and help page) per topic
 var base = Studio.category("iCOMpadre");
-var program  = base.group("Program", "program");
-var radio    = base.group("Radio", "radio");
-var pins     = base.group("Pins", "pins");
-var serial   = base.group("Serial", "serial");
-var storage  = base.group("Storage", "storage");
-var helpers  = base.group("Helpers", "helpers");
+var program  = base.group("Program", "program", "program");
+var radio    = base.group("Radio", "radio", "radio");
+var pins     = base.group("Pins", "pins", "pins");
+var serial   = base.group("Serial", "serial", "serial");
+var storage  = base.group("Storage", "storage", "storage");
+var helpers  = base.group("Helpers", "helpers", "helpers");
 
 // Pins of the iCOMpadre connector
 var PINS_ALL   = [["PIN A", "PIN_A"], ["PIN B", "PIN_B"], ["PIN C", "PIN_C"], ["PIN D", "PIN_D"],

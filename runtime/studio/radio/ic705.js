@@ -7,7 +7,7 @@
 // so sketches keep working: e.g. "input" and "field" keep the old names, the VFOs are separate blocks
 // and the attenuator is switched on or off.
 //
-// Documentation of the blocks: documentation/blocks/radio/ic705.md
+// Documentation of the blocks: documentation/radio/ic705.md
 
 Icom.radio({
   "prefix": "ic705",

@@ -5,7 +5,7 @@
 // their data, so the values used by all Icom radios are used: modes, 20 dB attenuator (20), preamp (00/01),
 // levels 0000 ~ 0255 and the S-meter scale (0000 = S0, 0120 = S9, 0241 = S9+60 dB).
 //
-// Documentation of the blocks: documentation/blocks/radio/ic718.md
+// Documentation of the blocks: documentation/radio/ic718.md
 
 Icom.radio({
   "prefix": "ic718",

@@ -27,11 +27,15 @@ runtime/
     ├── img/              toolbar icons
     └── blockly/          blockly 13: core, default blocks, english texts, lua generator, media, multiline text plugin
 documentation/            user documentation (merged into the iCOMpadre userguide by the CI)
-└── blocks/
-    ├── base.md           documentation of the blocks in studio/base.js
-    └── radio/
-        ├── ic705.md      documentation of the blocks in studio/radio/ic705.js
-        └── ic7610.md ... documentation of the radios described with Icom.radio()
+├── .pages                order and titles of the pages in the menu (also in the sub folders)
+├── index.md, editor.md, tutorial.md, blocks.md, about.md
+├── tutorial/             the programs of the tutorial (.json to open in the studio) and their pictures
+├── blockly/              the standard blockly categories (logic.md, control.md, ...)
+├── base/                 documentation of the blocks in studio/base.js, one page per group (program.md, pins.md, ...)
+├── radio/
+│   ├── ic705.md          documentation of the blocks in studio/radio/ic705.js
+│   └── ic7610.md ...     documentation of the radios described with Icom.radio()
+└── img/                  pictures of the blocks
 webserver.py              local development server
 ```
 
@@ -113,8 +117,8 @@ meter scales, memory channels, ...). For them it is enough to **describe** the r
    Every entry is explained in `runtime/studio/radio/icom.js`. The usual settings with more than on/off (`choices`) and the usual levels
    (`levels`) are given by their name, see `CHOICES` and `LEVELS` there.
 3. Include the file in `runtime/studio/index.html` below `radio/icom.js` (the order of the files is the order in the toolbox), and add it to the `filesToLoad` list in `runtime/index.html`.
-4. Write `documentation/blocks/radio/<radio>.md` (the existing ones show the structure: one section per block, with the CI-V command and the page)
-   and add the radio to `documentation/blocks/index.md`.
+4. Write `documentation/radio/<radio>.md` (the existing ones show the structure: one section per block, with the CI-V command and the page)
+   and add the radio to `documentation/radio/.pages`, `documentation/blocks.md` and the list of radios in `documentation/base/radio.md`.
 
 A command which several radios have belongs into `Icom.radio()` as a new entry. Blocks which only make sense for one radio can also be written by hand:
 
@@ -129,7 +133,7 @@ A command which several radios have belongs into `Icom.radio()` as a new entry. 
    {"name":"radio functionality",    "url":"studio/radio/ic7300.js"},
    ```
 5. Write the blocks (see conventions below). The CI-V reference guide of the radio lists the commands.
-6. Document the blocks in `documentation/blocks/radio/<radio>.md`, named like the js file (see *Help* below).
+6. Document the blocks in `documentation/radio/<radio>.md`, named like the js file (see *Help* below), and add it to the lists like in step 4 above.
 
 ## Block conventions
 
@@ -165,14 +169,15 @@ The colours don't collide with the standard blockly categories. A new radio simp
 
 ## Help (convention over configuration)
 
-The documentation under `documentation/blocks/` mirrors the block files under `runtime/studio/`:
+The documentation under `documentation/` mirrors the block files under `runtime/studio/`:
 
 | Block file | Documentation | Help link of a block |
 | --- | --- | --- |
-| `studio/base.js` | `documentation/blocks/base.md` | `../userguide/studio/blocks/base/#<blocktype>` |
-| `studio/radio/ic705.js` | `documentation/blocks/radio/ic705.md` | `../userguide/studio/blocks/radio/ic705/#<blocktype>` |
+| `studio/radio/ic705.js` | `documentation/radio/ic705.md` | `../userguide/studio/radio/ic705/#<blocktype>` |
+| `studio/base.js`, group `base.group("Pins", "pins", "pins")` | `documentation/base/pins.md` | `../userguide/studio/base/pins/#<blocktype>` |
 
 `Studio.category()` remembers which file registered the category, and `Studio.buildToolbox()` gives every block of it this link (*Help* in the context menu of the block).
+A group with a third parameter gets its own page in a folder named like the file; groups without it (e.g. the topics of the radios) share the page of their category.
 To make the link jump to the right place, give the heading of the block its block type as id:
 
 ```markdown
@@ -191,7 +196,8 @@ python ../webserver.py
 Enter a port between 8000 and 8100 and open `http://localhost:<port>/`. The server serves `runtime/` and accepts `PUT` for `.lua` and `.json` files, like the device does.
 Help links don't work locally, because the userguide only exists in the CI build.
 
-To build the userguide with the studio documentation locally, do what the CI does: copy `documentation/` of this app to `documentation/studio/` of the iCOMpadre repository and run `mkdocs build` there.
+To build the userguide with the studio documentation locally, do what the CI does: copy `documentation/` of this app (including the hidden `.pages` files) to `documentation/studio/` of the iCOMpadre repository and run `mkdocs build` there.
+The order and the titles of the pages in the menu come from the `.pages` files (plugin `mkdocs-awesome-pages-plugin`); a new page has to be added there.
 
 ### Checklist before committing a radio
 

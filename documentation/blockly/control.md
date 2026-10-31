@@ -3,14 +3,14 @@
 Control blocks decide **which** blocks are executed and **how often**.
 
 !!! note "There is no endless loop"
-    You don't need a *repeat forever* block: [Periodically](base.md#periodically) is already executed over and over again.
+    You don't need a *repeat forever* block: [Periodically](../base/program.md#periodically) is already executed over and over again.
     Keep the blocks in there short, so iCOMpadre has enough time to talk to the radio.
 
 ---
 
 ## If {#controls_if}
 
-![If block](img/controls_if.png){ width="75" }
+![If block](../img/controls_if.png){ width="75" }
 
 Executes the blocks in *do* only if the condition at *if* is true. Otherwise they are skipped.
 
@@ -36,7 +36,7 @@ Example: *if* AF Level > 80 *do* print "loud", *else if* AF Level > 30 *do* prin
 
 ## Test {#logic_ternary}
 
-![Test block](img/logic_ternary.png){ width="87" }
+![Test block](../img/logic_ternary.png){ width="87" }
 
 Chooses between two values: if the condition at *test* is true, the block returns the value at *if true*, otherwise the value at *if false*.
 It is a short form of the if block, which can be plugged in wherever a value is expected.
@@ -55,7 +55,7 @@ Example: *test* AF Level > 50, *if true* "loud", *if false* "quiet".
 
 ## For each item in list {#controls_forEach}
 
-![For each block](img/controls_forEach.png){ width="195" }
+![For each block](../img/controls_forEach.png){ width="195" }
 
 Executes the blocks in *do* once for every item of a [list](lists.md). The variable (*i*) contains the current item.
 
@@ -72,7 +72,7 @@ Example: for each item in the list *7000000, 14000000, 21000000*, print the item
 
 ## Break out / continue {#controls_flow_statements}
 
-![Break out block](img/controls_flow_statements.png){ width="160" }
+![Break out block](../img/controls_flow_statements.png){ width="160" }
 
 Can only be used inside a [for each](#controls_forEach) block:
 
