@@ -137,7 +137,7 @@ Blockly.Blocks['onstartup'] = {
   }
 };
 
-Blockly.Lua['onstartup'] = function(block) {
+Blockly.Lua.forBlock['onstartup'] = function(block) {
   var statements_actions = Blockly.Lua.statementToCode(block, 'actions');
   return 'function onStartup()\n' + statements_actions + 'end';
 };
@@ -157,7 +157,7 @@ Blockly.Blocks['periodically'] = {
   }
 };
 
-Blockly.Lua['periodically'] = function(block) {
+Blockly.Lua.forBlock['periodically'] = function(block) {
   var statements_actions = Blockly.Lua.statementToCode(block, 'actions');
   return 'function periodically()\n' + statements_actions + 'end';
 };
@@ -172,7 +172,7 @@ Blockly.Blocks['onchangeof'] = {
   init: function() {
     this.appendValueInput("expr")
         .setCheck(null)
-        .setAlign(Blockly.ALIGN_RIGHT)
+        .setAlign(Blockly.inputs.Align.RIGHT)
         .appendField("On change of");
     this.appendStatementInput("statements")
         .setCheck(["Boolean", "Number", "String"]);
@@ -182,8 +182,8 @@ Blockly.Blocks['onchangeof'] = {
   }
 };
 
-Blockly.Lua['onchangeof'] = function(block) {
-  var value_expr = Blockly.Lua.valueToCode(block, 'expr', Blockly.Lua.ORDER_ATOMIC);
+Blockly.Lua.forBlock['onchangeof'] = function(block) {
+  var value_expr = Blockly.Lua.valueToCode(block, 'expr', lua.Order.ATOMIC);
   var statements_statements = Blockly.Lua.statementToCode(block, 'statements');
 
   // every block gets its own global variable to remember the last value,
@@ -220,8 +220,8 @@ Blockly.Blocks['wait'] = {
   }
 };
 
-Blockly.Lua['wait'] = function(block) {
-  var value_timeout = Blockly.Lua.valueToCode(block, 'timeout', Blockly.Lua.ORDER_ATOMIC);
+Blockly.Lua.forBlock['wait'] = function(block) {
+  var value_timeout = Blockly.Lua.valueToCode(block, 'timeout', lua.Order.ATOMIC);
   return 'wait(' + value_timeout + ')\n';
 };
 
@@ -243,8 +243,8 @@ Blockly.Blocks['executeluachunk'] = {
   }
 };
 
-Blockly.Lua['executeluachunk'] = function(block) {
-  var value_script = Blockly.Lua.valueToCode(block, 'chunk', Blockly.Lua.ORDER_ATOMIC);
+Blockly.Lua.forBlock['executeluachunk'] = function(block) {
+  var value_script = Blockly.Lua.valueToCode(block, 'chunk', lua.Order.ATOMIC);
   return 'load(' + value_script + ')()\n';
 };
 
@@ -262,8 +262,8 @@ Blockly.Blocks['millis'] = {
   }
 };
 
-Blockly.Lua['millis'] = function(block) {
-  return ['millis()', Blockly.Lua.ORDER_NONE];
+Blockly.Lua.forBlock['millis'] = function(block) {
+  return ['millis()', lua.Order.NONE];
 };
 
 program.property("millis");
@@ -280,11 +280,11 @@ Blockly.Blocks['sendcommand'] = {
         .appendField("send command to radio");
     this.appendValueInput("cmd")
         .setCheck("Array")
-        .setAlign(Blockly.ALIGN_RIGHT)
+        .setAlign(Blockly.inputs.Align.RIGHT)
         .appendField("command");
     this.appendValueInput("data")
         .setCheck("Array")
-        .setAlign(Blockly.ALIGN_RIGHT)
+        .setAlign(Blockly.inputs.Align.RIGHT)
         .appendField("data");
     this.setPreviousStatement(true, null);
     this.setNextStatement(true, null);
@@ -292,9 +292,9 @@ Blockly.Blocks['sendcommand'] = {
   }
 };
 
-Blockly.Lua['sendcommand'] = function(block) {
-  var value_cmd = Blockly.Lua.valueToCode(block, 'cmd', Blockly.Lua.ORDER_ATOMIC);
-  var value_data = Blockly.Lua.valueToCode(block, 'data', Blockly.Lua.ORDER_ATOMIC);
+Blockly.Lua.forBlock['sendcommand'] = function(block) {
+  var value_cmd = Blockly.Lua.valueToCode(block, 'cmd', lua.Order.ATOMIC);
+  var value_data = Blockly.Lua.valueToCode(block, 'data', lua.Order.ATOMIC);
   return 'sendCommand(' + value_cmd + ', ' + value_data + ')\n';
 };
 
@@ -314,10 +314,10 @@ Blockly.Blocks['readdata'] = {
   }
 };
 
-Blockly.Lua['readdata'] = function(block) {
-  var value_command = Blockly.Lua.valueToCode(block, 'commandsequence', Blockly.Lua.ORDER_ATOMIC);
+Blockly.Lua.forBlock['readdata'] = function(block) {
+  var value_command = Blockly.Lua.valueToCode(block, 'commandsequence', lua.Order.ATOMIC);
   var code = 'readResultOfCommand(sendCommand(' + value_command + '))';
-  return [code, Blockly.Lua.ORDER_NONE];
+  return [code, lua.Order.NONE];
 };
 
 radio.property("readdata");
@@ -335,10 +335,10 @@ Blockly.Blocks['bcdasnumber'] = {
   }
 };
 
-Blockly.Lua['bcdasnumber'] = function(block) {
-  var inarray = Blockly.Lua.valueToCode(block, 'inputarray', Blockly.Lua.ORDER_ATOMIC);
+Blockly.Lua.forBlock['bcdasnumber'] = function(block) {
+  var inarray = Blockly.Lua.valueToCode(block, 'inputarray', lua.Order.ATOMIC);
   Studio.use('bcdToNumber');
-  return ['bcdToNumber(' + inarray + ')', Blockly.Lua.ORDER_ATOMIC];
+  return ['bcdToNumber(' + inarray + ')', lua.Order.ATOMIC];
 };
 
 radio.helper("bcdasnumber");
@@ -356,10 +356,10 @@ Blockly.Blocks['prettystring'] = {
   }
 };
 
-Blockly.Lua['prettystring'] = function(block) {
-  var inarray = Blockly.Lua.valueToCode(block, 'inputarray', Blockly.Lua.ORDER_ATOMIC);
+Blockly.Lua.forBlock['prettystring'] = function(block) {
+  var inarray = Blockly.Lua.valueToCode(block, 'inputarray', lua.Order.ATOMIC);
   Studio.use('pretty');
-  return ['pretty(' + inarray + ')', Blockly.Lua.ORDER_ATOMIC];
+  return ['pretty(' + inarray + ')', lua.Order.ATOMIC];
 };
 
 radio.helper("prettystring");
@@ -384,9 +384,9 @@ Blockly.Blocks['setanalogoutput'] = {
   }
 };
 
-Blockly.Lua['setanalogoutput'] = function(block) {
+Blockly.Lua.forBlock['setanalogoutput'] = function(block) {
   var desiredPin = Blockly.Lua.nameDB_.getName(block.getFieldValue('pinname'), Blockly.Names.NameType.VARIABLE);
-  var newValue = Blockly.Lua.valueToCode(block, 'newvalue', Blockly.Lua.ORDER_ATOMIC);
+  var newValue = Blockly.Lua.valueToCode(block, 'newvalue', lua.Order.ATOMIC);
   return 'setAnalogOutput(' + desiredPin + ', ' + newValue + ')\n';
 };
 
@@ -409,9 +409,9 @@ Blockly.Blocks['setdigitaloutput'] = {
   }
 };
 
-Blockly.Lua['setdigitaloutput'] = function(block) {
+Blockly.Lua.forBlock['setdigitaloutput'] = function(block) {
   var desiredPin = Blockly.Lua.nameDB_.getName(block.getFieldValue('pinname'), Blockly.Names.NameType.VARIABLE);
-  var newValue = Blockly.Lua.valueToCode(block, 'newvalue', Blockly.Lua.ORDER_ATOMIC);
+  var newValue = Blockly.Lua.valueToCode(block, 'newvalue', lua.Order.ATOMIC);
   return 'setDigitalOutput(' + desiredPin + ', ' + newValue + ')\n';
 };
 
@@ -430,10 +430,10 @@ Blockly.Blocks['readanaloginput'] = {
   }
 };
 
-Blockly.Lua['readanaloginput'] = function(block) {
+Blockly.Lua.forBlock['readanaloginput'] = function(block) {
   var desiredPin = Blockly.Lua.nameDB_.getName(block.getFieldValue('pinname'), Blockly.Names.NameType.VARIABLE);
   var code = 'readAnalogInput(' + desiredPin + ')';
-  return [code, Blockly.Lua.ORDER_RELATIONAL];
+  return [code, lua.Order.RELATIONAL];
 };
 
 pins.property("readanaloginput");
@@ -451,10 +451,10 @@ Blockly.Blocks['readdigitalinput'] = {
   }
 };
 
-Blockly.Lua['readdigitalinput'] = function(block) {
+Blockly.Lua.forBlock['readdigitalinput'] = function(block) {
   var desiredPin = Blockly.Lua.nameDB_.getName(block.getFieldValue('pinname'), Blockly.Names.NameType.VARIABLE);
   var code = 'readDigitalInput(' + desiredPin + ')';
-  return [code, Blockly.Lua.ORDER_RELATIONAL];
+  return [code, lua.Order.RELATIONAL];
 };
 
 pins.property("readdigitalinput");
@@ -475,10 +475,10 @@ Blockly.Blocks['touchvalue'] = {
   }
 };
 
-Blockly.Lua['touchvalue'] = function(block) {
+Blockly.Lua.forBlock['touchvalue'] = function(block) {
   var desiredPin = Blockly.Lua.nameDB_.getName(block.getFieldValue('pinname'), Blockly.Names.NameType.VARIABLE);
   var code = 'readTouchInput(' + desiredPin + ')';
-  return [code, Blockly.Lua.ORDER_RELATIONAL];
+  return [code, lua.Order.RELATIONAL];
 };
 
 pins.property("touchvalue");
@@ -500,11 +500,11 @@ Blockly.Blocks['isTouched'] = {
   }
 };
 
-Blockly.Lua['isTouched'] = function(block) {
+Blockly.Lua.forBlock['isTouched'] = function(block) {
   var desiredPin = Blockly.Lua.nameDB_.getName(block.getFieldValue('pinname'), Blockly.Names.NameType.VARIABLE);
   var threshold = block.getFieldValue('threshold');
   var code = '(readTouchInput(' + desiredPin + ') ' + threshold + ')';
-  return [code, Blockly.Lua.ORDER_RELATIONAL];
+  return [code, lua.Order.RELATIONAL];
 };
 
 pins.property("isTouched");
@@ -526,22 +526,22 @@ Blockly.Blocks['voltagevalue'] = {
   }
 };
 
-Blockly.Lua['voltagevalue'] = function(block) {
-  var voltageValue = Blockly.Lua.valueToCode(block, 'voltage', Blockly.Lua.ORDER_MULTIPLICATIVE) || '0';
+Blockly.Lua.forBlock['voltagevalue'] = function(block) {
+  var voltageValue = Blockly.Lua.valueToCode(block, 'voltage', lua.Order.MULTIPLICATIVE) || '0';
   var dropdown_unit = block.getFieldValue('vunit');
 
   // a plain number can be converted right away
   if (/^-?\d+(\.\d+)?$/.test(voltageValue))
   {
-    return [String(parseFloat(voltageValue) * parseFloat(dropdown_unit)), Blockly.Lua.ORDER_ATOMIC];
+    return [String(parseFloat(voltageValue) * parseFloat(dropdown_unit)), lua.Order.ATOMIC];
   }
 
   // everything else (variables, calculations, ...) has to be converted at runtime
   if (dropdown_unit == "1")
   {
-    return [voltageValue, Blockly.Lua.ORDER_MULTIPLICATIVE];
+    return [voltageValue, lua.Order.MULTIPLICATIVE];
   }
-  return [voltageValue + ' * ' + dropdown_unit, Blockly.Lua.ORDER_MULTIPLICATIVE];
+  return [voltageValue + ' * ' + dropdown_unit, lua.Order.MULTIPLICATIVE];
 };
 
 pins.helper("voltagevalue");
@@ -555,7 +555,7 @@ pins.helper("voltagevalue");
 Blockly.Blocks['onserialline'] = {
   init: function() {
     this.appendDummyInput()
-        .setAlign(Blockly.ALIGN_RIGHT)
+        .setAlign(Blockly.inputs.Align.RIGHT)
         .appendField(new Blockly.FieldVariable("line"), "Line");
     this.appendStatementInput("actions")
         .setCheck(null)
@@ -564,7 +564,7 @@ Blockly.Blocks['onserialline'] = {
   }
 };
 
-Blockly.Lua['onserialline'] = function(block) {
+Blockly.Lua.forBlock['onserialline'] = function(block) {
   var variable_line = Blockly.Lua.nameDB_.getName(block.getFieldValue('Line'), Blockly.Names.NameType.VARIABLE);
   var statements_actions = Blockly.Lua.statementToCode(block, 'actions');
   return 'function onSerialLine(' + variable_line + ')\n' + statements_actions + 'end';
@@ -578,7 +578,7 @@ serial.event("onserialline");
 Blockly.Blocks['onserialbyte'] = {
   init: function() {
     this.appendDummyInput()
-        .setAlign(Blockly.ALIGN_RIGHT)
+        .setAlign(Blockly.inputs.Align.RIGHT)
         .appendField(new Blockly.FieldVariable("byte"), "Byte");
     this.appendStatementInput("actions")
         .setCheck(null)
@@ -587,7 +587,7 @@ Blockly.Blocks['onserialbyte'] = {
   }
 };
 
-Blockly.Lua['onserialbyte'] = function(block) {
+Blockly.Lua.forBlock['onserialbyte'] = function(block) {
   var variable_data = Blockly.Lua.nameDB_.getName(block.getFieldValue('Byte'), Blockly.Names.NameType.VARIABLE);
   var statements_actions = Blockly.Lua.statementToCode(block, 'actions');
   return 'function onSerialByte(' + variable_data + ')\n' + statements_actions + 'end';
@@ -623,7 +623,7 @@ Blockly.Blocks['configserial'] = {
   }
 };
 
-Blockly.Lua['configserial'] = function(block) {
+Blockly.Lua.forBlock['configserial'] = function(block) {
   var value_speed = block.getFieldValue('speed');
   return 'configSerial(' + value_speed + ')\n';
 };
@@ -797,10 +797,10 @@ Blockly.Blocks['storage_remember'] = {
   }
 };
 
-Blockly.Lua['storage_remember'] = function(block) {
+Blockly.Lua.forBlock['storage_remember'] = function(block) {
   Studio.use('kvSet');
-  var value = Blockly.Lua.valueToCode(block, 'VALUE', Blockly.Lua.ORDER_NONE) || 'nil';
-  var key = Blockly.Lua.valueToCode(block, 'KEY', Blockly.Lua.ORDER_NONE) || "''";
+  var value = Blockly.Lua.valueToCode(block, 'VALUE', lua.Order.NONE) || 'nil';
+  var key = Blockly.Lua.valueToCode(block, 'KEY', lua.Order.NONE) || "''";
   return 'kvSet(' + key + ', ' + value + ')\n';
 };
 
@@ -824,9 +824,9 @@ Blockly.Blocks['storage_forget'] = {
   }
 };
 
-Blockly.Lua['storage_forget'] = function(block) {
+Blockly.Lua.forBlock['storage_forget'] = function(block) {
   Studio.use('kvSet');
-  var key = Blockly.Lua.valueToCode(block, 'KEY', Blockly.Lua.ORDER_NONE) || "''";
+  var key = Blockly.Lua.valueToCode(block, 'KEY', lua.Order.NONE) || "''";
   return 'kvSet(' + key + ', nil)\n';
 };
 
@@ -851,10 +851,10 @@ Blockly.Blocks['storage_append_line'] = {
   }
 };
 
-Blockly.Lua['storage_append_line'] = function(block) {
+Blockly.Lua.forBlock['storage_append_line'] = function(block) {
   Studio.use('storageAppendLine');
-  var text = Blockly.Lua.valueToCode(block, 'TEXT', Blockly.Lua.ORDER_NONE) || "''";
-  var file = Blockly.Lua.valueToCode(block, 'FILE', Blockly.Lua.ORDER_NONE) || "''";
+  var text = Blockly.Lua.valueToCode(block, 'TEXT', lua.Order.NONE) || "''";
+  var file = Blockly.Lua.valueToCode(block, 'FILE', lua.Order.NONE) || "''";
   return 'storageAppendLine(' + file + ', ' + text + ')\n';
 };
 
@@ -879,10 +879,10 @@ Blockly.Blocks['storage_append_csv'] = {
   }
 };
 
-Blockly.Lua['storage_append_csv'] = function(block) {
+Blockly.Lua.forBlock['storage_append_csv'] = function(block) {
   Studio.use(['storageAppendLine', 'storageCsvLine']);
-  var list = Blockly.Lua.valueToCode(block, 'LIST', Blockly.Lua.ORDER_NONE) || '{}';
-  var file = Blockly.Lua.valueToCode(block, 'FILE', Blockly.Lua.ORDER_NONE) || "''";
+  var list = Blockly.Lua.valueToCode(block, 'LIST', lua.Order.NONE) || '{}';
+  var file = Blockly.Lua.valueToCode(block, 'FILE', lua.Order.NONE) || "''";
   return 'storageAppendLine(' + file + ', storageCsvLine(' + list + '))\n';
 };
 
@@ -907,10 +907,10 @@ Blockly.Blocks['storage_write_file'] = {
   }
 };
 
-Blockly.Lua['storage_write_file'] = function(block) {
+Blockly.Lua.forBlock['storage_write_file'] = function(block) {
   Studio.use(['storageCheck', 'storageWrite']);
-  var text = Blockly.Lua.valueToCode(block, 'TEXT', Blockly.Lua.ORDER_NONE) || "''";
-  var file = Blockly.Lua.valueToCode(block, 'FILE', Blockly.Lua.ORDER_NONE) || "''";
+  var text = Blockly.Lua.valueToCode(block, 'TEXT', lua.Order.NONE) || "''";
+  var file = Blockly.Lua.valueToCode(block, 'FILE', lua.Order.NONE) || "''";
   return 'storageCheck(storageWrite(' + file + ', ' + text + ', "w"))\n';
 };
 
@@ -934,8 +934,8 @@ Blockly.Blocks['storage_delete_file'] = {
   }
 };
 
-Blockly.Lua['storage_delete_file'] = function(block) {
-  var file = Blockly.Lua.valueToCode(block, 'FILE', Blockly.Lua.ORDER_NONE) || "''";
+Blockly.Lua.forBlock['storage_delete_file'] = function(block) {
+  var file = Blockly.Lua.valueToCode(block, 'FILE', lua.Order.NONE) || "''";
   return 'os.remove(' + file + ')\n';
 };
 
@@ -959,11 +959,11 @@ Blockly.Blocks['storage_recall'] = {
   }
 };
 
-Blockly.Lua['storage_recall'] = function(block) {
+Blockly.Lua.forBlock['storage_recall'] = function(block) {
   Studio.use('kvGet');
-  var key = Blockly.Lua.valueToCode(block, 'KEY', Blockly.Lua.ORDER_NONE) || "''";
-  var fallback = Blockly.Lua.valueToCode(block, 'DEFAULT', Blockly.Lua.ORDER_NONE) || 'nil';
-  return ['kvGet(' + key + ', ' + fallback + ')', Blockly.Lua.ORDER_HIGH];
+  var key = Blockly.Lua.valueToCode(block, 'KEY', lua.Order.NONE) || "''";
+  var fallback = Blockly.Lua.valueToCode(block, 'DEFAULT', lua.Order.NONE) || 'nil';
+  return ['kvGet(' + key + ', ' + fallback + ')', lua.Order.HIGH];
 };
 
 storage.property("storage_recall", storageDefault({"KEY": "counter", "DEFAULT": 0}));
@@ -985,10 +985,10 @@ Blockly.Blocks['storage_file_lines'] = {
   }
 };
 
-Blockly.Lua['storage_file_lines'] = function(block) {
+Blockly.Lua.forBlock['storage_file_lines'] = function(block) {
   Studio.use('storageLines');
-  var file = Blockly.Lua.valueToCode(block, 'FILE', Blockly.Lua.ORDER_NONE) || "''";
-  return ['storageLines(' + file + ')', Blockly.Lua.ORDER_HIGH];
+  var file = Blockly.Lua.valueToCode(block, 'FILE', lua.Order.NONE) || "''";
+  return ['storageLines(' + file + ')', lua.Order.HIGH];
 };
 
 storage.property("storage_file_lines", storageDefault({"FILE": "log.txt"}));
@@ -1010,10 +1010,10 @@ Blockly.Blocks['storage_read_file'] = {
   }
 };
 
-Blockly.Lua['storage_read_file'] = function(block) {
+Blockly.Lua.forBlock['storage_read_file'] = function(block) {
   Studio.use('storageRead');
-  var file = Blockly.Lua.valueToCode(block, 'FILE', Blockly.Lua.ORDER_NONE) || "''";
-  return ['(storageRead(' + file + ') or "")', Blockly.Lua.ORDER_HIGH];
+  var file = Blockly.Lua.valueToCode(block, 'FILE', lua.Order.NONE) || "''";
+  return ['(storageRead(' + file + ') or "")', lua.Order.HIGH];
 };
 
 storage.property("storage_read_file", storageDefault({"FILE": "notes.txt"}));
@@ -1034,10 +1034,10 @@ Blockly.Blocks['storage_file_exists'] = {
   }
 };
 
-Blockly.Lua['storage_file_exists'] = function(block) {
+Blockly.Lua.forBlock['storage_file_exists'] = function(block) {
   Studio.use('storageExists');
-  var file = Blockly.Lua.valueToCode(block, 'FILE', Blockly.Lua.ORDER_NONE) || "''";
-  return ['storageExists(' + file + ')', Blockly.Lua.ORDER_HIGH];
+  var file = Blockly.Lua.valueToCode(block, 'FILE', lua.Order.NONE) || "''";
+  return ['storageExists(' + file + ')', lua.Order.HIGH];
 };
 
 storage.property("storage_file_exists", storageDefault({"FILE": "log.csv"}));
@@ -1064,7 +1064,7 @@ Blockly.Blocks['comment'] = {
   }
 };
 
-Blockly.Lua['comment'] = function(block) {
+Blockly.Lua.forBlock['comment'] = function(block) {
   var theComment = block.getFieldValue('theContent');
   return "-- " + theComment + "\n";
 };
@@ -1087,15 +1087,15 @@ Blockly.Blocks['mapnumber'] = {
   }
 };
 
-Blockly.Lua['mapnumber'] = function(block) {
-  var value_val = Blockly.Lua.valueToCode(block, 'val', Blockly.Lua.ORDER_ATOMIC);
-  var value_in_min = Blockly.Lua.valueToCode(block, 'in_min', Blockly.Lua.ORDER_ATOMIC);
-  var value_in_max = Blockly.Lua.valueToCode(block, 'in_max', Blockly.Lua.ORDER_ATOMIC);
-  var value_out_min = Blockly.Lua.valueToCode(block, 'out_min', Blockly.Lua.ORDER_ATOMIC);
-  var value_out_max = Blockly.Lua.valueToCode(block, 'out_max', Blockly.Lua.ORDER_ATOMIC);
+Blockly.Lua.forBlock['mapnumber'] = function(block) {
+  var value_val = Blockly.Lua.valueToCode(block, 'val', lua.Order.ATOMIC);
+  var value_in_min = Blockly.Lua.valueToCode(block, 'in_min', lua.Order.ATOMIC);
+  var value_in_max = Blockly.Lua.valueToCode(block, 'in_max', lua.Order.ATOMIC);
+  var value_out_min = Blockly.Lua.valueToCode(block, 'out_min', lua.Order.ATOMIC);
+  var value_out_max = Blockly.Lua.valueToCode(block, 'out_max', lua.Order.ATOMIC);
   Studio.use('map');
   var code = 'map(' + value_val + ', ' + value_in_min + ', ' + value_in_max + ', ' + value_out_min + ', ' + value_out_max + ')';
-  return [code, Blockly.Lua.ORDER_ATOMIC];
+  return [code, lua.Order.ATOMIC];
 };
 
 helpers.helper("mapnumber");
@@ -1113,9 +1113,9 @@ Blockly.Blocks['asChar'] = {
   }
 };
 
-Blockly.Lua['asChar'] = function(block) {
-  var inbyte = Blockly.Lua.valueToCode(block, 'inByte', Blockly.Lua.ORDER_ATOMIC);
-  return ['string.char(' + inbyte + ')', Blockly.Lua.ORDER_ATOMIC];
+Blockly.Lua.forBlock['asChar'] = function(block) {
+  var inbyte = Blockly.Lua.valueToCode(block, 'inByte', lua.Order.ATOMIC);
+  return ['string.char(' + inbyte + ')', lua.Order.ATOMIC];
 };
 
 helpers.helper("asChar");
@@ -1138,9 +1138,9 @@ Blockly.Blocks['asByte'] = {
   }
 };
 
-Blockly.Lua['asByte'] = function(block) {
+Blockly.Lua.forBlock['asByte'] = function(block) {
   var inchar = block.getFieldValue('inChar');
-  return ['string.byte("' + inchar + '")', Blockly.Lua.ORDER_ATOMIC];
+  return ['string.byte("' + inchar + '")', lua.Order.ATOMIC];
 };
 
 helpers.helper("asByte");

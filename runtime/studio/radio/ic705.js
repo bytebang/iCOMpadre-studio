@@ -27,7 +27,7 @@ var IC705_ON_OFF = [["on", "0x01"], ["off", "0x00"]];
 // Lua code of a value input, "0" if nothing is connected
 function ic705Value(block, name, order)
 {
-  return Blockly.Lua.valueToCode(block, name, order || Blockly.Lua.ORDER_NONE) || '0';
+  return Blockly.Lua.valueToCode(block, name, order || lua.Order.NONE) || '0';
 }
 
 // Warns while editing, if a plain number at the input is out of range
@@ -299,8 +299,8 @@ Blockly.Blocks['ic705_set_frequency'] = {
   }
 };
 
-Blockly.Lua['ic705_set_frequency'] = function(block) {
-  var frequency = ic705Value(block, 'FREQUENCY', Blockly.Lua.ORDER_MULTIPLICATIVE);
+Blockly.Lua.forBlock['ic705_set_frequency'] = function(block) {
+  var frequency = ic705Value(block, 'FREQUENCY', lua.Order.MULTIPLICATIVE);
   var unit = block.getFieldValue('UNIT');
   Studio.use(['frequencyToBcd']);
   return 'sendCommand({0x05}, frequencyToBcd(' + frequency + ' * ' + unit + ', 5))\n';
@@ -331,7 +331,7 @@ Blockly.Blocks['ic705_set_operating_mode'] = {
   }
 };
 
-Blockly.Lua['ic705_set_operating_mode'] = function(block) {
+Blockly.Lua.forBlock['ic705_set_operating_mode'] = function(block) {
   return 'sendCommand({0x06}, {' + block.getFieldValue('MODE') + '})\n';
 };
 
@@ -354,7 +354,7 @@ Blockly.Blocks['ic705_set_data_mode'] = {
   }
 };
 
-Blockly.Lua['ic705_set_data_mode'] = function(block) {
+Blockly.Lua.forBlock['ic705_set_data_mode'] = function(block) {
   return 'sendCommand({0x1A, 0x06}, ' + block.getFieldValue('STATE') + ')\n';
 };
 
@@ -384,7 +384,7 @@ Blockly.Blocks['ic705_set_tuning_step'] = {
   }
 };
 
-Blockly.Lua['ic705_set_tuning_step'] = function(block) {
+Blockly.Lua.forBlock['ic705_set_tuning_step'] = function(block) {
   return 'sendCommand({0x10, ' + block.getFieldValue('STEP') + '})\n';
 };
 
@@ -403,7 +403,7 @@ Blockly.Blocks['ic705_select_vfo_a'] = {
   }
 };
 
-Blockly.Lua['ic705_select_vfo_a'] = function(block) {
+Blockly.Lua.forBlock['ic705_select_vfo_a'] = function(block) {
   return 'sendCommand({0x07, 0x00})\n';
 };
 
@@ -422,7 +422,7 @@ Blockly.Blocks['ic705_select_vfo_b'] = {
   }
 };
 
-Blockly.Lua['ic705_select_vfo_b'] = function(block) {
+Blockly.Lua.forBlock['ic705_select_vfo_b'] = function(block) {
   return 'sendCommand({0x07, 0x01})\n';
 };
 
@@ -441,7 +441,7 @@ Blockly.Blocks['ic705_equalize_vfo'] = {
   }
 };
 
-Blockly.Lua['ic705_equalize_vfo'] = function(block) {
+Blockly.Lua.forBlock['ic705_equalize_vfo'] = function(block) {
   return 'sendCommand({0x07, 0xA0})\n';
 };
 
@@ -460,7 +460,7 @@ Blockly.Blocks['ic705_exchange_vfo'] = {
   }
 };
 
-Blockly.Lua['ic705_exchange_vfo'] = function(block) {
+Blockly.Lua.forBlock['ic705_exchange_vfo'] = function(block) {
   return 'sendCommand({0x07, 0xB0})\n';
 };
 
@@ -487,7 +487,7 @@ Blockly.Blocks['ic705_set_split'] = {
   }
 };
 
-Blockly.Lua['ic705_set_split'] = function(block) {
+Blockly.Lua.forBlock['ic705_set_split'] = function(block) {
   return 'sendCommand({0x0F, ' + block.getFieldValue('SPLIT') + '})\n';
 };
 
@@ -514,7 +514,7 @@ Blockly.Blocks['ic705_select_memory'] = {
   }
 };
 
-Blockly.Lua['ic705_select_memory'] = function(block) {
+Blockly.Lua.forBlock['ic705_select_memory'] = function(block) {
   Studio.use(['numberToBcd']);
   return 'sendCommand({0x08})\n' +
          'sendCommand({0x08}, numberToBcd(' + ic705Value(block, 'CHANNEL') + ', 2))\n';
@@ -538,7 +538,7 @@ Blockly.Blocks['ic705_set_rit'] = {
   }
 };
 
-Blockly.Lua['ic705_set_rit'] = function(block) {
+Blockly.Lua.forBlock['ic705_set_rit'] = function(block) {
   return 'sendCommand({0x21, 0x01}, {' + block.getFieldValue('STATE') + '})\n';
 };
 
@@ -564,7 +564,7 @@ Blockly.Blocks['ic705_set_rit_offset'] = {
   }
 };
 
-Blockly.Lua['ic705_set_rit_offset'] = function(block) {
+Blockly.Lua.forBlock['ic705_set_rit_offset'] = function(block) {
   Studio.use(['ic705RitData']);
   return 'sendCommand({0x21, 0x00}, ic705RitData(' + ic705Value(block, 'OFFSET') + '))\n';
 };
@@ -593,7 +593,7 @@ Blockly.Blocks['ic705_scan'] = {
   }
 };
 
-Blockly.Lua['ic705_scan'] = function(block) {
+Blockly.Lua.forBlock['ic705_scan'] = function(block) {
   return 'sendCommand({0x0E, ' + block.getFieldValue('SCAN') + '})\n';
 };
 
@@ -615,14 +615,14 @@ Blockly.Blocks['ic705_get_operating_frequency'] = {
   }
 };
 
-Blockly.Lua['ic705_get_operating_frequency'] = function(block) {
+Blockly.Lua.forBlock['ic705_get_operating_frequency'] = function(block) {
   Studio.use(['ic705ReadFrequency']);
   var unit = block.getFieldValue('unit');
   if (unit == "1")
   {
-    return ['ic705ReadFrequency()', Blockly.Lua.ORDER_HIGH];
+    return ['ic705ReadFrequency()', lua.Order.HIGH];
   }
-  return ['ic705ReadFrequency() / ' + unit, Blockly.Lua.ORDER_MULTIPLICATIVE];
+  return ['ic705ReadFrequency() / ' + unit, lua.Order.MULTIPLICATIVE];
 };
 
 ic705Frequency.property("ic705_get_operating_frequency");
@@ -640,9 +640,9 @@ Blockly.Blocks['ic705_get_operating_mode'] = {
   }
 };
 
-Blockly.Lua['ic705_get_operating_mode'] = function(block) {
+Blockly.Lua.forBlock['ic705_get_operating_mode'] = function(block) {
   Studio.use(['getOperatingModeString', 'ic705Query']);
-  return ['getOperatingModeString(ic705Query({0x04}))', Blockly.Lua.ORDER_HIGH];
+  return ['getOperatingModeString(ic705Query({0x04}))', lua.Order.HIGH];
 };
 
 ic705Frequency.property("ic705_get_operating_mode");
@@ -659,9 +659,9 @@ Blockly.Blocks['ic705_is_data_mode'] = {
   }
 };
 
-Blockly.Lua['ic705_is_data_mode'] = function(block) {
+Blockly.Lua.forBlock['ic705_is_data_mode'] = function(block) {
   Studio.use(['ic705ReadOn']);
-  return ['ic705ReadOn({0x1A, 0x06})', Blockly.Lua.ORDER_HIGH];
+  return ['ic705ReadOn({0x1A, 0x06})', lua.Order.HIGH];
 };
 
 ic705Frequency.property("ic705_is_data_mode");
@@ -678,9 +678,9 @@ Blockly.Blocks['ic705_is_split'] = {
   }
 };
 
-Blockly.Lua['ic705_is_split'] = function(block) {
+Blockly.Lua.forBlock['ic705_is_split'] = function(block) {
   Studio.use(['ic705ReadByte']);
-  return ['ic705ReadByte({0x0F}) == 1', Blockly.Lua.ORDER_RELATIONAL];
+  return ['ic705ReadByte({0x0F}) == 1', lua.Order.RELATIONAL];
 };
 
 ic705Frequency.property("ic705_is_split");
@@ -708,7 +708,7 @@ Blockly.Blocks['ic705_set_af_level'] = {
   }
 };
 
-Blockly.Lua['ic705_set_af_level'] = function(block) {
+Blockly.Lua.forBlock['ic705_set_af_level'] = function(block) {
   Studio.use(['ic705Percent']);
   return 'sendCommand({0x14, 0x01}, ic705Percent(' + ic705Value(block, 'level') + '))\n';
 };
@@ -735,7 +735,7 @@ Blockly.Blocks['ic705_set_rf_gain'] = {
   }
 };
 
-Blockly.Lua['ic705_set_rf_gain'] = function(block) {
+Blockly.Lua.forBlock['ic705_set_rf_gain'] = function(block) {
   Studio.use(['ic705Percent']);
   return 'sendCommand({0x14, 0x02}, ic705Percent(' + ic705Value(block, 'gain') + '))\n';
 };
@@ -762,7 +762,7 @@ Blockly.Blocks['ic705_set_squelch_level'] = {
   }
 };
 
-Blockly.Lua['ic705_set_squelch_level'] = function(block) {
+Blockly.Lua.forBlock['ic705_set_squelch_level'] = function(block) {
   Studio.use(['ic705Percent']);
   return 'sendCommand({0x14, 0x03}, ic705Percent(' + ic705Value(block, 'level') + '))\n';
 };
@@ -785,7 +785,7 @@ Blockly.Blocks['ic705_set_preamp'] = {
   }
 };
 
-Blockly.Lua['ic705_set_preamp'] = function(block) {
+Blockly.Lua.forBlock['ic705_set_preamp'] = function(block) {
   return 'sendCommand({0x16, 0x02}, {' + block.getFieldValue('PREAMP') + '})\n';
 };
 
@@ -807,7 +807,7 @@ Blockly.Blocks['ic705_set_attenuator'] = {
   }
 };
 
-Blockly.Lua['ic705_set_attenuator'] = function(block) {
+Blockly.Lua.forBlock['ic705_set_attenuator'] = function(block) {
   return 'sendCommand({0x11, ' + block.getFieldValue('STATE') + '})\n';
 };
 
@@ -829,7 +829,7 @@ Blockly.Blocks['ic705_set_agc'] = {
   }
 };
 
-Blockly.Lua['ic705_set_agc'] = function(block) {
+Blockly.Lua.forBlock['ic705_set_agc'] = function(block) {
   return 'sendCommand({0x16, 0x12}, {' + block.getFieldValue('AGC') + '})\n';
 };
 
@@ -847,9 +847,9 @@ Blockly.Blocks['ic705_get_af_level'] = {
   }
 };
 
-Blockly.Lua['ic705_get_af_level'] = function(block) {
+Blockly.Lua.forBlock['ic705_get_af_level'] = function(block) {
   Studio.use(['ic705ReadPercent']);
-  return ['ic705ReadPercent({0x14, 0x01})', Blockly.Lua.ORDER_HIGH];
+  return ['ic705ReadPercent({0x14, 0x01})', lua.Order.HIGH];
 };
 
 ic705Receiver.property("ic705_get_af_level");
@@ -866,9 +866,9 @@ Blockly.Blocks['ic705_get_rf_gain'] = {
   }
 };
 
-Blockly.Lua['ic705_get_rf_gain'] = function(block) {
+Blockly.Lua.forBlock['ic705_get_rf_gain'] = function(block) {
   Studio.use(['ic705ReadPercent']);
-  return ['ic705ReadPercent({0x14, 0x02})', Blockly.Lua.ORDER_HIGH];
+  return ['ic705ReadPercent({0x14, 0x02})', lua.Order.HIGH];
 };
 
 ic705Receiver.property("ic705_get_rf_gain");
@@ -885,9 +885,9 @@ Blockly.Blocks['ic705_get_squelch_level'] = {
   }
 };
 
-Blockly.Lua['ic705_get_squelch_level'] = function(block) {
+Blockly.Lua.forBlock['ic705_get_squelch_level'] = function(block) {
   Studio.use(['ic705ReadPercent']);
-  return ['ic705ReadPercent({0x14, 0x03})', Blockly.Lua.ORDER_HIGH];
+  return ['ic705ReadPercent({0x14, 0x03})', lua.Order.HIGH];
 };
 
 ic705Receiver.property("ic705_get_squelch_level");
@@ -904,9 +904,9 @@ Blockly.Blocks['ic705_get_preamp'] = {
   }
 };
 
-Blockly.Lua['ic705_get_preamp'] = function(block) {
+Blockly.Lua.forBlock['ic705_get_preamp'] = function(block) {
   Studio.use(['ic705ReadByte']);
-  return ['({[0] = "OFF", [1] = "P.AMP1", [2] = "P.AMP2"})[ic705ReadByte({0x16, 0x02})] or "OFF"', Blockly.Lua.ORDER_OR];
+  return ['({[0] = "OFF", [1] = "P.AMP1", [2] = "P.AMP2"})[ic705ReadByte({0x16, 0x02})] or "OFF"', lua.Order.OR];
 };
 
 ic705Receiver.property("ic705_get_preamp");
@@ -923,9 +923,9 @@ Blockly.Blocks['ic705_is_attenuator_on'] = {
   }
 };
 
-Blockly.Lua['ic705_is_attenuator_on'] = function(block) {
+Blockly.Lua.forBlock['ic705_is_attenuator_on'] = function(block) {
   Studio.use(['ic705ReadByte']);
-  return ['ic705ReadByte({0x11}) == 0x20', Blockly.Lua.ORDER_RELATIONAL];
+  return ['ic705ReadByte({0x11}) == 0x20', lua.Order.RELATIONAL];
 };
 
 ic705Receiver.property("ic705_is_attenuator_on");
@@ -942,9 +942,9 @@ Blockly.Blocks['ic705_get_agc'] = {
   }
 };
 
-Blockly.Lua['ic705_get_agc'] = function(block) {
+Blockly.Lua.forBlock['ic705_get_agc'] = function(block) {
   Studio.use(['ic705ReadByte']);
-  return ['({"FAST", "MID", "SLOW"})[ic705ReadByte({0x16, 0x12})] or ""', Blockly.Lua.ORDER_OR];
+  return ['({"FAST", "MID", "SLOW"})[ic705ReadByte({0x16, 0x12})] or ""', lua.Order.OR];
 };
 
 ic705Receiver.property("ic705_get_agc");
@@ -961,9 +961,9 @@ Blockly.Blocks['ic705_is_squelch_open'] = {
   }
 };
 
-Blockly.Lua['ic705_is_squelch_open'] = function(block) {
+Blockly.Lua.forBlock['ic705_is_squelch_open'] = function(block) {
   Studio.use(['ic705ReadOn']);
-  return ['ic705ReadOn({0x15, 0x01})', Blockly.Lua.ORDER_HIGH];
+  return ['ic705ReadOn({0x15, 0x01})', lua.Order.HIGH];
 };
 
 ic705Receiver.property("ic705_is_squelch_open");
@@ -988,7 +988,7 @@ Blockly.Blocks['ic705_set_transmit'] = {
   }
 };
 
-Blockly.Lua['ic705_set_transmit'] = function(block) {
+Blockly.Lua.forBlock['ic705_set_transmit'] = function(block) {
   return 'sendCommand({0x1C, 0x00}, {' + block.getFieldValue('STATE') + '})\n';
 };
 
@@ -1014,7 +1014,7 @@ Blockly.Blocks['ic705_set_rf_power'] = {
   }
 };
 
-Blockly.Lua['ic705_set_rf_power'] = function(block) {
+Blockly.Lua.forBlock['ic705_set_rf_power'] = function(block) {
   Studio.use(['ic705Percent']);
   return 'sendCommand({0x14, 0x0A}, ic705Percent(' + ic705Value(block, 'POWER') + '))\n';
 };
@@ -1041,7 +1041,7 @@ Blockly.Blocks['ic705_set_mic_gain'] = {
   }
 };
 
-Blockly.Lua['ic705_set_mic_gain'] = function(block) {
+Blockly.Lua.forBlock['ic705_set_mic_gain'] = function(block) {
   Studio.use(['ic705Percent']);
   return 'sendCommand({0x14, 0x0B}, ic705Percent(' + ic705Value(block, 'LEVEL') + '))\n';
 };
@@ -1069,9 +1069,9 @@ Blockly.Blocks['ic705_set_tone_frequency'] = {
   }
 };
 
-Blockly.Lua['ic705_set_tone_frequency'] = function(block) {
+Blockly.Lua.forBlock['ic705_set_tone_frequency'] = function(block) {
   Studio.use(['numberToBcd']);
-  return 'sendCommand({0x1B, 0x00}, numberToBcd(math.floor(' + ic705Value(block, 'TONE', Blockly.Lua.ORDER_MULTIPLICATIVE) + ' * 10 + 0.5), 3))\n';
+  return 'sendCommand({0x1B, 0x00}, numberToBcd(math.floor(' + ic705Value(block, 'TONE', lua.Order.MULTIPLICATIVE) + ' * 10 + 0.5), 3))\n';
 };
 
 ic705Transmit.action("ic705_set_tone_frequency");
@@ -1088,9 +1088,9 @@ Blockly.Blocks['ic705_is_transmitting'] = {
   }
 };
 
-Blockly.Lua['ic705_is_transmitting'] = function(block) {
+Blockly.Lua.forBlock['ic705_is_transmitting'] = function(block) {
   Studio.use(['ic705ReadOn']);
-  return ['ic705ReadOn({0x1C, 0x00})', Blockly.Lua.ORDER_HIGH];
+  return ['ic705ReadOn({0x1C, 0x00})', lua.Order.HIGH];
 };
 
 ic705Transmit.property("ic705_is_transmitting");
@@ -1107,9 +1107,9 @@ Blockly.Blocks['ic705_get_rf_power'] = {
   }
 };
 
-Blockly.Lua['ic705_get_rf_power'] = function(block) {
+Blockly.Lua.forBlock['ic705_get_rf_power'] = function(block) {
   Studio.use(['ic705ReadPercent']);
-  return ['ic705ReadPercent({0x14, 0x0A})', Blockly.Lua.ORDER_HIGH];
+  return ['ic705ReadPercent({0x14, 0x0A})', lua.Order.HIGH];
 };
 
 ic705Transmit.property("ic705_get_rf_power");
@@ -1126,9 +1126,9 @@ Blockly.Blocks['ic705_get_mic_gain'] = {
   }
 };
 
-Blockly.Lua['ic705_get_mic_gain'] = function(block) {
+Blockly.Lua.forBlock['ic705_get_mic_gain'] = function(block) {
   Studio.use(['ic705ReadPercent']);
-  return ['ic705ReadPercent({0x14, 0x0B})', Blockly.Lua.ORDER_HIGH];
+  return ['ic705ReadPercent({0x14, 0x0B})', lua.Order.HIGH];
 };
 
 ic705Transmit.property("ic705_get_mic_gain");
@@ -1151,13 +1151,13 @@ Blockly.Blocks['ic705_get_s_meter'] = {
   }
 };
 
-Blockly.Lua['ic705_get_s_meter'] = function(block) {
+Blockly.Lua.forBlock['ic705_get_s_meter'] = function(block) {
   Studio.use(['ic705Meter']);
   if (block.getFieldValue('UNIT') == 'DB')
   {
-    return ['ic705Meter({0x15, 0x02}, {{0, -54}, {120, 0}, {241, 60}})', Blockly.Lua.ORDER_HIGH];
+    return ['ic705Meter({0x15, 0x02}, {{0, -54}, {120, 0}, {241, 60}})', lua.Order.HIGH];
   }
-  return ['math.min(9, ic705Meter({0x15, 0x02}, {{0, 0}, {120, 9}}))', Blockly.Lua.ORDER_HIGH];
+  return ['math.min(9, ic705Meter({0x15, 0x02}, {{0, 0}, {120, 9}}))', lua.Order.HIGH];
 };
 
 ic705Meters.property("ic705_get_s_meter");
@@ -1174,9 +1174,9 @@ Blockly.Blocks['ic705_get_swr_meter_level'] = {
   }
 };
 
-Blockly.Lua['ic705_get_swr_meter_level'] = function(block) {
+Blockly.Lua.forBlock['ic705_get_swr_meter_level'] = function(block) {
   Studio.use(['ic705Meter']);
-  return ['ic705Meter({0x15, 0x12}, {{0, 1.0}, {48, 1.5}, {80, 2.0}, {120, 3.0}})', Blockly.Lua.ORDER_HIGH];
+  return ['ic705Meter({0x15, 0x12}, {{0, 1.0}, {48, 1.5}, {80, 2.0}, {120, 3.0}})', lua.Order.HIGH];
 };
 
 ic705Meters.property("ic705_get_swr_meter_level");
@@ -1193,9 +1193,9 @@ Blockly.Blocks['ic705_get_power_output'] = {
   }
 };
 
-Blockly.Lua['ic705_get_power_output'] = function(block) {
+Blockly.Lua.forBlock['ic705_get_power_output'] = function(block) {
   Studio.use(['ic705Meter']);
-  return ['ic705Meter({0x15, 0x11}, {{0, 0}, {143, 50}, {213, 100}})', Blockly.Lua.ORDER_HIGH];
+  return ['ic705Meter({0x15, 0x11}, {{0, 0}, {143, 50}, {213, 100}})', lua.Order.HIGH];
 };
 
 ic705Meters.property("ic705_get_power_output");
@@ -1212,9 +1212,9 @@ Blockly.Blocks['ic705_get_alc'] = {
   }
 };
 
-Blockly.Lua['ic705_get_alc'] = function(block) {
+Blockly.Lua.forBlock['ic705_get_alc'] = function(block) {
   Studio.use(['ic705Meter']);
-  return ['ic705Meter({0x15, 0x13}, {{0, 0}, {120, 100}})', Blockly.Lua.ORDER_HIGH];
+  return ['ic705Meter({0x15, 0x13}, {{0, 0}, {120, 100}})', lua.Order.HIGH];
 };
 
 ic705Meters.property("ic705_get_alc");
@@ -1231,9 +1231,9 @@ Blockly.Blocks['ic705_get_supply_voltage'] = {
   }
 };
 
-Blockly.Lua['ic705_get_supply_voltage'] = function(block) {
+Blockly.Lua.forBlock['ic705_get_supply_voltage'] = function(block) {
   Studio.use(['ic705Meter']);
-  return ['ic705Meter({0x15, 0x15}, {{0, 0}, {75, 5}, {241, 16}})', Blockly.Lua.ORDER_HIGH];
+  return ['ic705Meter({0x15, 0x15}, {{0, 0}, {75, 5}, {241, 16}})', lua.Order.HIGH];
 };
 
 ic705Meters.property("ic705_get_supply_voltage");
@@ -1250,9 +1250,9 @@ Blockly.Blocks['ic705_get_supply_current'] = {
   }
 };
 
-Blockly.Lua['ic705_get_supply_current'] = function(block) {
+Blockly.Lua.forBlock['ic705_get_supply_current'] = function(block) {
   Studio.use(['ic705Meter']);
-  return ['ic705Meter({0x15, 0x16}, {{0, 0}, {121, 2}, {241, 4}})', Blockly.Lua.ORDER_HIGH];
+  return ['ic705Meter({0x15, 0x16}, {{0, 0}, {121, 2}, {241, 4}})', lua.Order.HIGH];
 };
 
 ic705Meters.property("ic705_get_supply_current");
@@ -1269,9 +1269,9 @@ Blockly.Blocks['ic705_is_on_battery'] = {
   }
 };
 
-Blockly.Lua['ic705_is_on_battery'] = function(block) {
+Blockly.Lua.forBlock['ic705_is_on_battery'] = function(block) {
   Studio.use(['ic705ReadOn']);
-  return ['ic705ReadOn({0x1A, 0x0B})', Blockly.Lua.ORDER_HIGH];
+  return ['ic705ReadOn({0x1A, 0x0B})', lua.Order.HIGH];
 };
 
 ic705Meters.property("ic705_is_on_battery");
@@ -1297,9 +1297,9 @@ Blockly.Blocks['ic705_send_cw'] = {
   }
 };
 
-Blockly.Lua['ic705_send_cw'] = function(block) {
+Blockly.Lua.forBlock['ic705_send_cw'] = function(block) {
   Studio.use(['ic705TextBytes']);
-  var text = Blockly.Lua.valueToCode(block, 'TEXT', Blockly.Lua.ORDER_NONE) || "''";
+  var text = Blockly.Lua.valueToCode(block, 'TEXT', lua.Order.NONE) || "''";
   return 'sendCommand({0x17}, ic705TextBytes(' + text + '))\n';
 };
 
@@ -1325,7 +1325,7 @@ Blockly.Blocks['ic705_set_keying_speed'] = {
   }
 };
 
-Blockly.Lua['ic705_set_keying_speed'] = function(block) {
+Blockly.Lua.forBlock['ic705_set_keying_speed'] = function(block) {
   Studio.use(['ic705Wpm']);
   return 'sendCommand({0x14, 0x0C}, ic705Wpm(' + ic705Value(block, 'WPM') + '))\n';
 };
@@ -1353,7 +1353,7 @@ Blockly.Blocks['ic705_play_voice_memory'] = {
   }
 };
 
-Blockly.Lua['ic705_play_voice_memory'] = function(block) {
+Blockly.Lua.forBlock['ic705_play_voice_memory'] = function(block) {
   return 'sendCommand({0x28, 0x00}, {' + block.getFieldValue('MEMORY') + '})\n';
 };
 
@@ -1379,7 +1379,7 @@ Blockly.Blocks['ic705_announce'] = {
   }
 };
 
-Blockly.Lua['ic705_announce'] = function(block) {
+Blockly.Lua.forBlock['ic705_announce'] = function(block) {
   return 'sendCommand({0x13, ' + block.getFieldValue('WHAT') + '})\n';
 };
 
@@ -1397,9 +1397,9 @@ Blockly.Blocks['ic705_get_keying_speed'] = {
   }
 };
 
-Blockly.Lua['ic705_get_keying_speed'] = function(block) {
+Blockly.Lua.forBlock['ic705_get_keying_speed'] = function(block) {
   Studio.use(['ic705ReadNumber']);
-  return ['math.floor(6 + ic705ReadNumber({0x14, 0x0C}) * 42 / 255 + 0.5)', Blockly.Lua.ORDER_HIGH];
+  return ['math.floor(6 + ic705ReadNumber({0x14, 0x0C}) * 42 / 255 + 0.5)', lua.Order.HIGH];
 };
 
 ic705CwVoice.property("ic705_get_keying_speed");
@@ -1426,9 +1426,9 @@ Blockly.Blocks['ic705_get_gps_position'] = {
   }
 };
 
-Blockly.Lua['ic705_get_gps_position'] = function(block) {
+Blockly.Lua.forBlock['ic705_get_gps_position'] = function(block) {
   Studio.use(['ic705GpsValue']);
-  return ['ic705GpsValue("' + block.getFieldValue('VALUE') + '")', Blockly.Lua.ORDER_HIGH];
+  return ['ic705GpsValue("' + block.getFieldValue('VALUE') + '")', lua.Order.HIGH];
 };
 
 ic705Gps.property("ic705_get_gps_position");
@@ -1453,9 +1453,9 @@ Blockly.Blocks['ic705_get_gps_time'] = {
   }
 };
 
-Blockly.Lua['ic705_get_gps_time'] = function(block) {
+Blockly.Lua.forBlock['ic705_get_gps_time'] = function(block) {
   Studio.use(['ic705GpsTime']);
-  return ['ic705GpsTime("' + block.getFieldValue('PART') + '")', Blockly.Lua.ORDER_HIGH];
+  return ['ic705GpsTime("' + block.getFieldValue('PART') + '")', lua.Order.HIGH];
 };
 
 ic705Gps.property("ic705_get_gps_time");
@@ -1480,9 +1480,9 @@ Blockly.Blocks['ic705_get_clock'] = {
   }
 };
 
-Blockly.Lua['ic705_get_clock'] = function(block) {
+Blockly.Lua.forBlock['ic705_get_clock'] = function(block) {
   Studio.use(['ic705Clock']);
-  return ['ic705Clock("' + block.getFieldValue('PART') + '")', Blockly.Lua.ORDER_HIGH];
+  return ['ic705Clock("' + block.getFieldValue('PART') + '")', lua.Order.HIGH];
 };
 
 ic705Gps.property("ic705_get_clock");
@@ -1504,9 +1504,9 @@ Blockly.Blocks['ic705_locator'] = {
   }
 };
 
-Blockly.Lua['ic705_locator'] = function(block) {
+Blockly.Lua.forBlock['ic705_locator'] = function(block) {
   Studio.use(['ic705Locator']);
-  return ['ic705Locator(' + ic705Value(block, 'LAT') + ', ' + ic705Value(block, 'LON') + ')', Blockly.Lua.ORDER_HIGH];
+  return ['ic705Locator(' + ic705Value(block, 'LAT') + ', ' + ic705Value(block, 'LON') + ')', lua.Order.HIGH];
 };
 
 ic705Gps.helper("ic705_locator");
@@ -1536,7 +1536,7 @@ Blockly.Blocks['ic705_switch_function'] = {
   }
 };
 
-Blockly.Lua['ic705_switch_function'] = function(block) {
+Blockly.Lua.forBlock['ic705_switch_function'] = function(block) {
   return 'sendCommand({0x16, ' + block.getFieldValue('FUNCTION') + '}, {' + block.getFieldValue('STATE') + '})\n';
 };
 
@@ -1562,7 +1562,7 @@ Blockly.Blocks['ic705_set_lcd_brightness'] = {
   }
 };
 
-Blockly.Lua['ic705_set_lcd_brightness'] = function(block) {
+Blockly.Lua.forBlock['ic705_set_lcd_brightness'] = function(block) {
   Studio.use(['ic705Percent']);
   return 'sendCommand({0x14, 0x19}, ic705Percent(' + ic705Value(block, 'LEVEL') + '))\n';
 };
@@ -1585,7 +1585,7 @@ Blockly.Blocks['ic705_set_power'] = {
   }
 };
 
-Blockly.Lua['ic705_set_power'] = function(block) {
+Blockly.Lua.forBlock['ic705_set_power'] = function(block) {
   return 'sendCommand({0x18, ' + block.getFieldValue('STATE') + '})\n';
 };
 
@@ -1606,9 +1606,9 @@ Blockly.Blocks['ic705_is_function_on'] = {
   }
 };
 
-Blockly.Lua['ic705_is_function_on'] = function(block) {
+Blockly.Lua.forBlock['ic705_is_function_on'] = function(block) {
   Studio.use(['ic705ReadOn']);
-  return ['ic705ReadOn({0x16, ' + block.getFieldValue('FUNCTION') + '})', Blockly.Lua.ORDER_HIGH];
+  return ['ic705ReadOn({0x16, ' + block.getFieldValue('FUNCTION') + '})', lua.Order.HIGH];
 };
 
 ic705Settings.property("ic705_is_function_on");
@@ -1625,9 +1625,9 @@ Blockly.Blocks['ic705_get_lcd_brightness'] = {
   }
 };
 
-Blockly.Lua['ic705_get_lcd_brightness'] = function(block) {
+Blockly.Lua.forBlock['ic705_get_lcd_brightness'] = function(block) {
   Studio.use(['ic705ReadPercent']);
-  return ['ic705ReadPercent({0x14, 0x19})', Blockly.Lua.ORDER_HIGH];
+  return ['ic705ReadPercent({0x14, 0x19})', lua.Order.HIGH];
 };
 
 ic705Settings.property("ic705_get_lcd_brightness");

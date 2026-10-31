@@ -9,6 +9,10 @@
   <script src="./blockly/blocks_compressed.js"></script>
   <script src="./blockly/en.js"></script>
   <script src="./blockly/lua_compressed.js"></script>
+  <!-- the multiline text block is a plugin since blockly 12. It expects the lua generator module under this name -->
+  <script>window['Blockly.Lua'] = window.lua;</script>
+  <script src="./blockly/field-multilineinput.js"></script>
+  <script>textMultiline.installBlock({lua: Blockly.Lua});</script>
   <script src="./filesaver.js"></script>
   <link rel="stylesheet" href="./studio.css">
 </head>

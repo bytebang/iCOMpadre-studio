@@ -63,8 +63,8 @@ Blockly.Blocks['myradio_set_af_level'] = {
 };
 
 // Lua generator of an action block: returns a statement (string, ending with a newline)
-Blockly.Lua['myradio_set_af_level'] = function(block) {
-  var level = Blockly.Lua.valueToCode(block, 'level', Blockly.Lua.ORDER_ATOMIC);
+Blockly.Lua.forBlock['myradio_set_af_level'] = function(block) {
+  var level = Blockly.Lua.valueToCode(block, 'level', lua.Order.ATOMIC);
   Studio.use(['myradioPercentToLevel']); // pulls the lua helper (and map, numberToBcd) into main.lua
   return 'sendCommand({0x14, 0x01}, myradioPercentToLevel(' + level + '))\n';
 };
@@ -90,10 +90,10 @@ Blockly.Blocks['myradio_get_af_level'] = {
 };
 
 // Lua generator of a property block: returns [expression, operator precedence]
-Blockly.Lua['myradio_get_af_level'] = function(block) {
+Blockly.Lua.forBlock['myradio_get_af_level'] = function(block) {
   Studio.use(['map', 'bcdToNumber']);
   var code = 'math.floor(map(bcdToNumber(readResultOfCommand(sendCommand({0x14, 0x01}))), 0, 255, 0, 100))';
-  return [code, Blockly.Lua.ORDER_ATOMIC];
+  return [code, lua.Order.ATOMIC];
 };
 
 myradio.property("myradio_get_af_level");

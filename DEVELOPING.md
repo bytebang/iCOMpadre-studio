@@ -24,7 +24,7 @@ runtime/
     ├── studio.css
     ├── filesaver.js      download of files (export)
     ├── img/              toolbar icons
-    └── blockly/          minimal blockly 10 build: core, default blocks, english texts, lua generator
+    └── blockly/          blockly 13: core, default blocks, english texts, lua generator, media, multiline text plugin
 documentation/            user documentation (merged into the iCOMpadre userguide by the CI)
 └── blocks/
     ├── base.md           documentation of the blocks in studio/base.js
@@ -87,7 +87,7 @@ Studio.luaFunction("map", [                     // lua helper function ...
   "  return out_min + (x - in_min)*(out_max - out_min)/(in_max - in_min)",
   "end"]);
 
-Blockly.Lua['ic705_set_af_level'] = function(block) {
+Blockly.Lua.forBlock['ic705_set_af_level'] = function(block) {
   Studio.use(['map', 'numberToBcd']);           // ... emitted into main.lua only if it is used
   ...
 };
@@ -120,7 +120,7 @@ Blockly.Lua['ic705_set_af_level'] = function(block) {
 * **Naming:** block types start with the radio, e.g. `ic705_set_rf_gain`, `ic705_get_rf_gain`. Names have to be unique across all files.
 * **Kinds:**
   * *action*: `previousStatement` / `nextStatement`, the generator returns a statement string ending with `\n`
-  * *property*: `output` with a type (`"Number"`, `"String"`, `"Array"`), the generator returns `[code, Blockly.Lua.ORDER_ATOMIC]`
+  * *property*: `output` with a type (`"Number"`, `"String"`, `"Array"`), the generator returns `[code, lua.Order.ATOMIC]`
   * *event*: a statement input, the generator returns a lua function that the firmware calls
 * **Definition:** use `jsonInit()` and set the tooltip only there.
 * **CI-V:** put the command and the data format in a comment above the block, e.g. `// CI-V: 0x14 0x01 + level as 2 byte BCD`.
@@ -183,3 +183,16 @@ To build the userguide with the studio documentation locally, do what the CI doe
 * Every new block can be dragged onto the workspace.
 * The *Lua* panel shows the generated lua code. Check it for every new block.
 * The new file is in both `studio/index.html` and the preloader list.
+
+## Updating blockly
+
+The files in `runtime/studio/blockly/` come unchanged from the npm packages `blockly` and `@blockly/field-multilineinput` (same version), only the `//# sourceMappingURL` line is removed:
+
+| File | From the package |
+| --- | --- |
+| `blockly_compressed.js`, `blocks_compressed.js`, `lua_compressed.js` | `blockly/` |
+| `en.js` | `blockly/msg/en.js` |
+| `sprites.svg`, `delete-icon.svg`, `foldout-icon.svg`, `resize-handle.svg`, `handclosed.cur`, `handdelete.cur` | `blockly/media/` (the sounds are not needed, the studio runs with `sounds: false`) |
+| `field-multilineinput.js` | `@blockly/field-multilineinput/dist/index.js` (the `text_multiline` block, which is no longer part of blockly) |
+
+After an update, compare the generated lua code of every block in the toolbox with the one of the previous version, and check that a sketch saved with the previous version still opens.
