@@ -1,11 +1,8 @@
-# The online help of the studio: https://bytebang.github.io/iCOMpadre-studio/
-# Built and published by .github/workflows/docs.yml. On the device the same pages are part of the
-# iCOMpadre userguide (the CI of the iCOMpadre repository copies documentation/ to its studio/ folder).
+# For the preview of the documentation (mkdocs serve) and for the online version (.github/workflows/docs.yml).
+# On the SD card the CI of the iCOMpadre repository builds documentation/ with the settings of the iCOMpadre documentation:
+# it only takes the title from here.
 site_name: iCOMpadre Studio
-site_url: https://bytebang.github.io/iCOMpadre-studio/
 docs_dir: documentation
-repo_url: https://github.com/bytebang/iCOMpadre-studio
-edit_uri: ""
 
 markdown_extensions:
   - attr_list   # explicit heading ids, e.g. "## Set AF Level {#ic705_set_af_level}" for the help links of the blocks

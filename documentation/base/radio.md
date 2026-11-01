@@ -30,7 +30,7 @@ Other Icom radios can be used with [Connect to CI-V address](#connect_address) a
 Selects the radio iCOMpadre talks to, and how it is connected:
 
 * **Bluetooth** for the IC-705, which has no REMOTE jack. This is what iCOMpadre does if there is no *Connect* block.
-* **cable** for all other radios: connect the REMOTE jack of the radio to iCOMpadre with a mono cable (see [Radios](../../radios.md)). Choose the baud rate which is set as *CI-V Baud Rate* in the menu of the radio, or set the radio to *Auto*.
+* **cable** for all other radios: connect the REMOTE jack of the radio to iCOMpadre with a mono cable (see [Radios](/documentation/radios/)). Choose the baud rate which is set as *CI-V Baud Rate* in the menu of the radio, or set the radio to *Auto*.
 
 The block uses the default CI-V address of the radio, e.g. 94h for the IC-7300. Put it into [OnStartup](program.md#onstartup), so it is executed before iCOMpadre talks to the radio.
 

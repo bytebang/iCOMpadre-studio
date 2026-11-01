@@ -170,7 +170,7 @@ def main():
         problems = page.problems(ignore=("Saving failed",))
         check("no console problems in another language", not problems, problems)
 
-        # the online demo: nothing is saved on a device, the help links point to the online help
+        # the online demo: nothing is saved on a device
         open_studio(page, server, "/?online")
         check("the online demo says that the sketch stays in the browser", "Online demo" in page.eval(status + ".textContent"))
         before = open(server.file("main.lua"), encoding="utf-8").read()
@@ -179,8 +179,8 @@ def main():
         page.wait(status + ".textContent.includes('Download')")
         check("the online demo doesn't save on a device", open(server.file("main.lua"), encoding="utf-8").read() == before)
         help_url = page.eval("new Blockly.Workspace().newBlock('ic705_set_frequency').helpUrl")
-        check("the online demo links to the online help",
-              help_url == "https://bytebang.github.io/iCOMpadre-studio/radio/ic705/#ic705_set_frequency", help_url)
+        check("the online demo links to the documentation next to it, like on the SD card",
+              help_url == "../documentation/radio/ic705/#ic705_set_frequency", help_url)
         problems = page.problems(ignore=("Saving failed",))
         check("no console problems in the online demo", not problems, problems)
         page.eval("localStorage.clear()")

@@ -28,7 +28,7 @@ runtime/
     ├── img/              toolbar icons
     ├── msg/              the texts of the studio: en.js (master) and its translations (de.js, ...)
     └── blockly/          blockly 13: core, default blocks, texts (en.js, de.js), lua generator, media, multiline text plugin
-documentation/            user documentation (merged into the iCOMpadre userguide by the CI)
+documentation/            the user documentation (markdown). On the SD card it is built to /studio/documentation/
 ├── .pages                order and titles of the pages in the menu (also in the sub folders)
 ├── index.md, editor.md, tutorial.md, blocks.md, about.md
 ├── tutorial/             the programs of the tutorial (.json to open in the studio) and their pictures
@@ -38,6 +38,7 @@ documentation/            user documentation (merged into the iCOMpadre userguid
 │   ├── ic705.md          documentation of the blocks in studio/radio/ic705.js
 │   └── ic7610.md ...     documentation of the radios described with Icom.radio()
 └── img/                  pictures of the blocks
+mkdocs.yml                for the preview of the documentation and its online version
 webserver.py              local development server
 ```
 
@@ -193,14 +194,16 @@ The colours don't collide with the standard blockly categories. A new radio simp
 
 ## Help (convention over configuration)
 
-The documentation under `documentation/` mirrors the block files under `runtime/studio/`:
+The documentation under `documentation/` mirrors the block files under `runtime/studio/`.
+On the SD card the built documentation is next to the studio (`/studio/documentation/`), so the help links are relative:
 
 | Block file | Documentation | Help link of a block |
 | --- | --- | --- |
-| `studio/radio/ic705.js` | `documentation/radio/ic705.md` | `../userguide/studio/radio/ic705/#<blocktype>` |
-| `studio/base.js`, group `base.group("Pins", "pins", "pins")` | `documentation/base/pins.md` | `../userguide/studio/base/pins/#<blocktype>` |
+| `studio/radio/ic705.js` | `documentation/radio/ic705.md` | `../documentation/radio/ic705/#<blocktype>` |
+| `studio/base.js`, group `base.group("Pins", "pins", "pins")` | `documentation/base/pins.md` | `../documentation/base/pins/#<blocktype>` |
 
-The online demo of the studio (`Studio.online`) links to the online help instead: `https://bytebang.github.io/iCOMpadre-studio/radio/ic705/#<blocktype>`.
+They work on every copy of the SD card, e.g. on GitHub Pages. Only the studio served by githack (the repository itself, without the built documentation)
+links to GitHub Pages: `https://bytebang.github.io/iCOMpadre-studio/studio/documentation/radio/ic705/#<blocktype>`.
 
 `Studio.category()` remembers which file registered the category, and `Studio.buildToolbox()` gives every block of it this link (*Help* in the context menu of the block).
 A group with a third parameter gets its own page in a folder named like the file; groups without it (e.g. the topics of the radios) share the page of their category.
@@ -220,17 +223,27 @@ python ../webserver.py
 ```
 
 Enter a port between 8000 and 8100 and open `http://localhost:<port>/`. The server serves `runtime/` and accepts `PUT` for `.lua` and `.json` files, like the device does.
-Help links don't work locally, because the userguide only exists in the CI build.
+### The documentation
 
-The documentation of the studio alone can be viewed with `mkdocs serve` in this folder (`pip install mkdocs mkdocs-awesome-pages-plugin pymdown-extensions`).
-The same is published as online help on every push to `main` by `.github/workflows/docs.yml`: https://bytebang.github.io/iCOMpadre-studio/.
-Links to other chapters of the iCOMpadre userguide (`../../radios.md`) are plain text there.
-The workflow also publishes `runtime/` as online demo: https://bytebang.github.io/iCOMpadre-studio/app/.
-The studio notices that it runs online (`Studio.online`, on github.io and githack.com, or with `?online` in the address):
-it starts empty, *Save* points to *Download*, and the help links point to the online help.
+The documentation is plain markdown, built with mkdocs (`pip install mkdocs mkdocs-awesome-pages-plugin pymdown-extensions`):
 
-To build the userguide with the studio documentation locally, do what the CI does: copy `documentation/` of this app (including the hidden `.pages` files) to `documentation/studio/` of the iCOMpadre repository and run `mkdocs build` there.
+```sh
+mkdocs serve                                  # preview while writing
+mkdocs build --site-dir runtime/documentation # the help links of the local studio work
+```
+
+The second command puts the documentation where the studio looks for it, like `/studio/documentation/` on the SD card (`runtime/documentation/` is not committed).
 The order and the titles of the pages in the menu come from the `.pages` files (plugin `mkdocs-awesome-pages-plugin`); a new page has to be added there.
+
+The documentation of iCOMpadre itself is separate, on the SD card in `/documentation/`. Links to it are written with their path on the SD card,
+e.g. `[Radios](/documentation/radios/)`: on iCOMpadre the SD card is the root of the web server. In a local build and online they lead nowhere.
+On the SD card the CI of the iCOMpadre repository builds `documentation/` with the settings of the iCOMpadre documentation, `mkdocs.yml` only gives the title.
+
+`.github/workflows/docs.yml` builds the documentation on every push and pull request (strict: broken links fail the build) and publishes the studio
+with its documentation on GitHub Pages, laid out like on the SD card: https://bytebang.github.io/iCOMpadre-studio/studio/ is the studio as online demo,
+https://bytebang.github.io/iCOMpadre-studio/studio/documentation/ its documentation.
+The studio notices that it runs online (`Studio.online`, on github.io and githack.com, or with `?online` in the address):
+it starts empty and *Save* points to *Download*.
 
 ### Checklist before committing a radio
 

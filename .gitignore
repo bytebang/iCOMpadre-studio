@@ -2,5 +2,5 @@ main.lua
 icompadre.json
 __pycache__/
 
-# output of "mkdocs build"
-site/
+# the documentation, built for the local studio (see DEVELOPING.md)
+runtime/documentation/

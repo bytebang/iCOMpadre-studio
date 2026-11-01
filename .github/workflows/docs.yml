@@ -1,10 +1,12 @@
 name: Documentation
 
-# Builds the documentation of the studio and publishes it as online help on GitHub Pages:
-# https://bytebang.github.io/iCOMpadre-studio/
+# Builds the documentation of the studio (on every push and pull request, so broken links show up before a merge)
+# and publishes the studio with its documentation on GitHub Pages, laid out like on the SD card of iCOMpadre:
+#   https://bytebang.github.io/iCOMpadre-studio/studio/                the studio as online demo
+#   https://bytebang.github.io/iCOMpadre-studio/studio/documentation/  its documentation
 on:
   push:
-    branches: [main]
+  pull_request:
   workflow_dispatch:
 
 permissions:
@@ -13,7 +15,7 @@ permissions:
   id-token: write
 
 concurrency:
-  group: pages
+  group: pages-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
@@ -30,25 +32,22 @@ jobs:
       - name: Install mkdocs
         run: pip install mkdocs mkdocs-awesome-pages-plugin pymdown-extensions
 
-      # On the device the pages are part of the iCOMpadre userguide and may link to its other chapters (../../radios.md).
-      # Those chapters are not online: such links become plain text
-      - name: Links to the iCOMpadre userguide become text
-        run: |
-          grep -rlE '\]\(\.\./\.\./[^)]*\)' documentation | xargs -r sed -i -E 's/\[([^]]*)\]\(\.\.\/\.\.\/[^)]*\)/\1 in the iCOMpadre userguide/g'
-
       - name: Build the documentation
-        run: mkdocs build --strict --site-dir site
+        run: mkdocs build --strict --site-dir "$PWD/site/studio/documentation"
 
-      # The studio itself as online demo: https://bytebang.github.io/iCOMpadre-studio/app/
-      # It notices that it runs online (Studio.online): nothing to save to, the help links point to the online help
-      - name: Add the studio as online demo
-        run: cp -r runtime site/app
+      - name: Add the studio, like on the SD card
+        run: |
+          cp -r runtime/. site/studio/
+          rm -f site/studio/main.lua site/studio/icompadre.json
+          printf '<!DOCTYPE html><meta charset="utf-8"><meta http-equiv="refresh" content="0; url=studio/"><a href="studio/">iCOMpadre Studio</a>\n' > site/index.html
 
       - uses: actions/upload-pages-artifact@v3
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
         with:
           path: site
 
   deploy:
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     needs: build
     runs-on: ubuntu-latest
     environment:
