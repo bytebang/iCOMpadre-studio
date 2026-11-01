@@ -4,7 +4,7 @@ iCOMpadre-studio is the code editor for iCOMpadre and it runs usually of the SD 
 
 ## General usage
 
-The interface is easy to use. On the left pane there is a selection of [blocks](blocks.md) that can be dragged to the workspace and there they can be connected to meaningful programs. Lets have a look how a RF Gain Limiter to 30% for the IC-705 can be implemented in 60 seconds: 
+The interface is easy to use. On the left pane there is a selection of [blocks](blocks.md) that can be dragged to the workspace and there they can be connected to meaningful programs. Let's have a look how an RF Gain Limiter to 30% for the IC-705 can be implemented in 60 seconds: 
 
 ![RF Gain Limiter in 60 seconds](rfgain-limiter.gif)
 
