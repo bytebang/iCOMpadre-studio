@@ -13,9 +13,12 @@ The GitHub action `.github/workflows/tests.yml` runs all tests on every push.
 
 | Test | What it checks |
 | --- | --- |
-| `test_generated_code.py` | The lua code of every block of the toolbox is the same as in `expected_lua.json`, and every block generates code. |
+| `test_generated_code.py` | The lua code of every block of the toolbox is the same as in `expected_lua.json`, every block generates code, and the iCOMpadre blocks generate the same code in every language. |
 | `test_lua.py` | The radio blocks run in Lua 5.3 with a simulated firmware: without answers (right after the start) and with answers. Read blocks return the right values for known answers, action blocks send the right bytes. |
-| `test_ui.py` | Loading and saving, unsaved changes and their backup in the browser, open / import / share, the lua panel, ctrl+s, dark mode, phone width, errors of the loader. |
+| `test_ui.py` | Loading and saving, unsaved changes and their backup in the browser, open / import / share, the lua panel, ctrl+s, dark mode, phone width, another language, errors of the loader. |
+| `test_i18n.py` | The texts in `msg/`: translations have no unknown texts and the same placeholders as english, every text is used, translated block files contain no texts of their own (no browser needed). |
+
+The browser runs with english as its language, because the studio follows the language of the browser.
 
 ## When test_generated_code.py fails
 

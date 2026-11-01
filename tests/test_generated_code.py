@@ -4,28 +4,49 @@ Every change of the generated code shows up here: a new block, a changed block o
 If the change is intended, update the expected code and review the diff before committing it:
 
     python tests/test_generated_code.py --update
+
+It also checks that the iCOMpadre blocks generate the same code in every language of msg/,
+so a program works the same, no matter in which language it was made.
 """
 import difflib
+import glob
 import json
 import os
 import sys
 
-from harness import Browser, Checks, Server, generate_all, open_studio
+from harness import RUNTIME, Browser, Checks, Server, generate_all, open_studio
 
 EXPECTED = os.path.join(os.path.dirname(os.path.abspath(__file__)), "expected_lua.json")
+
+# the standard blockly blocks: blockly translates the default names of their variables (e.g. item -> Element)
+BLOCKLY_PREFIXES = ("logic_", "controls_", "math_", "lists_", "text", "variables_", "procedures_")
 
 
 def main():
     update = "--update" in sys.argv
     checks = Checks()
+    languages = sorted(os.path.basename(path)[:-3] for path in glob.glob(os.path.join(RUNTIME, "studio", "msg", "*.js")))
+    translated = {}
     server, browser = Server(), Browser()
     try:
         open_studio(browser.page, server)
         generated = generate_all(browser.page)
+        for language in languages:
+            if language != "en":
+                open_studio(browser.page, server, "/studio/index.html?lang=" + language)
+                checks.check("%s: the studio is shown in this language" % language,
+                             browser.page.eval("document.documentElement.lang") == language)
+                translated[language] = generate_all(browser.page)
         problems = browser.page.problems()
     finally:
         browser.close()
         server.close()
+
+    for language, other in sorted(translated.items()):
+        different = sorted(name for name, block in generated["blocks"].items()
+                           if not name.startswith(BLOCKLY_PREFIXES) and other["blocks"].get(name) != block)
+        checks.check("%s: the iCOMpadre blocks generate the same code as in english" % language, not different, different)
+        checks.check("%s: the same helper functions as in english" % language, other["helpers"] == generated["helpers"])
 
     actual = {"blocks": generated["blocks"], "helpers": generated["helpers"]}
     errors = {k: v["code"] for k, v in actual["blocks"].items() if v["code"].startswith("ERROR")}

@@ -221,7 +221,9 @@ class Browser:
             s.bind(("127.0.0.1", 0))
             port = s.getsockname()[1]
         args = [path, "--headless=new", "--remote-debugging-port=%d" % port, "--user-data-dir=" + self.profile,
-                "--no-first-run", "--disable-gpu", "--disable-extensions", "about:blank"]
+                "--no-first-run", "--disable-gpu", "--disable-extensions",
+                "--lang=en-US", "--accept-lang=en-US",   # the studio follows the browser language, the tests expect english
+                "about:blank"]
         if sys.platform.startswith("linux"):
             args.insert(1, "--no-sandbox")
         self.proc = subprocess.Popen(args, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)

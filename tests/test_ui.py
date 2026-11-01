@@ -159,6 +159,17 @@ def main():
         check("the workspace follows the dark mode", True)
         page.call("Emulation.setEmulatedMedia", features=[])
 
+        # another language: the loader passes it on, the texts of blockly and of the studio are translated
+        open_studio(page, server, "/?lang=de")
+        check("the loader passes the language on", page.eval("location.search") == "?lang=de")
+        check("the page has the language", page.eval("document.documentElement.lang") == "de")
+        check("the blockly texts are translated", page.eval("Blockly.Msg.ADD_COMMENT") == "Kommentar hinzufügen")
+        label = page.eval("new Blockly.Workspace().newBlock('onstartup').toString()")
+        check("the studio texts are translated", label.startswith("Beim Start"), label)
+        check("the toolbox is translated", '"Programm"' in page.eval("JSON.stringify(toolbox)"))
+        problems = page.problems(ignore=("Saving failed",))
+        check("no console problems in another language", not problems, problems)
+
         # the loader shows an error instead of waiting forever
         icon = server.file(os.path.join("studio", "img", "code.svg"))
         os.rename(icon, icon + ".off")

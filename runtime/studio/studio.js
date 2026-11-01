@@ -30,10 +30,10 @@ var Studio = (function() {
 
   // Sections of a category, in the order they appear in the toolbox
   var SECTIONS = [
-    {"key": "events",     "label": "Events"},
-    {"key": "actions",    "label": "Actions"},
-    {"key": "properties", "label": "Properties"},
-    {"key": "helpers",    "label": "Helpers"},
+    {"key": "events",     "label": Blockly.Msg.STUDIO_EVENTS},
+    {"key": "actions",    "label": Blockly.Msg.STUDIO_ACTIONS},
+    {"key": "properties", "label": Blockly.Msg.STUDIO_PROPERTIES},
+    {"key": "helpers",    "label": Blockly.Msg.STUDIO_HELPERS},
   ];
 
   // The colour palette of the iCOMpadre blocks. The hues don't collide with the
@@ -289,8 +289,7 @@ var Studio = (function() {
         return other.type == block.type && other.isEnabled();
       });
       var duplicate = block.isEnabled() && twins.length > 1;
-      block.setWarningText(duplicate ? "This block is " + twins.length + " times in the program,\nbut only one of them is executed.\n" +
-                                       "Put all blocks into one of them\nand delete the others." : null, "duplicate-event");
+      block.setWarningText(duplicate ? Blockly.Msg.STUDIO_DUPLICATE_EVENT.replace("%1", twins.length) : null, "duplicate-event");
     });
   }
 

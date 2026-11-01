@@ -6,15 +6,16 @@
 // setDigitalOutput, readDigitalInput, setAnalogOutput, readAnalogInput, readTouchInput
 //
 // Documentation of the blocks: documentation/base/<group>.md, one page per group
+// The texts of the blocks are in msg/en.js (translations in msg/<language>.js)
 
 // Register the contribution of this file: one category with a group (colour and help page) per topic
 var base = Studio.category("iCOMpadre");
-var program  = base.group("Program", "program", "program");
-var radio    = base.group("Radio", "radio", "radio");
-var pins     = base.group("Pins", "pins", "pins");
-var serial   = base.group("Serial", "serial", "serial");
-var storage  = base.group("Storage", "storage", "storage");
-var helpers  = base.group("Helpers", "helpers", "helpers");
+var program  = base.group(Blockly.Msg.ICP_GROUP_PROGRAM, "program", "program");
+var radio    = base.group(Blockly.Msg.ICP_GROUP_RADIO, "radio", "radio");
+var pins     = base.group(Blockly.Msg.ICP_GROUP_PINS, "pins", "pins");
+var serial   = base.group(Blockly.Msg.ICP_GROUP_SERIAL, "serial", "serial");
+var storage  = base.group(Blockly.Msg.ICP_GROUP_STORAGE, "storage", "storage");
+var helpers  = base.group(Blockly.Msg.ICP_GROUP_HELPERS, "helpers", "helpers");
 
 // Pins of the iCOMpadre connector
 var PINS_ALL   = [["PIN A", "PIN_A"], ["PIN B", "PIN_B"], ["PIN C", "PIN_C"], ["PIN D", "PIN_D"],
@@ -130,10 +131,10 @@ Studio.luaFunction("bcdToNumber", [
 Blockly.Blocks['onstartup'] = {
   init: function() {
     this.appendDummyInput()
-        .appendField("OnStartup");
+        .appendField(Blockly.Msg.ICP_ONSTARTUP);
     this.appendStatementInput("actions")
         .setCheck(null);
-    this.setTooltip("This is executed during the startup of the device");
+    this.setTooltip(Blockly.Msg.ICP_ONSTARTUP_TOOLTIP);
   }
 };
 
@@ -150,10 +151,10 @@ program.event("onstartup");
 Blockly.Blocks['periodically'] = {
   init: function() {
     this.appendDummyInput()
-        .appendField("Periodically");
+        .appendField(Blockly.Msg.ICP_PERIODICALLY);
     this.appendStatementInput("actions")
         .setCheck(null);
-    this.setTooltip("This is executed periodically if the radio is turned on. Otherwise the function is not called");
+    this.setTooltip(Blockly.Msg.ICP_PERIODICALLY_TOOLTIP);
   }
 };
 
@@ -170,10 +171,10 @@ program.event("periodically");
 Blockly.Blocks['onradioconnected'] = {
   init: function() {
     this.appendDummyInput()
-        .appendField("OnRadioConnected");
+        .appendField(Blockly.Msg.ICP_ONRADIOCONNECTED);
     this.appendStatementInput("actions")
         .setCheck(null);
-    this.setTooltip("This is executed when the radio starts to answer: after the start of iCOMpadre or when the radio is switched on");
+    this.setTooltip(Blockly.Msg.ICP_ONRADIOCONNECTED_TOOLTIP);
   }
 };
 
@@ -190,10 +191,10 @@ program.event("onradioconnected");
 Blockly.Blocks['onradiodisconnected'] = {
   init: function() {
     this.appendDummyInput()
-        .appendField("OnRadioDisconnected");
+        .appendField(Blockly.Msg.ICP_ONRADIODISCONNECTED);
     this.appendStatementInput("actions")
         .setCheck(null);
-    this.setTooltip("This is executed when the radio stops to answer, e.g. when it is switched off");
+    this.setTooltip(Blockly.Msg.ICP_ONRADIODISCONNECTED_TOOLTIP);
   }
 };
 
@@ -213,12 +214,12 @@ Blockly.Blocks['onchangeof'] = {
     this.appendValueInput("expr")
         .setCheck(null)
         .setAlign(Blockly.inputs.Align.RIGHT)
-        .appendField("On change of");
+        .appendField(Blockly.Msg.ICP_ONCHANGEOF);
     this.appendStatementInput("statements")
         .setCheck(["Boolean", "Number", "String"]);
     this.setPreviousStatement(true, null);
     this.setNextStatement(true, null);
-    this.setTooltip("Executes the block if the watchedValue changes");
+    this.setTooltip(Blockly.Msg.ICP_ONCHANGEOF_TOOLTIP);
   }
 };
 
@@ -247,7 +248,7 @@ Blockly.Blocks['wait'] = {
   init: function() {
     this.jsonInit({
       "type": "wait",
-      "message0": "Wait %1 %2 ms",
+      "message0": Blockly.Msg.ICP_WAIT,
       "args0": [
         {"type": "input_dummy"},
         {"type": "input_value", "name": "timeout", "check": "Number"}
@@ -255,7 +256,7 @@ Blockly.Blocks['wait'] = {
       "inputsInline": true,
       "previousStatement": null,
       "nextStatement": null,
-      "tooltip": "Waits for x milliseconds"
+      "tooltip": Blockly.Msg.ICP_WAIT_TOOLTIP
     });
   }
 };
@@ -273,12 +274,12 @@ program.action("wait");
 Blockly.Blocks['executeluachunk'] = {
   init: function() {
     this.appendDummyInput()
-        .appendField("execute Lua Chunk");
+        .appendField(Blockly.Msg.ICP_EXECUTELUACHUNK);
     this.appendValueInput("chunk")
         .setCheck("String");
     this.setPreviousStatement(true, null);
     this.setNextStatement(true, null);
-    this.setTooltip("Runs the given Lua Script");
+    this.setTooltip(Blockly.Msg.ICP_EXECUTELUACHUNK_TOOLTIP);
     this.setHelpUrl("https://www.lua.org/manual/5.3/");   // the lua manual is more useful than our docs here
   }
 };
@@ -296,9 +297,9 @@ program.action("executeluachunk");
 Blockly.Blocks['millis'] = {
   init: function() {
     this.appendDummyInput()
-        .appendField("milliseconds since start");
+        .appendField(Blockly.Msg.ICP_MILLIS);
     this.setOutput(true, "Number");
-    this.setTooltip("Returns the milliseconds since the device was started. Rolls over after ~49 days");
+    this.setTooltip(Blockly.Msg.ICP_MILLIS_TOOLTIP);
   }
 };
 
@@ -313,8 +314,9 @@ program.property("millis");
 /* **************************************************************** */
 
 // The connections to a radio: bluetooth (IC-705) or the cable at the REMOTE jack with a baud rate
-var CIV_CONNECTIONS = [["cable (19200 baud)", "cable/19200"], ["cable (9600 baud)", "cable/9600"],
-                       ["cable (4800 baud)", "cable/4800"], ["cable (1200 baud)", "cable/1200"], ["Bluetooth", "bluetooth"]];
+var CIV_CONNECTIONS = [19200, 9600, 4800, 1200].map(function(baud) {
+  return [Blockly.Msg.ICP_CABLE.replace("%1", baud), "cable/" + baud];
+}).concat([["Bluetooth", "bluetooth"]]);
 
 // Lua arguments of configCIV() for the connection: "bluetooth" or "cable", 19200
 function civConnection(value)
@@ -328,7 +330,7 @@ function civConnection(value)
 Blockly.Blocks['connect_radio'] = {
   init: function() {
     this.jsonInit({
-      "message0": "Connect to %1 via %2",
+      "message0": Blockly.Msg.ICP_CONNECT_RADIO,
       "args0": [
         {
           "type": "field_dropdown",
@@ -341,8 +343,7 @@ Blockly.Blocks['connect_radio'] = {
       ],
       "previousStatement": null,
       "nextStatement": null,
-      "tooltip": "Selects the radio iCOMpadre talks to, with the default CI-V address of the radio. " +
-                 "Put it into OnStartup. Without this block iCOMpadre talks to an IC-705 via Bluetooth"
+      "tooltip": Blockly.Msg.ICP_CONNECT_RADIO_TOOLTIP
     });
   }
 };
@@ -359,15 +360,14 @@ radio.action("connect_radio");
 Blockly.Blocks['connect_address'] = {
   init: function() {
     this.jsonInit({
-      "message0": "Connect to CI-V address %1 h via %2",
+      "message0": Blockly.Msg.ICP_CONNECT_ADDRESS,
       "args0": [
         {"type": "field_input", "name": "ADDRESS", "text": "A4"},
         {"type": "field_dropdown", "name": "CONNECTION", "options": CIV_CONNECTIONS}
       ],
       "previousStatement": null,
       "nextStatement": null,
-      "tooltip": "Selects the radio iCOMpadre talks to by its CI-V address in hex (01 ~ DF), as it is set in the menu of the radio. " +
-                 "Put it into OnStartup"
+      "tooltip": Blockly.Msg.ICP_CONNECT_ADDRESS_TOOLTIP
     });
     this.getField('ADDRESS').setValidator(function(text) {
       var hex = text.trim().toUpperCase().replace(/^0X/, '').replace(/H$/, '');
@@ -389,18 +389,18 @@ radio.action("connect_address");
 Blockly.Blocks['sendcommand'] = {
   init: function() {
     this.appendDummyInput()
-        .appendField("send command to radio");
+        .appendField(Blockly.Msg.ICP_SENDCOMMAND);
     this.appendValueInput("cmd")
         .setCheck("Array")
         .setAlign(Blockly.inputs.Align.RIGHT)
-        .appendField("command");
+        .appendField(Blockly.Msg.ICP_SENDCOMMAND_COMMAND);
     this.appendValueInput("data")
         .setCheck("Array")
         .setAlign(Blockly.inputs.Align.RIGHT)
-        .appendField("data");
+        .appendField(Blockly.Msg.ICP_SENDCOMMAND_DATA);
     this.setPreviousStatement(true, null);
     this.setNextStatement(true, null);
-    this.setTooltip("Sends the given command to the radio");
+    this.setTooltip(Blockly.Msg.ICP_SENDCOMMAND_TOOLTIP);
   }
 };
 
@@ -418,11 +418,11 @@ radio.action("sendcommand");
 Blockly.Blocks['readdata'] = {
   init: function() {
     this.appendDummyInput()
-        .appendField("Read data from radio");
+        .appendField(Blockly.Msg.ICP_READDATA);
     this.appendValueInput("commandsequence")
         .setCheck("Array");
     this.setOutput(true, "Array");
-    this.setTooltip("Returns the plain resultarray of the given command");
+    this.setTooltip(Blockly.Msg.ICP_READDATA_TOOLTIP);
   }
 };
 
@@ -441,9 +441,9 @@ Blockly.Blocks['bcdasnumber'] = {
   init: function() {
     this.appendValueInput("inputarray")
         .setCheck("Array")
-        .appendField("BCD values as Number");
+        .appendField(Blockly.Msg.ICP_BCDASNUMBER);
     this.setOutput(true, "Number");
-    this.setTooltip("Converts bcd hex values to the corresponding number");
+    this.setTooltip(Blockly.Msg.ICP_BCDASNUMBER_TOOLTIP);
   }
 };
 
@@ -462,9 +462,9 @@ Blockly.Blocks['prettystring'] = {
   init: function() {
     this.appendValueInput("inputarray")
         .setCheck("Array")
-        .appendField("pretty");
+        .appendField(Blockly.Msg.ICP_PRETTYSTRING);
     this.setOutput(true, "String");
-    this.setTooltip("Converts a list to a string with hex values");
+    this.setTooltip(Blockly.Msg.ICP_PRETTYSTRING_TOOLTIP);
   }
 };
 
@@ -485,14 +485,14 @@ radio.helper("prettystring");
 Blockly.Blocks['setanalogoutput'] = {
   init: function() {
     this.appendDummyInput()
-        .appendField("Set")
+        .appendField(Blockly.Msg.ICP_SETANALOGOUTPUT)
         .appendField(new Blockly.FieldDropdown(PINS_DAC), "pinname");
     this.appendValueInput("newvalue")
         .setCheck("Number")
-        .appendField("to Voltage");
+        .appendField(Blockly.Msg.ICP_SETANALOGOUTPUT_TO);
     this.setPreviousStatement(true, null);
     this.setNextStatement(true, null);
-    this.setTooltip("Sets the given pin to the selected value");
+    this.setTooltip(Blockly.Msg.ICP_SETANALOGOUTPUT_TOOLTIP);
   }
 };
 
@@ -510,14 +510,14 @@ pins.action("setanalogoutput");
 Blockly.Blocks['setdigitaloutput'] = {
   init: function() {
     this.appendDummyInput()
-        .appendField("Set")
+        .appendField(Blockly.Msg.ICP_SETDIGITALOUTPUT)
         .appendField(new Blockly.FieldDropdown(PINS_ALL), "pinname");
     this.appendValueInput("newvalue")
         .setCheck("Boolean")
-        .appendField("to Value");
+        .appendField(Blockly.Msg.ICP_SETDIGITALOUTPUT_TO);
     this.setPreviousStatement(true, null);
     this.setNextStatement(true, null);
-    this.setTooltip("Sets the digital output to high (true) or low (false)");
+    this.setTooltip(Blockly.Msg.ICP_SETDIGITALOUTPUT_TOOLTIP);
   }
 };
 
@@ -535,10 +535,10 @@ pins.action("setdigitaloutput");
 Blockly.Blocks['readanaloginput'] = {
   init: function() {
     this.appendDummyInput()
-        .appendField("Voltage of")
+        .appendField(Blockly.Msg.ICP_READANALOGINPUT)
         .appendField(new Blockly.FieldDropdown(PINS_ALL), "pinname");
     this.setOutput(true, "Number");
-    this.setTooltip("Reads the voltage at the given input in V");
+    this.setTooltip(Blockly.Msg.ICP_READANALOGINPUT_TOOLTIP);
   }
 };
 
@@ -556,10 +556,10 @@ pins.property("readanaloginput");
 Blockly.Blocks['readdigitalinput'] = {
   init: function() {
     this.appendDummyInput()
-        .appendField("State of")
+        .appendField(Blockly.Msg.ICP_READDIGITALINPUT)
         .appendField(new Blockly.FieldDropdown(PINS_ALL), "pinname");
     this.setOutput(true, "Boolean");
-    this.setTooltip("Read the value of the given input");
+    this.setTooltip(Blockly.Msg.ICP_READDIGITALINPUT_TOOLTIP);
   }
 };
 
@@ -577,12 +577,12 @@ pins.property("readdigitalinput");
 Blockly.Blocks['touchvalue'] = {
   init: function() {
     this.jsonInit({
-      "message0": "Touch value of %1",
+      "message0": Blockly.Msg.ICP_TOUCHVALUE,
       "args0": [
         {"type": "field_dropdown", "name": "pinname", "options": PINS_TOUCH}
       ],
       "output": "Number",
-      "tooltip": "Reads the touch value of a pin"
+      "tooltip": Blockly.Msg.ICP_TOUCHVALUE_TOOLTIP
     });
   }
 };
@@ -601,13 +601,13 @@ pins.property("touchvalue");
 Blockly.Blocks['isTouched'] = {
   init: function() {
     this.jsonInit({
-      "message0": "Is %1 %2 ?",
+      "message0": Blockly.Msg.ICP_ISTOUCHED,
       "args0": [
         {"type": "field_dropdown", "name": "pinname", "options": PINS_TOUCH},
-        {"type": "field_dropdown", "name": "threshold", "options": [["touched", "< 30"], ["released", ">= 30"]]}
+        {"type": "field_dropdown", "name": "threshold", "options": [[Blockly.Msg.ICP_ISTOUCHED_TOUCHED, "< 30"], [Blockly.Msg.ICP_ISTOUCHED_RELEASED, ">= 30"]]}
       ],
       "output": "Boolean",
-      "tooltip": "Returns true if a pin has been touched"
+      "tooltip": Blockly.Msg.ICP_ISTOUCHED_TOOLTIP
     });
   }
 };
@@ -633,7 +633,7 @@ Blockly.Blocks['voltagevalue'] = {
         {"type": "field_dropdown", "name": "vunit", "options": [["V", "1"], ["mV", "0.001"]]}
       ],
       "output": "Number",
-      "tooltip": "Voltage representation"
+      "tooltip": Blockly.Msg.ICP_VOLTAGEVALUE_TOOLTIP
     });
   }
 };
@@ -671,8 +671,8 @@ Blockly.Blocks['onserialline'] = {
         .appendField(new Blockly.FieldVariable("line"), "Line");
     this.appendStatementInput("actions")
         .setCheck(null)
-        .appendField("OnSerialLine");
-    this.setTooltip("This is triggered when a user enters a command on the serial interface. The content of the line is in the variable line");
+        .appendField(Blockly.Msg.ICP_ONSERIALLINE);
+    this.setTooltip(Blockly.Msg.ICP_ONSERIALLINE_TOOLTIP);
   }
 };
 
@@ -694,8 +694,8 @@ Blockly.Blocks['onserialbyte'] = {
         .appendField(new Blockly.FieldVariable("byte"), "Byte");
     this.appendStatementInput("actions")
         .setCheck(null)
-        .appendField("OnSerialByte");
-    this.setTooltip("This is triggered each time a byte arrives on the serial interface. The value of the byte is in the variable byte as number");
+        .appendField(Blockly.Msg.ICP_ONSERIALBYTE);
+    this.setTooltip(Blockly.Msg.ICP_ONSERIALBYTE_TOOLTIP);
   }
 };
 
@@ -717,7 +717,7 @@ serial.action("text_print");
 Blockly.Blocks['configserial'] = {
   init: function() {
     this.jsonInit({
-      "message0": "Set serial speed to  %1,8,N,1",
+      "message0": Blockly.Msg.ICP_CONFIGSERIAL,
       "args0": [
         {
           "type": "field_dropdown",
@@ -730,7 +730,7 @@ Blockly.Blocks['configserial'] = {
       ],
       "previousStatement": null,
       "nextStatement": null,
-      "tooltip": "Sets the speed of the serial port"
+      "tooltip": Blockly.Msg.ICP_CONFIGSERIAL_TOOLTIP
     });
   }
 };
@@ -896,7 +896,7 @@ Studio.luaFunction("storageLines", [
 Blockly.Blocks['storage_remember'] = {
   init: function() {
     this.jsonInit({
-      "message0": "Remember %1 as %2",
+      "message0": Blockly.Msg.ICP_STORAGE_REMEMBER,
       "args0": [
         {"type": "input_value", "name": "VALUE"},
         {"type": "input_value", "name": "KEY", "check": "String"}
@@ -904,7 +904,7 @@ Blockly.Blocks['storage_remember'] = {
       "inputsInline": true,
       "previousStatement": null,
       "nextStatement": null,
-      "tooltip": "Remembers a value (number, text, true/false or list) under a name. It is kept on the SD card, also when iCOMpadre is switched off"
+      "tooltip": Blockly.Msg.ICP_STORAGE_REMEMBER_TOOLTIP
     });
   }
 };
@@ -924,14 +924,14 @@ storage.action("storage_remember", storageDefault({"VALUE": 0, "KEY": "counter"}
 Blockly.Blocks['storage_forget'] = {
   init: function() {
     this.jsonInit({
-      "message0": "Forget %1",
+      "message0": Blockly.Msg.ICP_STORAGE_FORGET,
       "args0": [
         {"type": "input_value", "name": "KEY", "check": "String"}
       ],
       "inputsInline": true,
       "previousStatement": null,
       "nextStatement": null,
-      "tooltip": "Forgets the value remembered under the name"
+      "tooltip": Blockly.Msg.ICP_STORAGE_FORGET_TOOLTIP
     });
   }
 };
@@ -950,7 +950,7 @@ storage.action("storage_forget", storageDefault({"KEY": "counter"}));
 Blockly.Blocks['storage_append_line'] = {
   init: function() {
     this.jsonInit({
-      "message0": "Append line %1 to file %2",
+      "message0": Blockly.Msg.ICP_STORAGE_APPEND_LINE,
       "args0": [
         {"type": "input_value", "name": "TEXT"},
         {"type": "input_value", "name": "FILE", "check": "String"}
@@ -958,7 +958,7 @@ Blockly.Blocks['storage_append_line'] = {
       "inputsInline": true,
       "previousStatement": null,
       "nextStatement": null,
-      "tooltip": "Appends the text as a new line to the end of the file. The file is created if it does not exist"
+      "tooltip": Blockly.Msg.ICP_STORAGE_APPEND_LINE_TOOLTIP
     });
   }
 };
@@ -978,7 +978,7 @@ storage.action("storage_append_line", storageDefault({"TEXT": "Hello", "FILE": "
 Blockly.Blocks['storage_append_csv'] = {
   init: function() {
     this.jsonInit({
-      "message0": "Append values %1 to CSV file %2",
+      "message0": Blockly.Msg.ICP_STORAGE_APPEND_CSV,
       "args0": [
         {"type": "input_value", "name": "LIST", "check": "Array"},
         {"type": "input_value", "name": "FILE", "check": "String"}
@@ -986,7 +986,7 @@ Blockly.Blocks['storage_append_csv'] = {
       "inputsInline": true,
       "previousStatement": null,
       "nextStatement": null,
-      "tooltip": "Appends the values of the list as a new line to a CSV file, which can be opened in a spreadsheet"
+      "tooltip": Blockly.Msg.ICP_STORAGE_APPEND_CSV_TOOLTIP
     });
   }
 };
@@ -1006,7 +1006,7 @@ storage.action("storage_append_csv", storageDefault({"FILE": "log.csv"}));
 Blockly.Blocks['storage_write_file'] = {
   init: function() {
     this.jsonInit({
-      "message0": "Write text %1 to file %2",
+      "message0": Blockly.Msg.ICP_STORAGE_WRITE_FILE,
       "args0": [
         {"type": "input_value", "name": "TEXT"},
         {"type": "input_value", "name": "FILE", "check": "String"}
@@ -1014,7 +1014,7 @@ Blockly.Blocks['storage_write_file'] = {
       "inputsInline": true,
       "previousStatement": null,
       "nextStatement": null,
-      "tooltip": "Writes the text to the file. The old content of the file is replaced"
+      "tooltip": Blockly.Msg.ICP_STORAGE_WRITE_FILE_TOOLTIP
     });
   }
 };
@@ -1034,14 +1034,14 @@ storage.action("storage_write_file", storageDefault({"TEXT": "Hello", "FILE": "n
 Blockly.Blocks['storage_delete_file'] = {
   init: function() {
     this.jsonInit({
-      "message0": "Delete file %1",
+      "message0": Blockly.Msg.ICP_STORAGE_DELETE_FILE,
       "args0": [
         {"type": "input_value", "name": "FILE", "check": "String"}
       ],
       "inputsInline": true,
       "previousStatement": null,
       "nextStatement": null,
-      "tooltip": "Deletes the file"
+      "tooltip": Blockly.Msg.ICP_STORAGE_DELETE_FILE_TOOLTIP
     });
   }
 };
@@ -1059,14 +1059,14 @@ storage.action("storage_delete_file", storageDefault({"FILE": "log.csv"}));
 Blockly.Blocks['storage_recall'] = {
   init: function() {
     this.jsonInit({
-      "message0": "Recall %1 or else %2",
+      "message0": Blockly.Msg.ICP_STORAGE_RECALL,
       "args0": [
         {"type": "input_value", "name": "KEY", "check": "String"},
         {"type": "input_value", "name": "DEFAULT"}
       ],
       "inputsInline": true,
       "output": null,
-      "tooltip": "Returns the value remembered under the name. If nothing has been remembered yet, the value after 'or else' is returned"
+      "tooltip": Blockly.Msg.ICP_STORAGE_RECALL_TOOLTIP
     });
   }
 };
@@ -1086,13 +1086,13 @@ storage.property("storage_recall", storageDefault({"KEY": "counter", "DEFAULT": 
 Blockly.Blocks['storage_file_lines'] = {
   init: function() {
     this.jsonInit({
-      "message0": "Lines of file %1",
+      "message0": Blockly.Msg.ICP_STORAGE_FILE_LINES,
       "args0": [
         {"type": "input_value", "name": "FILE", "check": "String"}
       ],
       "inputsInline": true,
       "output": "Array",
-      "tooltip": "Returns the lines of the file as a list. The list is empty if the file does not exist"
+      "tooltip": Blockly.Msg.ICP_STORAGE_FILE_LINES_TOOLTIP
     });
   }
 };
@@ -1111,13 +1111,13 @@ storage.property("storage_file_lines", storageDefault({"FILE": "log.txt"}));
 Blockly.Blocks['storage_read_file'] = {
   init: function() {
     this.jsonInit({
-      "message0": "Text of file %1",
+      "message0": Blockly.Msg.ICP_STORAGE_READ_FILE,
       "args0": [
         {"type": "input_value", "name": "FILE", "check": "String"}
       ],
       "inputsInline": true,
       "output": "String",
-      "tooltip": "Returns the content of the file as text. The text is empty if the file does not exist"
+      "tooltip": Blockly.Msg.ICP_STORAGE_READ_FILE_TOOLTIP
     });
   }
 };
@@ -1135,13 +1135,13 @@ storage.property("storage_read_file", storageDefault({"FILE": "notes.txt"}));
 Blockly.Blocks['storage_file_exists'] = {
   init: function() {
     this.jsonInit({
-      "message0": "File %1 exists?",
+      "message0": Blockly.Msg.ICP_STORAGE_FILE_EXISTS,
       "args0": [
         {"type": "input_value", "name": "FILE", "check": "String"}
       ],
       "inputsInline": true,
       "output": "Boolean",
-      "tooltip": "True if the file exists"
+      "tooltip": Blockly.Msg.ICP_STORAGE_FILE_EXISTS_TOOLTIP
     });
   }
 };
@@ -1164,14 +1164,14 @@ Blockly.Blocks['comment'] = {
   init: function() {
     this.jsonInit({
       "type": "comment",
-      "message0": "Comment: %1",
+      "message0": Blockly.Msg.ICP_COMMENT,
       "args0": [
         {"type": "field_input", "name": "theContent", "check": "String"}
       ],
       "inputsInline": false,
       "previousStatement": null,
       "nextStatement": null,
-      "tooltip": "Does nothing, is just for commenting"
+      "tooltip": Blockly.Msg.ICP_COMMENT_TOOLTIP
     });
   }
 };
@@ -1188,14 +1188,14 @@ helpers.helper("comment");
 // Lua: map(value, in_min, in_max, out_min, out_max)
 Blockly.Blocks['mapnumber'] = {
   init: function() {
-    this.appendValueInput("val").setCheck("Number").appendField("map");
-    this.appendValueInput("in_min").setCheck("Number").appendField("from range of");
+    this.appendValueInput("val").setCheck("Number").appendField(Blockly.Msg.ICP_MAPNUMBER);
+    this.appendValueInput("in_min").setCheck("Number").appendField(Blockly.Msg.ICP_MAPNUMBER_FROM);
     this.appendValueInput("in_max").setCheck("Number").appendField("-");
-    this.appendValueInput("out_min").setCheck("Number").appendField("to range from");
+    this.appendValueInput("out_min").setCheck("Number").appendField(Blockly.Msg.ICP_MAPNUMBER_TO);
     this.appendValueInput("out_max").setCheck("Number").appendField("-");
     this.setInputsInline(true);
     this.setOutput(true, null);
-    this.setTooltip("Maps a number from one range into another (by linear intra/extrapolation).");
+    this.setTooltip(Blockly.Msg.ICP_MAPNUMBER_TOOLTIP);
   }
 };
 
@@ -1219,9 +1219,9 @@ Blockly.Blocks['asChar'] = {
   init: function() {
     this.appendValueInput("inByte")
         .setCheck("Number")
-        .appendField("char of");
+        .appendField(Blockly.Msg.ICP_ASCHAR);
     this.setOutput(true, "String");
-    this.setTooltip("Converts the number to a character");
+    this.setTooltip(Blockly.Msg.ICP_ASCHAR_TOOLTIP);
   }
 };
 
@@ -1239,13 +1239,13 @@ Blockly.Blocks['asByte'] = {
   init: function() {
     this.jsonInit({
       "type": "asByte",
-      "message0": "byte of character %1",
+      "message0": Blockly.Msg.ICP_ASBYTE,
       "args0": [
         {"type": "field_input", "name": "inChar", "check": "String"}
       ],
       "output": "Number",
       "inputsInline": false,
-      "tooltip": "Converts the first character of the given string to a numeric byte value"
+      "tooltip": Blockly.Msg.ICP_ASBYTE_TOOLTIP
     });
   }
 };

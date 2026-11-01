@@ -44,6 +44,11 @@
 //   position, clock                           23 00 (label, text), 1A 05 (date, time: the numbers of the settings)
 //   functions, brightness, power              16 xx on/off (options), 14 19, 18
 //   levels, menu                              14 xx in one block: names of LEVELS or own [name, sub], 1A 05 + number
+//
+// Languages: the texts of the blocks are in msg/en.js (ICOM_...). The texts of a description (e.g. the names of the
+// options) stay english, the block shows their translation if msg/*.js has one (ICOM_TERM_..., see term()).
+// The names which the read blocks return to the program (e.g. "USB", "FAST") are never translated,
+// so a program works the same in every language.
 
 /**
  * Creates the blocks of Icom radios. The only global this file adds.
@@ -51,37 +56,44 @@
  */
 var Icom = (function() {
 
-  var ON_OFF = [["on", "0x01"], ["off", "0x00"]];
+  var ON_OFF = [[Blockly.Msg.ICOM_ON, "0x01"], [Blockly.Msg.ICOM_OFF, "0x00"]];
   var UNITS = [["Hz", "1"], ["kHz", "1e3"], ["MHz", "1e6"]];
 
-  // The groups of a radio category, in the order of the toolbox (the same as for the IC-705)
+  // The groups of a radio category, in the order of the toolbox (the same as for the IC-705), with the text of their name
   var GROUPS = ["Frequency & Mode", "Receiver", "Transmit", "Meters", "CW & Voice", "GPS & Time", "Settings"];
+  var GROUP_NAMES = {
+    "Frequency & Mode": Blockly.Msg.ICOM_GROUP_FREQUENCY_MODE, "Receiver": Blockly.Msg.ICOM_GROUP_RECEIVER,
+    "Transmit": Blockly.Msg.ICOM_GROUP_TRANSMIT, "Meters": Blockly.Msg.ICOM_GROUP_METERS, "CW & Voice": Blockly.Msg.ICOM_GROUP_CW_VOICE,
+    "GPS & Time": Blockly.Msg.ICOM_GROUP_GPS_TIME, "Settings": Blockly.Msg.ICOM_GROUP_SETTINGS
+  };
 
   // The usual settings of command 16 with more than on/off. A radio lists the ones it has in spec.choices by name.
   var CHOICES = {
-    "dsp_filter_type": {"label": "DSP Filter Type", "sub": "0x56", "group": "Receiver",
-                        "options": [["SHARP", "0x00"], ["SOFT", "0x01"]], "tooltip": "Sets the shape of the DSP IF filter in the operating band"},
-    "notch_width": {"label": "Manual Notch Width", "sub": "0x57", "group": "Receiver",
-                    "options": [["WIDE", "0x00"], ["MID", "0x01"], ["NAR", "0x02"]], "tooltip": "Sets the width of the manual notch filter"},
-    "digital_squelch": {"label": "Digital Squelch", "sub": "0x5B", "group": "Receiver",
+    "dsp_filter_type": {"label": Blockly.Msg.ICOM_DSP_FILTER_TYPE, "sub": "0x56", "group": "Receiver",
+                        "options": [["SHARP", "0x00"], ["SOFT", "0x01"]], "tooltip": Blockly.Msg.ICOM_DSP_FILTER_TYPE_TOOLTIP},
+    "notch_width": {"label": Blockly.Msg.ICOM_NOTCH_WIDTH, "sub": "0x57", "group": "Receiver",
+                    "options": [["WIDE", "0x00"], ["MID", "0x01"], ["NAR", "0x02"]], "tooltip": Blockly.Msg.ICOM_NOTCH_WIDTH_TOOLTIP},
+    "digital_squelch": {"label": Blockly.Msg.ICOM_DIGITAL_SQUELCH, "sub": "0x5B", "group": "Receiver",
                         "options": [["OFF", "0x00"], ["DSQL", "0x01"], ["CSQL", "0x02"]],
-                        "tooltip": "Sets the digital call sign squelch (DSQL) or the digital code squelch (CSQL). DV mode only"},
-    "tone_function": {"label": "Tone Function", "sub": "0x5D", "group": "Transmit",
+                        "tooltip": Blockly.Msg.ICOM_DIGITAL_SQUELCH_TOOLTIP},
+    "tone_function": {"label": Blockly.Msg.ICOM_TONE_FUNCTION, "sub": "0x5D", "group": "Transmit",
                       "options": [["OFF", "0x00"], ["TONE", "0x01"], ["TSQL", "0x02"], ["DTCS", "0x03"], ["DTCS(T)", "0x06"],
                                   ["TONE(T)/DTCS(R)", "0x07"], ["DTCS(T)/TSQL(R)", "0x08"], ["TONE(T)/TSQL(R)", "0x09"]],
-                      "tooltip": "Selects the repeater tone, tone squelch or DTCS function (FM mode)"},
-    "ssb_tx_bandwidth": {"label": "SSB TX Bandwidth", "sub": "0x58", "group": "Transmit",
-                         "options": [["WIDE", "0x00"], ["MID", "0x01"], ["NAR", "0x02"]], "tooltip": "Selects the SSB transmit bandwidth"},
-    "break_in": {"label": "Break-In", "sub": "0x47", "group": "CW & Voice",
-                 "options": [["OFF", "0x00"], ["semi", "0x01"], ["full", "0x02"]], "tooltip": "Sets the CW break-in function: off, semi or full break-in"},
-    "gps_tx_mode": {"label": "GPS TX Mode", "sub": "0x5C", "group": "GPS & Time",
-                    "options": [["OFF", "0x00"], ["D-PRS", "0x01"], ["NMEA", "0x02"]], "tooltip": "Selects which position data is transmitted in DV mode"}
+                      "tooltip": Blockly.Msg.ICOM_TONE_FUNCTION_TOOLTIP},
+    "ssb_tx_bandwidth": {"label": Blockly.Msg.ICOM_SSB_TX_BANDWIDTH, "sub": "0x58", "group": "Transmit",
+                         "options": [["WIDE", "0x00"], ["MID", "0x01"], ["NAR", "0x02"]], "tooltip": Blockly.Msg.ICOM_SSB_TX_BANDWIDTH_TOOLTIP},
+    "break_in": {"label": Blockly.Msg.ICOM_BREAK_IN, "sub": "0x47", "group": "CW & Voice",
+                 "options": [["OFF", "0x00"], ["semi", "0x01"], ["full", "0x02"]], "tooltip": Blockly.Msg.ICOM_BREAK_IN_TOOLTIP},
+    "gps_tx_mode": {"label": Blockly.Msg.ICOM_GPS_TX_MODE, "sub": "0x5C", "group": "GPS & Time",
+                    "options": [["OFF", "0x00"], ["D-PRS", "0x01"], ["NMEA", "0x02"]], "tooltip": Blockly.Msg.ICOM_GPS_TX_MODE_TOOLTIP}
   };
 
   // The usual levels 0 ~ 100 % of command 14 for the block "Set Level". A radio lists the ones it has in spec.levels by name.
   var LEVELS = {
-    "nr": ["NR level", "0x06"], "nb": ["NB level", "0x12"], "pbt1": ["inner PBT (PBT1)", "0x07"], "pbt2": ["outer PBT (PBT2)", "0x08"],
-    "notch": ["manual notch position", "0x0D"], "monitor": ["monitor level", "0x15"], "vox": ["VOX gain", "0x16"], "antivox": ["anti-VOX gain", "0x17"]
+    "nr": [Blockly.Msg.ICOM_LEVEL_NR, "0x06"], "nb": [Blockly.Msg.ICOM_LEVEL_NB, "0x12"],
+    "pbt1": [Blockly.Msg.ICOM_LEVEL_PBT1, "0x07"], "pbt2": [Blockly.Msg.ICOM_LEVEL_PBT2, "0x08"],
+    "notch": [Blockly.Msg.ICOM_LEVEL_NOTCH, "0x0D"], "monitor": [Blockly.Msg.ICOM_LEVEL_MONITOR, "0x15"],
+    "vox": [Blockly.Msg.ICOM_LEVEL_VOX, "0x16"], "antivox": [Blockly.Msg.ICOM_LEVEL_ANTIVOX, "0x17"]
   };
 
   /* **************************************************************** */
@@ -394,11 +406,38 @@ var Icom = (function() {
     return code.split(',').map(function(byte) { return byte.trim().replace(/^0x/, '').toUpperCase(); }).join(' ');
   }
 
-  // Names of the options, e.g. "LSB, USB or AM"
-  function optionNames(options)
+  // A text of msg/*.js with its {placeholders} replaced, e.g. msg("ICOM_SELECT_VFO", {"vfo": "VFO A"})
+  function msg(key, values)
   {
-    var names = options.map(function(option) { return option[0]; });
-    return names.length > 1 ? names.slice(0, -1).join(', ') + ' or ' + names[names.length - 1] : names.join('');
+    return Blockly.Msg[key].replace(/\{(\w+)\}/g, function(all, name) { return values[name]; });
+  }
+
+  // The key of a text of a radio description in msg/*.js: "Split on" -> ICOM_TERM_Split_on, "fine ΔF" -> ICOM_TERM_fine_delta_F.
+  // Upper and lower case are kept: "OFF" (as written on the radio) is not the same as "off".
+  // tests/test_i18n.py builds the keys the same way
+  function termKey(text)
+  {
+    return "ICOM_TERM_" + text.replace(/Δ/g, " delta ").replace(/[^A-Za-z0-9]+/g, "_").replace(/^_+|_+$/g, "");
+  }
+
+  // The translation of a text of a radio description (e.g. an option of a dropdown), or the text itself
+  function term(text)
+  {
+    return Blockly.Msg[termKey(text)] || text;
+  }
+
+  // The options of a dropdown with translated names. Only for the dropdown: nameTable() needs the original names
+  function termOptions(options)
+  {
+    return options.map(function(option) { return [term(option[0])].concat(option.slice(1)); });
+  }
+
+  // Translated names of the options, e.g. "LSB, USB or AM".
+  // returned: the names as the read block returns them to the program, i.e. not translated
+  function optionNames(options, returned)
+  {
+    var names = options.map(function(option) { return returned ? option[0] : term(option[0]); });
+    return names.length > 1 ? msg("ICOM_OR", {"list": names.slice(0, -1).join(', '), "last": names[names.length - 1]}) : names.join('');
   }
 
   /* **************************************************************** */
@@ -483,21 +522,21 @@ var Icom = (function() {
       var cmd = '{0x14, ' + sub + '}';
       var input = entry.input || 'LEVEL';
       define(entry.group, 'action', 'set_' + suffix, {
-        "message0": "Set " + label + " to %1 %%",
+        "message0": msg("ICOM_SET_LEVEL", {"label": label}),
         "args0": [{"type": "input_value", "name": input, "check": "Number"}],
         "inputsInline": true,
-        "tooltip": "Sets the " + text + " (in %)"
+        "tooltip": msg("ICOM_SET_LEVEL_TOOLTIP", {"text": text})
       }, function(block) {
         Studio.use(['icomPercent']);
         return 'sendCommand(' + cmd + ', icomPercent(' + value(block, input) + '))\n';
       }, function(block) {
-        checkRange(block, input, 0, 100, label + " must be between 0 and 100%");
+        checkRange(block, input, 0, 100, msg("ICOM_LEVEL_RANGE", {"label": label}));
       }, {"civ": "14 " + civBytes(sub) + " + 0000 ~ 0255", "page": entry.page});
 
       define(entry.group, 'property', 'get_' + suffix, {
         "message0": label,
         "output": "Number",
-        "tooltip": "Reads the " + text + " (in %)"
+        "tooltip": msg("ICOM_GET_LEVEL_TOOLTIP", {"text": text})
       }, function(block) {
         Studio.use(['icomReadPercent']);
         return ['icomReadPercent(' + cmd + ')', lua.Order.HIGH];
@@ -528,13 +567,13 @@ var Icom = (function() {
     if (spec.frequency)
     {
       define("Frequency & Mode", 'action', 'set_frequency', {
-        "message0": "Set Frequency to %1 %2",
+        "message0": Blockly.Msg.ICOM_SET_FREQUENCY,
         "args0": [
           {"type": "input_value", "name": "FREQUENCY", "check": "Number"},
           {"type": "field_dropdown", "name": "UNIT", "options": UNITS}
         ],
         "inputsInline": true,
-        "tooltip": "Sets the frequency of the radio"
+        "tooltip": Blockly.Msg.ICOM_SET_FREQUENCY_TOOLTIP
       }, function(block) {
         var frequency = value(block, 'FREQUENCY', lua.Order.MULTIPLICATIVE);
         Studio.use(['frequencyToBcd']);
@@ -545,10 +584,10 @@ var Icom = (function() {
     if (spec.modes)
     {
       define("Frequency & Mode", 'action', 'set_operating_mode', {
-        "message0": "Set Operating Mode to %1",
-        "args0": [{"type": "field_dropdown", "name": "MODE", "options": spec.modes.options}],
+        "message0": Blockly.Msg.ICOM_SET_OPERATING_MODE,
+        "args0": [{"type": "field_dropdown", "name": "MODE", "options": termOptions(spec.modes.options)}],
         "inputsInline": true,
-        "tooltip": "Sets the operating mode of the radio"
+        "tooltip": Blockly.Msg.ICOM_SET_OPERATING_MODE_TOOLTIP
       }, function(block) {
         return 'sendCommand({0x06}, {' + block.getFieldValue('MODE') + '})\n';
       }, null, {"civ": "06 + mode", "page": spec.modes.page});
@@ -557,9 +596,9 @@ var Icom = (function() {
     if (spec.dataMode)
     {
       define("Frequency & Mode", 'action', 'set_data_mode', {
-        "message0": "Data Mode %1",
-        "args0": [{"type": "field_dropdown", "name": "STATE", "options": [["on", "{0x01, 0x01}"], ["off", "{0x00, 0x00}"]]}],
-        "tooltip": "Switches the data mode (e.g. USB-D for digital modes like FT8) on or off"
+        "message0": Blockly.Msg.ICOM_SET_DATA_MODE,
+        "args0": [{"type": "field_dropdown", "name": "STATE", "options": [[Blockly.Msg.ICOM_ON, "{0x01, 0x01}"], [Blockly.Msg.ICOM_OFF, "{0x00, 0x00}"]]}],
+        "tooltip": Blockly.Msg.ICOM_SET_DATA_MODE_TOOLTIP
       }, function(block) {
         return 'sendCommand({0x1A, 0x06}, ' + block.getFieldValue('STATE') + ')\n';
       }, null, {"civ": "1A 06 + 01 01 (on, FIL1) / 00 00 (off)", "page": spec.dataMode.page});
@@ -568,10 +607,10 @@ var Icom = (function() {
     if (spec.tuningSteps)
     {
       define("Frequency & Mode", 'action', 'set_tuning_step', {
-        "message0": "Set Tuning Step to %1",
-        "args0": [{"type": "field_dropdown", "name": "STEP", "options": spec.tuningSteps.options}],
+        "message0": Blockly.Msg.ICOM_SET_TUNING_STEP,
+        "args0": [{"type": "field_dropdown", "name": "STEP", "options": termOptions(spec.tuningSteps.options)}],
         "inputsInline": true,
-        "tooltip": "Sets the tuning step of the radio"
+        "tooltip": Blockly.Msg.ICOM_SET_TUNING_STEP_TOOLTIP
       }, function(block) {
         return 'sendCommand({0x10, ' + block.getFieldValue('STEP') + '})\n';
       }, null, {"civ": "10 + step", "page": spec.tuningSteps.page});
@@ -582,8 +621,8 @@ var Icom = (function() {
     {
       spec.vfo.options.forEach(function(option) {
         define("Frequency & Mode", 'action', 'select_vfo_' + option[2], {
-          "message0": "Select " + option[0],
-          "tooltip": "Selects " + option[0]
+          "message0": msg("ICOM_SELECT_VFO", {"vfo": term(option[0])}),
+          "tooltip": msg("ICOM_SELECT_VFO_TOOLTIP", {"vfo": term(option[0])})
         }, function(block) {
           return 'sendCommand({0x07, ' + option[1] + '})\n';
         }, null, {"civ": "07 " + civBytes(option[1]), "page": spec.vfo.page});
@@ -592,9 +631,9 @@ var Icom = (function() {
     else if (spec.vfo)
     {
       define("Frequency & Mode", 'action', 'select_vfo', {
-        "message0": "Select %1",
-        "args0": [{"type": "field_dropdown", "name": "VFO", "options": spec.vfo.options}],
-        "tooltip": "Selects " + optionNames(spec.vfo.options)
+        "message0": Blockly.Msg.ICOM_SELECT,
+        "args0": [{"type": "field_dropdown", "name": "VFO", "options": termOptions(spec.vfo.options)}],
+        "tooltip": msg("ICOM_SELECT_TOOLTIP", {"options": optionNames(spec.vfo.options)})
       }, function(block) {
         return 'sendCommand({0x07, ' + block.getFieldValue('VFO') + '})\n';
       }, null, {"civ": "07 + " + spec.vfo.options.map(function(o) { return civBytes(o[1]) + " (" + o[0] + ")"; }).join(" / "),
@@ -604,8 +643,8 @@ var Icom = (function() {
     if (spec.equalize)
     {
       define("Frequency & Mode", 'action', 'equalize_vfo', {
-        "message0": "Equalize " + spec.equalize.what,
-        "tooltip": "Copies the frequency and mode of the selected one to the other one (" + spec.equalize.what + ")"
+        "message0": msg("ICOM_EQUALIZE", {"what": term(spec.equalize.what)}),
+        "tooltip": msg("ICOM_EQUALIZE_TOOLTIP", {"what": term(spec.equalize.what)})
       }, function(block) {
         return 'sendCommand({0x07, ' + spec.equalize.code + '})\n';
       }, null, {"civ": "07 " + civBytes(spec.equalize.code), "page": spec.equalize.page});
@@ -614,8 +653,8 @@ var Icom = (function() {
     if (spec.exchange)
     {
       define("Frequency & Mode", 'action', 'exchange_vfo', {
-        "message0": "Exchange " + spec.exchange.what,
-        "tooltip": "Exchanges the frequency and mode of the " + spec.exchange.what
+        "message0": msg("ICOM_EXCHANGE", {"what": term(spec.exchange.what)}),
+        "tooltip": msg("ICOM_EXCHANGE_TOOLTIP", {"what": term(spec.exchange.what)})
       }, function(block) {
         return 'sendCommand({0x07, ' + spec.exchange.code + '})\n';
       }, null, {"civ": "07 " + civBytes(spec.exchange.code), "page": spec.exchange.page});
@@ -624,9 +663,9 @@ var Icom = (function() {
     if (spec.dualwatch)
     {
       define("Frequency & Mode", 'action', 'set_dualwatch', {
-        "message0": "Dualwatch %1",
-        "args0": [{"type": "field_dropdown", "name": "STATE", "options": [["on", "0xC1"], ["off", "0xC0"]]}],
-        "tooltip": "Switches the dualwatch (receiving on the main and the sub band) on or off"
+        "message0": Blockly.Msg.ICOM_SET_DUALWATCH,
+        "args0": [{"type": "field_dropdown", "name": "STATE", "options": [[Blockly.Msg.ICOM_ON, "0xC1"], [Blockly.Msg.ICOM_OFF, "0xC0"]]}],
+        "tooltip": Blockly.Msg.ICOM_SET_DUALWATCH_TOOLTIP
       }, function(block) {
         return 'sendCommand({0x07, ' + block.getFieldValue('STATE') + '})\n';
       }, null, {"civ": "07 C1 (on) / 07 C0 (off)", "page": spec.dualwatch.page});
@@ -635,9 +674,9 @@ var Icom = (function() {
     if (spec.split)
     {
       define("Frequency & Mode", 'action', 'set_split', {
-        "message0": "Set %1",
-        "args0": [{"type": "field_dropdown", "name": "SPLIT", "options": spec.split.options}],
-        "tooltip": "Selects " + optionNames(spec.split.options)
+        "message0": Blockly.Msg.ICOM_SET_SPLIT,
+        "args0": [{"type": "field_dropdown", "name": "SPLIT", "options": termOptions(spec.split.options)}],
+        "tooltip": msg("ICOM_SELECT_TOOLTIP", {"options": optionNames(spec.split.options)})
       }, function(block) {
         return 'sendCommand({0x0F, ' + block.getFieldValue('SPLIT') + '})\n';
       }, null, {"civ": "0F + " + spec.split.options.map(function(o) { return civBytes(o[1]) + " (" + o[0] + ")"; }).join(" / "),
@@ -648,17 +687,16 @@ var Icom = (function() {
     {
       var memory = spec.memory;
       define("Frequency & Mode", 'action', 'select_memory', {
-        "message0": "Select Memory Channel %1",
+        "message0": Blockly.Msg.ICOM_SELECT_MEMORY,
         "args0": [{"type": "input_value", "name": "CHANNEL", "check": "Number"}],
         "inputsInline": true,
-        "tooltip": "Switches to the memory mode and selects the memory channel (" + memory.min + " ~ " + memory.max + ")"
+        "tooltip": msg("ICOM_SELECT_MEMORY_TOOLTIP", {"min": memory.min, "max": memory.max})
       }, function(block) {
         Studio.use(['numberToBcd']);
         return 'sendCommand({0x08})\n' +
                'sendCommand({0x08}, numberToBcd(' + value(block, 'CHANNEL') + ', 2))\n';
       }, function(block) {
-        checkRange(block, 'CHANNEL', memory.min, memory.max,
-                   "The memory channel must be between " + memory.min + " and " + memory.max);
+        checkRange(block, 'CHANNEL', memory.min, memory.max, msg("ICOM_MEMORY_RANGE", {"min": memory.min, "max": memory.max}));
       }, {"civ": "08 (memory mode), 08 + " + String(memory.min).padStart(4, '0') + " ~ " + String(memory.max).padStart(4, '0') + " (channel)",
           "page": memory.page});
     }
@@ -666,32 +704,32 @@ var Icom = (function() {
     if (spec.rit)
     {
       define("Frequency & Mode", 'action', 'set_rit', {
-        "message0": "RIT %1",
+        "message0": Blockly.Msg.ICOM_SET_RIT,
         "args0": [{"type": "field_dropdown", "name": "STATE", "options": ON_OFF}],
-        "tooltip": "Switches the RIT (receive incremental tuning) on or off"
+        "tooltip": Blockly.Msg.ICOM_SET_RIT_TOOLTIP
       }, function(block) {
         return 'sendCommand({0x21, 0x01}, {' + block.getFieldValue('STATE') + '})\n';
       }, null, {"civ": "21 01 + 00 / 01", "page": spec.rit.page});
 
       define("Frequency & Mode", 'action', 'set_rit_offset', {
-        "message0": "Set RIT offset to %1 Hz",
+        "message0": Blockly.Msg.ICOM_SET_RIT_OFFSET,
         "args0": [{"type": "input_value", "name": "OFFSET", "check": "Number"}],
         "inputsInline": true,
-        "tooltip": "Sets the RIT offset (-9999 ~ +9999 Hz)"
+        "tooltip": Blockly.Msg.ICOM_SET_RIT_OFFSET_TOOLTIP
       }, function(block) {
         Studio.use(['icomRitData']);
         return 'sendCommand({0x21, 0x00}, icomRitData(' + value(block, 'OFFSET') + '))\n';
       }, function(block) {
-        checkRange(block, 'OFFSET', -9999, 9999, "The RIT offset must be between -9999 and +9999 Hz");
+        checkRange(block, 'OFFSET', -9999, 9999, Blockly.Msg.ICOM_RIT_OFFSET_RANGE);
       }, {"civ": "21 00 + 10Hz/1Hz, 1kHz/100Hz, direction", "page": spec.rit.offsetPage});
     }
 
     if (spec.scan)
     {
       define("Frequency & Mode", 'action', 'scan', {
-        "message0": "Scan %1",
-        "args0": [{"type": "field_dropdown", "name": "SCAN", "options": spec.scan.options}],
-        "tooltip": "Starts a scan of the selected type, or stops it"
+        "message0": Blockly.Msg.ICOM_SCAN,
+        "args0": [{"type": "field_dropdown", "name": "SCAN", "options": termOptions(spec.scan.options)}],
+        "tooltip": Blockly.Msg.ICOM_SCAN_TOOLTIP
       }, function(block) {
         return 'sendCommand({0x0E, ' + block.getFieldValue('SCAN') + '})\n';
       }, null, {"civ": "0E + 00 (stop) / scan type", "page": spec.scan.page});
@@ -700,10 +738,10 @@ var Icom = (function() {
     if (spec.frequency)
     {
       define("Frequency & Mode", 'property', 'get_operating_frequency', {
-        "message0": "operating frequency in %1",
+        "message0": Blockly.Msg.ICOM_GET_OPERATING_FREQUENCY,
         "args0": [{"type": "field_dropdown", "name": "unit", "options": UNITS}],
         "output": "Number",
-        "tooltip": "Reads the current frequency of the radio"
+        "tooltip": Blockly.Msg.ICOM_GET_OPERATING_FREQUENCY_TOOLTIP
       }, function(block) {
         Studio.use(['icomReadFrequency']);
         var unit = block.getFieldValue('unit');
@@ -718,9 +756,9 @@ var Icom = (function() {
     if (spec.modes)
     {
       define("Frequency & Mode", 'property', 'get_operating_mode', {
-        "message0": "Operating Mode",
+        "message0": Blockly.Msg.ICOM_GET_OPERATING_MODE,
         "output": "String",
-        "tooltip": "Reads the current operating mode of the radio (" + optionNames(spec.modes.options) + ")"
+        "tooltip": msg("ICOM_GET_OPERATING_MODE_TOOLTIP", {"options": optionNames(spec.modes.options, true)})
       }, function(block) {
         Studio.use(['icomName', 'icomQuery']);
         return ['icomName(icomQuery({0x04}), ' + nameTable(spec.modes.options) + ', "Unknown")', lua.Order.HIGH];
@@ -730,9 +768,9 @@ var Icom = (function() {
     if (spec.dataMode)
     {
       define("Frequency & Mode", 'property', 'is_data_mode', {
-        "message0": "Is Data Mode on?",
+        "message0": Blockly.Msg.ICOM_IS_DATA_MODE,
         "output": "Boolean",
-        "tooltip": "True if the data mode (e.g. USB-D) is on"
+        "tooltip": Blockly.Msg.ICOM_IS_DATA_MODE_TOOLTIP
       }, function(block) {
         Studio.use(['icomReadByte']);
         return ['icomReadByte({0x1A, 0x06}) ~= 0', lua.Order.RELATIONAL];
@@ -742,9 +780,9 @@ var Icom = (function() {
     if (spec.dualwatch)
     {
       define("Frequency & Mode", 'property', 'is_dualwatch', {
-        "message0": "Is Dualwatch on?",
+        "message0": Blockly.Msg.ICOM_IS_DUALWATCH,
         "output": "Boolean",
-        "tooltip": "True if the dualwatch is on"
+        "tooltip": Blockly.Msg.ICOM_IS_DUALWATCH_TOOLTIP
       }, function(block) {
         Studio.use(['icomReadOn']);
         return ['icomReadOn({0x07, 0xC2})', lua.Order.HIGH];
@@ -754,9 +792,9 @@ var Icom = (function() {
     if (spec.split && spec.split.options.some(function(option) { return option[1] == "0x01"; }))
     {
       define("Frequency & Mode", 'property', 'is_split', {
-        "message0": "Is Split on?",
+        "message0": Blockly.Msg.ICOM_IS_SPLIT,
         "output": "Boolean",
-        "tooltip": "True if the split function is on"
+        "tooltip": Blockly.Msg.ICOM_IS_SPLIT_TOOLTIP
       }, function(block) {
         Studio.use(['icomReadByte']);
         return ['icomReadByte({0x0F}) == 1', lua.Order.RELATIONAL];
@@ -765,9 +803,12 @@ var Icom = (function() {
 
     /* ------------------------------ RECEIVER ------------------------------ */
 
-    level(spec.afLevel && Object.assign({"group": "Receiver"}, spec.afLevel), "0x01", "af_level", "AF Level", "AF output level (volume)");
-    level(spec.rfGain && Object.assign({"group": "Receiver"}, spec.rfGain), "0x02", "rf_gain", "RF Gain", "RF gain");
-    level(spec.squelchLevel && Object.assign({"group": "Receiver"}, spec.squelchLevel), "0x03", "squelch_level", "Squelch Level", "squelch level");
+    level(spec.afLevel && Object.assign({"group": "Receiver"}, spec.afLevel), "0x01", "af_level",
+          Blockly.Msg.ICOM_AF_LEVEL, Blockly.Msg.ICOM_AF_LEVEL_TEXT);
+    level(spec.rfGain && Object.assign({"group": "Receiver"}, spec.rfGain), "0x02", "rf_gain",
+          Blockly.Msg.ICOM_RF_GAIN, Blockly.Msg.ICOM_RF_GAIN_TEXT);
+    level(spec.squelchLevel && Object.assign({"group": "Receiver"}, spec.squelchLevel), "0x03", "squelch_level",
+          Blockly.Msg.ICOM_SQUELCH_LEVEL, Blockly.Msg.ICOM_SQUELCH_LEVEL_TEXT);
 
     // A setting with a dropdown (command 11 or 16 xx): a set block and a read block which returns the name.
     // Optional entries: group, field (name of the dropdown, VALUE), message and tooltip of the set block,
@@ -781,9 +822,9 @@ var Icom = (function() {
       var group = entry.group || "Receiver";
       var field = entry.field || 'VALUE';
       define(group, 'action', 'set_' + suffix, {
-        "message0": entry.message || "Set " + label + " to %1",
-        "args0": [{"type": "field_dropdown", "name": field, "options": entry.options}],
-        "tooltip": entry.tooltip || "Sets the " + text + ": " + optionNames(entry.options)
+        "message0": entry.message ? term(entry.message) : msg("ICOM_SET_SETTING", {"label": label}),
+        "args0": [{"type": "field_dropdown", "name": field, "options": termOptions(entry.options)}],
+        "tooltip": entry.tooltip ? term(entry.tooltip) : msg("ICOM_SET_SETTING_TOOLTIP", {"text": text, "options": optionNames(entry.options)})
       }, function(block) {
         return 'sendCommand(' + cmd + ', {' + block.getFieldValue(field) + '})\n';
       }, null, {"civ": civBytes(cmd.slice(1, -1)) + " + " + entry.options.map(function(o) { return civBytes(o[1]) + " (" + o[0] + ")"; }).join(" / "),
@@ -792,9 +833,9 @@ var Icom = (function() {
       if (entry.onValue)
       {
         define(group, 'property', 'is_' + suffix + '_on', {
-          "message0": "Is " + label + " on?",
+          "message0": msg("ICOM_IS_SETTING_ON", {"label": label}),
           "output": "Boolean",
-          "tooltip": "True if the " + text + " is on"
+          "tooltip": msg("ICOM_IS_SETTING_ON_TOOLTIP", {"label": label, "text": text})
         }, function(block) {
           Studio.use(['icomReadByte']);
           return ['icomReadByte(' + cmd + ') == ' + entry.onValue, lua.Order.RELATIONAL];
@@ -806,7 +847,7 @@ var Icom = (function() {
       define(group, 'property', 'get_' + suffix, {
         "message0": label,
         "output": "String",
-        "tooltip": "Reads the " + text + ": " + optionNames(entry.options)
+        "tooltip": msg("ICOM_GET_SETTING_TOOLTIP", {"text": text, "options": optionNames(entry.options, true)})
       }, function(block) {
         Studio.use(['icomName', 'icomQuery']);
         return ['icomName(icomQuery(' + cmd + '), ' + nameTable(entry.options) + ', "' + (entry.default || '') + '")', lua.Order.HIGH];
@@ -825,17 +866,17 @@ var Icom = (function() {
       });
     }
 
-    setting(spec.preamp, '{0x16, 0x02}', 'preamp', 'Preamp', 'preamplifier');
-    setting(spec.attenuator, '{0x11}', 'attenuator', 'Attenuator', 'attenuator');
-    setting(spec.agc, '{0x16, 0x12}', 'agc', 'AGC', 'AGC time constant');
+    setting(spec.preamp, '{0x16, 0x02}', 'preamp', Blockly.Msg.ICOM_PREAMP, Blockly.Msg.ICOM_PREAMP_TEXT);
+    setting(spec.attenuator, '{0x11}', 'attenuator', Blockly.Msg.ICOM_ATTENUATOR, Blockly.Msg.ICOM_ATTENUATOR_TEXT);
+    setting(spec.agc, '{0x16, 0x12}', 'agc', Blockly.Msg.ICOM_AGC, Blockly.Msg.ICOM_AGC_TEXT);
 
     if (spec.squelchStatus)
     {
       var squelchSub = spec.squelchStatus.sub || "0x01";
       define("Receiver", 'property', 'is_squelch_open', {
-        "message0": "Is Squelch open?",
+        "message0": Blockly.Msg.ICOM_IS_SQUELCH_OPEN,
         "output": "Boolean",
-        "tooltip": "True if the squelch is open, i.e. a signal is received"
+        "tooltip": Blockly.Msg.ICOM_IS_SQUELCH_OPEN_TOOLTIP
       }, function(block) {
         Studio.use(['icomReadOn']);
         return ['icomReadOn({0x15, ' + squelchSub + '})', lua.Order.HIGH];
@@ -847,9 +888,9 @@ var Icom = (function() {
     if (spec.toneSquelchStatus)
     {
       define("Receiver", 'property', 'is_tone_squelch_open', {
-        "message0": "Is Tone Squelch open?",
+        "message0": Blockly.Msg.ICOM_IS_TONE_SQUELCH_OPEN,
         "output": "Boolean",
-        "tooltip": "True if the tone squelch (or DTCS, DSQL, CSQL) is open, i.e. a matching signal is received"
+        "tooltip": Blockly.Msg.ICOM_IS_TONE_SQUELCH_OPEN_TOOLTIP
       }, function(block) {
         Studio.use(['icomReadOn']);
         return ['icomReadOn({0x15, 0x05})', lua.Order.HIGH];
@@ -861,23 +902,24 @@ var Icom = (function() {
     if (spec.transmit)
     {
       define("Transmit", 'action', 'set_transmit', {
-        "message0": "Transmit %1",
-        "args0": [{"type": "field_dropdown", "name": "STATE", "options": [["on (TX)", "0x01"], ["off (RX)", "0x00"]]}],
-        "tooltip": "Switches the transmitter on (like pressing PTT) or back to receive. Make sure your program switches it off again!"
+        "message0": Blockly.Msg.ICOM_SET_TRANSMIT,
+        "args0": [{"type": "field_dropdown", "name": "STATE", "options": [[Blockly.Msg.ICOM_TRANSMIT_ON, "0x01"], [Blockly.Msg.ICOM_TRANSMIT_OFF, "0x00"]]}],
+        "tooltip": Blockly.Msg.ICOM_SET_TRANSMIT_TOOLTIP
       }, function(block) {
         return 'sendCommand({0x1C, 0x00}, {' + block.getFieldValue('STATE') + '})\n';
       }, null, {"civ": "1C 00 + 00 (RX) / 01 (TX)", "page": spec.transmit.page});
     }
 
-    level(spec.rfPower && Object.assign({"group": "Transmit"}, spec.rfPower), "0x0A", "rf_power", "RF Power", "RF power in % of the maximum");
+    level(spec.rfPower && Object.assign({"group": "Transmit"}, spec.rfPower), "0x0A", "rf_power",
+          Blockly.Msg.ICOM_RF_POWER, Blockly.Msg.ICOM_RF_POWER_TEXT);
 
     if (spec.rfPowerSteps)
     {
       var steps = spec.rfPowerSteps;
       define("Transmit", 'action', 'set_rf_power', {
-        "message0": "Set RF Power to %1",
-        "args0": [{"type": "field_dropdown", "name": "POWER", "options": steps.options.map(function(o) { return [o[0], String(o[1])]; })}],
-        "tooltip": "Sets the RF power: " + optionNames(steps.options)
+        "message0": Blockly.Msg.ICOM_SET_RF_POWER_STEP,
+        "args0": [{"type": "field_dropdown", "name": "POWER", "options": steps.options.map(function(o) { return [term(o[0]), String(o[1])]; })}],
+        "tooltip": msg("ICOM_SET_RF_POWER_STEP_TOOLTIP", {"options": optionNames(steps.options)})
       }, function(block) {
         Studio.use(['numberToBcd']);
         return 'sendCommand({0x14, 0x0A}, numberToBcd(' + block.getFieldValue('POWER') + ', 2))\n';
@@ -885,9 +927,9 @@ var Icom = (function() {
                 "page": steps.page});
 
       define("Transmit", 'property', 'get_rf_power', {
-        "message0": "RF Power",
+        "message0": Blockly.Msg.ICOM_RF_POWER,
         "output": "String",
-        "tooltip": "Reads the RF power setting: " + optionNames(steps.options)
+        "tooltip": msg("ICOM_GET_RF_POWER_STEP_TOOLTIP", {"options": optionNames(steps.options, true)})
       }, function(block) {
         Studio.use(['icomReadNumber']);
         // the radio answers with a value in the range of the step
@@ -903,29 +945,30 @@ var Icom = (function() {
       }).join(", "), "page": steps.page});
     }
 
-    level(spec.micGain && Object.assign({"group": "Transmit"}, spec.micGain), "0x0B", "mic_gain", "Mic Gain", "mic gain");
+    level(spec.micGain && Object.assign({"group": "Transmit"}, spec.micGain), "0x0B", "mic_gain",
+          Blockly.Msg.ICOM_MIC_GAIN, Blockly.Msg.ICOM_MIC_GAIN_TEXT);
 
     if (spec.tone)
     {
       define("Transmit", 'action', 'set_tone_frequency', {
-        "message0": "Set Repeater Tone to %1 Hz",
+        "message0": Blockly.Msg.ICOM_SET_TONE,
         "args0": [{"type": "input_value", "name": "TONE", "check": "Number"}],
         "inputsInline": true,
-        "tooltip": "Sets the frequency of the repeater tone (CTCSS), e.g. 88.5 Hz"
+        "tooltip": Blockly.Msg.ICOM_SET_TONE_TOOLTIP
       }, function(block) {
         Studio.use(['numberToBcd']);
         return 'sendCommand({0x1B, 0x00}, numberToBcd(math.floor(' + value(block, 'TONE', lua.Order.MULTIPLICATIVE) + ' * 10 + 0.5), 3))\n';
       }, function(block) {
-        checkRange(block, 'TONE', 67, 254.1, "The repeater tone must be between 67.0 and 254.1 Hz");
+        checkRange(block, 'TONE', 67, 254.1, Blockly.Msg.ICOM_TONE_RANGE);
       }, {"civ": "1B 00 + 3 bytes BCD in 0.1 Hz", "page": spec.tone.page});
     }
 
     if (spec.transmit)
     {
       define("Transmit", 'property', 'is_transmitting', {
-        "message0": "Is Transmitting?",
+        "message0": Blockly.Msg.ICOM_IS_TRANSMITTING,
         "output": "Boolean",
-        "tooltip": "True while the radio transmits"
+        "tooltip": Blockly.Msg.ICOM_IS_TRANSMITTING_TOOLTIP
       }, function(block) {
         Studio.use(['icomReadOn']);
         return ['icomReadOn({0x1C, 0x00})', lua.Order.HIGH];
@@ -941,22 +984,23 @@ var Icom = (function() {
         return;
       }
       var cmd = '{0x14, ' + sub + '}';
+      var values = {"label": label, "text": text, "min": min, "max": max, "unit": unit ? " " + unit : "", "unitName": unit};
       define(group, 'action', 'set_' + suffix, {
-        "message0": "Set " + label + " to %1" + (unit ? " " + unit : ""),
+        "message0": msg("ICOM_SET_SCALED", values),
         "args0": [{"type": "input_value", "name": input, "check": "Number"}],
         "inputsInline": true,
-        "tooltip": "Sets the " + text + " (" + min + " ~ " + max + (unit ? " " + unit : "") + ")"
+        "tooltip": msg("ICOM_SET_SCALED_TOOLTIP", values)
       }, function(block) {
         Studio.use(['icomLevel']);
         return 'sendCommand(' + cmd + ', icomLevel(' + value(block, input) + ', ' + min + ', ' + max + '))\n';
       }, function(block) {
-        checkRange(block, input, min, max, "The " + text + " must be between " + min + " and " + max + (unit ? " " + unit : ""));
+        checkRange(block, input, min, max, msg("ICOM_SCALED_RANGE", values));
       }, {"civ": "14 " + civBytes(sub) + " + 0000 = " + min + " ~ 0255 = " + max + (unit ? " " + unit : ""), "page": entry.page});
 
       define(group, 'property', 'get_' + suffix, {
         "message0": label,
         "output": "Number",
-        "tooltip": "Reads the " + text + (unit ? " (in " + unit + ")" : " (" + min + " ~ " + max + ")")
+        "tooltip": msg(unit ? "ICOM_GET_SCALED_UNIT_TOOLTIP" : "ICOM_GET_SCALED_TOOLTIP", values)
       }, function(block) {
         if (integer)
         {
@@ -969,50 +1013,52 @@ var Icom = (function() {
     }
 
     choices("Transmit");
-    scaled(spec.compLevel, "Transmit", "0x0E", "comp_level", "Compressor Level", "LEVEL", 0, 10, "", "level of the speech compressor");
+    scaled(spec.compLevel, "Transmit", "0x0E", "comp_level", Blockly.Msg.ICOM_COMP_LEVEL, "LEVEL", 0, 10, "",
+           Blockly.Msg.ICOM_COMP_LEVEL_TEXT);
 
     if (spec.tsql)
     {
       define("Transmit", 'action', 'set_tsql_frequency', {
-        "message0": "Set Tone Squelch to %1 Hz",
+        "message0": Blockly.Msg.ICOM_SET_TSQL,
         "args0": [{"type": "input_value", "name": "TONE", "check": "Number"}],
         "inputsInline": true,
-        "tooltip": "Sets the frequency of the tone squelch (CTCSS), e.g. 88.5 Hz"
+        "tooltip": Blockly.Msg.ICOM_SET_TSQL_TOOLTIP
       }, function(block) {
         Studio.use(['numberToBcd']);
         return 'sendCommand({0x1B, 0x01}, numberToBcd(math.floor(' + value(block, 'TONE', lua.Order.MULTIPLICATIVE) + ' * 10 + 0.5), 3))\n';
       }, function(block) {
-        checkRange(block, 'TONE', 67, 254.1, "The tone squelch frequency must be between 67.0 and 254.1 Hz");
+        checkRange(block, 'TONE', 67, 254.1, Blockly.Msg.ICOM_TSQL_RANGE);
       }, {"civ": "1B 01 + 3 bytes BCD in 0.1 Hz", "page": spec.tsql.page});
     }
 
     if (spec.dtcs)
     {
       define("Transmit", 'action', 'set_dtcs_code', {
-        "message0": "Set DTCS Code to %1 polarity %2",
+        "message0": Blockly.Msg.ICOM_SET_DTCS,
         "args0": [
           {"type": "input_value", "name": "CODE", "check": "Number"},
           {
             "type": "field_dropdown",
             "name": "POLARITY",
-            "options": [["normal", "0x00"], ["TX reverse", "0x10"], ["RX reverse", "0x01"], ["TX and RX reverse", "0x11"]]
+            "options": [[Blockly.Msg.ICOM_DTCS_NORMAL, "0x00"], [Blockly.Msg.ICOM_DTCS_TX_REVERSE, "0x10"],
+                        [Blockly.Msg.ICOM_DTCS_RX_REVERSE, "0x01"], [Blockly.Msg.ICOM_DTCS_BOTH_REVERSE, "0x11"]]
           }
         ],
         "inputsInline": true,
-        "tooltip": "Sets the DTCS code (e.g. 23 for code 023, digits 0 ~ 7) and its polarity"
+        "tooltip": Blockly.Msg.ICOM_SET_DTCS_TOOLTIP
       }, function(block) {
         Studio.use(['icomDtcsData']);
         return 'sendCommand({0x1B, 0x02}, icomDtcsData(' + value(block, 'CODE') + ', ' + block.getFieldValue('POLARITY') + '))\n';
       }, function(block) {
         var input = block.getInputTargetBlock('CODE');
         var code = (input && input.type == 'math_number') ? input.getFieldValue('NUM') : null;
-        block.setWarningText(code !== null && !/^[0-7]{1,3}$/.test(code) ? "A DTCS code has up to 3 digits from 0 to 7, e.g. 23" : null);
+        block.setWarningText(code !== null && !/^[0-7]{1,3}$/.test(code) ? Blockly.Msg.ICOM_DTCS_INVALID : null);
       }, {"civ": "1B 02 + polarity, 0 + first digit, second + third digit", "page": spec.dtcs.page});
 
       define("Transmit", 'property', 'get_dtcs_code', {
-        "message0": "DTCS Code",
+        "message0": Blockly.Msg.ICOM_GET_DTCS,
         "output": "Number",
-        "tooltip": "Reads the DTCS code, e.g. 23 for code 023"
+        "tooltip": Blockly.Msg.ICOM_GET_DTCS_TOOLTIP
       }, function(block) {
         Studio.use(['icomReadDtcs']);
         return ['icomReadDtcs()', lua.Order.HIGH];
@@ -1022,15 +1068,15 @@ var Icom = (function() {
     if (spec.csql)
     {
       define("Transmit", 'action', 'set_csql_code', {
-        "message0": "Set Digital Code Squelch to %1",
+        "message0": Blockly.Msg.ICOM_SET_CSQL,
         "args0": [{"type": "input_value", "name": "CODE", "check": "Number"}],
         "inputsInline": true,
-        "tooltip": "Sets the code of the digital code squelch (CSQL) in DV mode (0 ~ 99)"
+        "tooltip": Blockly.Msg.ICOM_SET_CSQL_TOOLTIP
       }, function(block) {
         Studio.use(['numberToBcd']);
         return 'sendCommand({0x1B, 0x07}, numberToBcd(' + value(block, 'CODE') + ', 1))\n';
       }, function(block) {
-        checkRange(block, 'CODE', 0, 99, "The code must be between 0 and 99");
+        checkRange(block, 'CODE', 0, 99, Blockly.Msg.ICOM_CSQL_RANGE);
       }, {"civ": "1B 07 + 00 ~ 99", "page": spec.csql.page});
     }
 
@@ -1039,13 +1085,12 @@ var Icom = (function() {
     if (spec.sMeter)
     {
       var s = spec.sMeter;
-      var units = s.plus60 ? [["S-units", "S"], ["dB over S9", "DB"]] : [["S-units", "S"]];
+      var units = s.plus60 ? [[Blockly.Msg.ICOM_S_UNITS, "S"], [Blockly.Msg.ICOM_DB_OVER_S9, "DB"]] : [[Blockly.Msg.ICOM_S_UNITS, "S"]];
       define("Meters", 'property', 'get_s_meter', {
-        "message0": "S-Meter in %1",
+        "message0": Blockly.Msg.ICOM_S_METER,
         "args0": [{"type": "field_dropdown", "name": "UNIT", "options": units}],
         "output": "Number",
-        "tooltip": s.plus60 ? "Reads the S-meter: in S-units (0 ~ 9), or in dB over S9 (negative below S9, 6 dB per S-unit)"
-                            : "Reads the S-meter in S-units (0 ~ 9)"
+        "tooltip": s.plus60 ? Blockly.Msg.ICOM_S_METER_DB_TOOLTIP : Blockly.Msg.ICOM_S_METER_TOOLTIP
       }, function(block) {
         Studio.use(['icomMeter']);
         if (block.getFieldValue('UNIT') == 'DB')
@@ -1057,23 +1102,23 @@ var Icom = (function() {
                        (s.plus60 ? ", " + String(s.plus60).padStart(4, '0') + " = S9+60 dB" : ""), "page": s.page});
     }
 
-    meter(spec.swr, "0x12", "get_swr_meter_level", "SWR", "", "Reads the SWR while transmitting, e.g. 1.5");
+    meter(spec.swr, "0x12", "get_swr_meter_level", Blockly.Msg.ICOM_SWR, "", Blockly.Msg.ICOM_SWR_TOOLTIP);
     if (spec.powerOutput)
     {
       var watts = spec.powerOutput.unit == "W";
-      meter(spec.powerOutput, "0x11", "get_power_output", "Power Output", watts ? " W" : " %",
-            watts ? "Reads the output power while transmitting (in W)" : "Reads the output power meter while transmitting (in % of the maximum)");
+      meter(spec.powerOutput, "0x11", "get_power_output", Blockly.Msg.ICOM_POWER_OUTPUT, watts ? " W" : " %",
+            watts ? Blockly.Msg.ICOM_POWER_OUTPUT_W_TOOLTIP : Blockly.Msg.ICOM_POWER_OUTPUT_PERCENT_TOOLTIP);
     }
-    meter(spec.alc, "0x13", "get_alc", "ALC", " %", "Reads the ALC meter while transmitting (in %, 100 = end of the ALC zone)");
-    meter(spec.voltage, "0x15", "get_supply_voltage", "Supply Voltage", " V", "Reads the supply voltage of the final amplifier (in V)");
-    meter(spec.current, "0x16", "get_supply_current", "Supply Current", " A", "Reads the current drawn by the final amplifier (in A)");
+    meter(spec.alc, "0x13", "get_alc", Blockly.Msg.ICOM_ALC, " %", Blockly.Msg.ICOM_ALC_TOOLTIP);
+    meter(spec.voltage, "0x15", "get_supply_voltage", Blockly.Msg.ICOM_SUPPLY_VOLTAGE, " V", Blockly.Msg.ICOM_SUPPLY_VOLTAGE_TOOLTIP);
+    meter(spec.current, "0x16", "get_supply_current", Blockly.Msg.ICOM_SUPPLY_CURRENT, " A", Blockly.Msg.ICOM_SUPPLY_CURRENT_TOOLTIP);
 
     if (spec.battery)
     {
       define("Meters", 'property', 'is_on_battery', {
-        "message0": "Is on Battery?",
+        "message0": Blockly.Msg.ICOM_IS_ON_BATTERY,
         "output": "Boolean",
-        "tooltip": "True if the radio is powered by its battery pack, false with an external power supply"
+        "tooltip": Blockly.Msg.ICOM_IS_ON_BATTERY_TOOLTIP
       }, function(block) {
         Studio.use(['icomReadOn']);
         return ['icomReadOn({0x1A, 0x0B})', lua.Order.HIGH];
@@ -1083,26 +1128,26 @@ var Icom = (function() {
     if (spec.overflow)
     {
       define("Meters", 'property', 'is_overflow', {
-        "message0": "Is Overflow?",
+        "message0": Blockly.Msg.ICOM_IS_OVERFLOW,
         "output": "Boolean",
-        "tooltip": "True if the OVF indicator is on, i.e. the receiver is overloaded by a strong signal"
+        "tooltip": Blockly.Msg.ICOM_IS_OVERFLOW_TOOLTIP
       }, function(block) {
         Studio.use(['icomReadOn']);
         return ['icomReadOn({0x15, 0x07})', lua.Order.HIGH];
       }, null, {"civ": "15 07 -> 00 (OVF off) / 01 (OVF on)", "page": spec.overflow.page});
     }
 
-    meter(spec.compMeter, "0x14", "get_comp_meter", "Compression", " dB", "Reads the COMP meter while transmitting with the speech compressor (in dB)");
+    meter(spec.compMeter, "0x14", "get_comp_meter", Blockly.Msg.ICOM_COMPRESSION, " dB", Blockly.Msg.ICOM_COMPRESSION_TOOLTIP);
 
     /* ------------------------------ CW & VOICE ------------------------------ */
 
     if (spec.cw)
     {
       define("CW & Voice", 'action', 'send_cw', {
-        "message0": "Send CW %1",
+        "message0": Blockly.Msg.ICOM_SEND_CW,
         "args0": [{"type": "input_value", "name": "TEXT"}],
         "inputsInline": true,
-        "tooltip": "Sends the text (up to 30 characters) as CW. The radio has to be in CW mode with break-in on"
+        "tooltip": Blockly.Msg.ICOM_SEND_CW_TOOLTIP
       }, function(block) {
         Studio.use(['icomTextBytes']);
         var text = Blockly.Lua.valueToCode(block, 'TEXT', lua.Order.NONE) || "''";
@@ -1113,29 +1158,29 @@ var Icom = (function() {
     if (spec.keyingSpeed)
     {
       define("CW & Voice", 'action', 'set_keying_speed', {
-        "message0": "Set CW Speed to %1 WPM",
+        "message0": Blockly.Msg.ICOM_SET_KEYING_SPEED,
         "args0": [{"type": "input_value", "name": "WPM", "check": "Number"}],
         "inputsInline": true,
-        "tooltip": "Sets the keying speed of the electronic keyer (6 ~ 48 WPM)"
+        "tooltip": Blockly.Msg.ICOM_SET_KEYING_SPEED_TOOLTIP
       }, function(block) {
         Studio.use(['icomWpm']);
         return 'sendCommand({0x14, 0x0C}, icomWpm(' + value(block, 'WPM') + '))\n';
       }, function(block) {
-        checkRange(block, 'WPM', 6, 48, "The CW speed must be between 6 and 48 WPM");
+        checkRange(block, 'WPM', 6, 48, Blockly.Msg.ICOM_KEYING_SPEED_RANGE);
       }, {"civ": "14 0C + 0000 = 6 WPM ~ 0255 = 48 WPM", "page": spec.keyingSpeed.page});
     }
 
     if (spec.voiceMemory)
     {
       define("CW & Voice", 'action', 'play_voice_memory', {
-        "message0": "Transmit Voice Memory %1",
+        "message0": Blockly.Msg.ICOM_PLAY_VOICE_MEMORY,
         "args0": [{
           "type": "field_dropdown",
           "name": "MEMORY",
           "options": [["T1", "0x01"], ["T2", "0x02"], ["T3", "0x03"], ["T4", "0x04"], ["T5", "0x05"],
-                      ["T6", "0x06"], ["T7", "0x07"], ["T8", "0x08"], ["stop", "0x00"]]
+                      ["T6", "0x06"], ["T7", "0x07"], ["T8", "0x08"], [Blockly.Msg.ICOM_STOP, "0x00"]]
         }],
-        "tooltip": "Transmits a recorded voice memory (e.g. a CQ call), or stops it"
+        "tooltip": Blockly.Msg.ICOM_PLAY_VOICE_MEMORY_TOOLTIP
       }, function(block) {
         return 'sendCommand({0x28, 0x00}, {' + block.getFieldValue('MEMORY') + '})\n';
       }, null, {"civ": "28 00 + 01 ~ 08 (T1 ~ T8) / 00 (stop)", "page": spec.voiceMemory.page});
@@ -1144,13 +1189,14 @@ var Icom = (function() {
     if (spec.announce)
     {
       define("CW & Voice", 'action', 'announce', {
-        "message0": "Announce %1",
+        "message0": Blockly.Msg.ICOM_ANNOUNCE,
         "args0": [{
           "type": "field_dropdown",
           "name": "WHAT",
-          "options": [["frequency, S-meter and mode", "0x00"], ["frequency and S-meter", "0x01"], ["mode", "0x02"]]
+          "options": [[Blockly.Msg.ICOM_ANNOUNCE_ALL, "0x00"], [Blockly.Msg.ICOM_ANNOUNCE_FREQUENCY, "0x01"],
+                      [Blockly.Msg.ICOM_ANNOUNCE_MODE, "0x02"]]
         }],
-        "tooltip": "The radio speaks the selected information with its voice synthesizer"
+        "tooltip": Blockly.Msg.ICOM_ANNOUNCE_TOOLTIP
       }, function(block) {
         return 'sendCommand({0x13, ' + block.getFieldValue('WHAT') + '})\n';
       }, null, {"civ": "13 00 / 01 / 02", "page": spec.announce.page});
@@ -1159,9 +1205,9 @@ var Icom = (function() {
     if (spec.keyingSpeed)
     {
       define("CW & Voice", 'property', 'get_keying_speed', {
-        "message0": "CW Speed",
+        "message0": Blockly.Msg.ICOM_GET_KEYING_SPEED,
         "output": "Number",
-        "tooltip": "Reads the keying speed of the electronic keyer (in WPM)"
+        "tooltip": Blockly.Msg.ICOM_GET_KEYING_SPEED_TOOLTIP
       }, function(block) {
         Studio.use(['icomReadNumber']);
         return ['math.floor(6 + icomReadNumber({0x14, 0x0C}) * 42 / 255 + 0.5)', lua.Order.HIGH];
@@ -1169,37 +1215,41 @@ var Icom = (function() {
     }
 
     choices("CW & Voice");
-    scaled(spec.cwPitch, "CW & Voice", "0x09", "cw_pitch", "CW Pitch", "PITCH", 300, 900, "Hz", "CW pitch", true);
-    scaled(spec.breakInDelay, "CW & Voice", "0x0F", "break_in_delay", "Break-In Delay", "DELAY", 2, 13, "dots", "delay of the semi break-in");
+    scaled(spec.cwPitch, "CW & Voice", "0x09", "cw_pitch", Blockly.Msg.ICOM_CW_PITCH, "PITCH", 300, 900, "Hz",
+           Blockly.Msg.ICOM_CW_PITCH_TEXT, true);
+    scaled(spec.breakInDelay, "CW & Voice", "0x0F", "break_in_delay", Blockly.Msg.ICOM_BREAK_IN_DELAY, "DELAY", 2, 13, Blockly.Msg.ICOM_DOTS,
+           Blockly.Msg.ICOM_BREAK_IN_DELAY_TEXT);
 
     /* ------------------------------ GPS & TIME ------------------------------ */
 
     if (spec.position)
     {
       define("GPS & Time", 'property', 'get_gps_position', {
-        "message0": (spec.position.label || "Position") + " %1",
+        "message0": msg("ICOM_GET_POSITION", {"label": spec.position.label ? term(spec.position.label) : Blockly.Msg.ICOM_POSITION}),
         "args0": [{
           "type": "field_dropdown",
           "name": "VALUE",
-          "options": [["latitude", "lat"], ["longitude", "lon"], ["altitude (m)", "alt"], ["course (°)", "course"], ["speed (km/h)", "speed"]]
+          "options": [[Blockly.Msg.ICOM_LATITUDE, "lat"], [Blockly.Msg.ICOM_LONGITUDE, "lon"], [Blockly.Msg.ICOM_ALTITUDE, "alt"],
+                      [Blockly.Msg.ICOM_COURSE, "course"], [Blockly.Msg.ICOM_SPEED, "speed"]]
         }],
         "output": "Number",
-        "tooltip": spec.position.text + ". Latitude and longitude in degrees (north and east positive)"
+        "tooltip": msg("ICOM_GET_POSITION_TOOLTIP", {"text": term(spec.position.text)})
       }, function(block) {
         Studio.use(['icomGpsValue']);
         return ['icomGpsValue("' + block.getFieldValue('VALUE') + '")', lua.Order.HIGH];
       }, null, {"civ": "23 00", "page": spec.position.page});
 
       define("GPS & Time", 'property', 'get_gps_time', {
-        "message0": "GPS Time (UTC) %1",
+        "message0": Blockly.Msg.ICOM_GET_GPS_TIME,
         "args0": [{
           "type": "field_dropdown",
           "name": "PART",
-          "options": [["as text", "text"], ["unix time", "unix"], ["year", "year"], ["month", "month"], ["day", "day"],
-                      ["hour", "hour"], ["minute", "minute"], ["second", "second"]]
+          "options": [[Blockly.Msg.ICOM_AS_TEXT, "text"], [Blockly.Msg.ICOM_UNIX_TIME, "unix"], [Blockly.Msg.ICOM_YEAR, "year"],
+                      [Blockly.Msg.ICOM_MONTH, "month"], [Blockly.Msg.ICOM_DAY, "day"], [Blockly.Msg.ICOM_HOUR, "hour"],
+                      [Blockly.Msg.ICOM_MINUTE, "minute"], [Blockly.Msg.ICOM_SECOND, "second"]]
         }],
         "output": null,
-        "tooltip": "Reads the date and time (UTC) of the GPS. Unix time are the seconds since 1970-01-01"
+        "tooltip": Blockly.Msg.ICOM_GET_GPS_TIME_TOOLTIP
       }, function(block) {
         Studio.use(['icomGpsTime']);
         return ['icomGpsTime("' + block.getFieldValue('PART') + '")', lua.Order.HIGH];
@@ -1210,15 +1260,16 @@ var Icom = (function() {
     {
       var clock = spec.clock;
       define("GPS & Time", 'property', 'get_clock', {
-        "message0": "Radio Clock %1",
+        "message0": Blockly.Msg.ICOM_GET_CLOCK,
         "args0": [{
           "type": "field_dropdown",
           "name": "PART",
-          "options": [["time as text", "time"], ["date as text", "date"], ["year", "year"], ["month", "month"],
-                      ["day", "day"], ["hour", "hour"], ["minute", "minute"]]
+          "options": [[Blockly.Msg.ICOM_TIME_AS_TEXT, "time"], [Blockly.Msg.ICOM_DATE_AS_TEXT, "date"], [Blockly.Msg.ICOM_YEAR, "year"],
+                      [Blockly.Msg.ICOM_MONTH, "month"], [Blockly.Msg.ICOM_DAY, "day"], [Blockly.Msg.ICOM_HOUR, "hour"],
+                      [Blockly.Msg.ICOM_MINUTE, "minute"]]
         }],
         "output": null,
-        "tooltip": "Reads the date and time of the clock of the radio (local time)"
+        "tooltip": Blockly.Msg.ICOM_GET_CLOCK_TOOLTIP
       }, function(block) {
         Studio.use(['icomClock']);
         return ['icomClock({0x1A, 0x05, ' + clock.date + '}, {0x1A, 0x05, ' + clock.time + '}, "' + block.getFieldValue('PART') + '")', lua.Order.HIGH];
@@ -1228,14 +1279,14 @@ var Icom = (function() {
     if (spec.position)
     {
       define("GPS & Time", 'helper', 'locator', {
-        "message0": "Locator of latitude %1 longitude %2",
+        "message0": Blockly.Msg.ICOM_LOCATOR,
         "args0": [
           {"type": "input_value", "name": "LAT", "check": "Number"},
           {"type": "input_value", "name": "LON", "check": "Number"}
         ],
         "inputsInline": true,
         "output": "String",
-        "tooltip": "Calculates the Maidenhead locator (6 characters, e.g. JN77rb) of a position"
+        "tooltip": Blockly.Msg.ICOM_LOCATOR_TOOLTIP
       }, function(block) {
         Studio.use(['icomLocator']);
         return ['icomLocator(' + value(block, 'LAT') + ', ' + value(block, 'LON') + ')', lua.Order.HIGH];
@@ -1250,25 +1301,26 @@ var Icom = (function() {
     {
       var functions = spec.functions.options;
       define("Settings", 'action', 'switch_function', {
-        "message0": "Switch %1 %2",
+        "message0": Blockly.Msg.ICOM_SWITCH_FUNCTION,
         "args0": [
-          {"type": "field_dropdown", "name": "FUNCTION", "options": functions},
+          {"type": "field_dropdown", "name": "FUNCTION", "options": termOptions(functions)},
           {"type": "field_dropdown", "name": "STATE", "options": ON_OFF}
         ],
-        "tooltip": "Switches a function of the radio on or off"
+        "tooltip": Blockly.Msg.ICOM_SWITCH_FUNCTION_TOOLTIP
       }, function(block) {
         return 'sendCommand({0x16, ' + block.getFieldValue('FUNCTION') + '}, {' + block.getFieldValue('STATE') + '})\n';
       }, null, {"civ": "16 xx + 00 (off) / 01 (on)", "page": spec.functions.page});
     }
 
-    level(spec.brightness && Object.assign({"group": "Settings"}, spec.brightness), "0x19", "lcd_brightness", "LCD Brightness", "LCD brightness");
+    level(spec.brightness && Object.assign({"group": "Settings"}, spec.brightness), "0x19", "lcd_brightness",
+          Blockly.Msg.ICOM_LCD_BRIGHTNESS, Blockly.Msg.ICOM_LCD_BRIGHTNESS_TEXT);
 
     if (spec.power)
     {
       define("Settings", 'action', 'set_power', {
-        "message0": "Switch Radio %1",
-        "args0": [{"type": "field_dropdown", "name": "STATE", "options": [["off", "0x00"], ["on", "0x01"]]}],
-        "tooltip": "Switches the radio off or on. Switching on only works if the radio is in standby"
+        "message0": Blockly.Msg.ICOM_SET_POWER,
+        "args0": [{"type": "field_dropdown", "name": "STATE", "options": [[Blockly.Msg.ICOM_OFF, "0x00"], [Blockly.Msg.ICOM_ON, "0x01"]]}],
+        "tooltip": Blockly.Msg.ICOM_SET_POWER_TOOLTIP
       }, function(block) {
         return 'sendCommand({0x18, ' + block.getFieldValue('STATE') + '})\n';
       }, null, {"civ": "18 00 (off) / 18 01 (on)", "page": spec.power.page});
@@ -1277,10 +1329,10 @@ var Icom = (function() {
     if (spec.functions)
     {
       define("Settings", 'property', 'is_function_on', {
-        "message0": "Is %1 on?",
-        "args0": [{"type": "field_dropdown", "name": "FUNCTION", "options": spec.functions.options}],
+        "message0": Blockly.Msg.ICOM_IS_FUNCTION_ON,
+        "args0": [{"type": "field_dropdown", "name": "FUNCTION", "options": termOptions(spec.functions.options)}],
         "output": "Boolean",
-        "tooltip": "True if the function of the radio is switched on"
+        "tooltip": Blockly.Msg.ICOM_IS_FUNCTION_ON_TOOLTIP
       }, function(block) {
         Studio.use(['icomReadByte']);
         return ['icomReadByte({0x16, ' + block.getFieldValue('FUNCTION') + '}) ~= 0', lua.Order.RELATIONAL];
@@ -1292,26 +1344,26 @@ var Icom = (function() {
     {
       var levels = spec.levels.options;
       define("Settings", 'action', 'set_level', {
-        "message0": "Set %1 to %2 %%",
+        "message0": Blockly.Msg.ICOM_SET_LEVEL_OF,
         "args0": [
-          {"type": "field_dropdown", "name": "LEVEL", "options": levels},
+          {"type": "field_dropdown", "name": "LEVEL", "options": termOptions(levels)},
           {"type": "input_value", "name": "VALUE", "check": "Number"}
         ],
         "inputsInline": true,
-        "tooltip": "Sets a level in %. For a PBT or a notch position 50 % is the center"
+        "tooltip": Blockly.Msg.ICOM_SET_LEVEL_OF_TOOLTIP
       }, function(block) {
         Studio.use(['icomPercent']);
         return 'sendCommand({0x14, ' + block.getFieldValue('LEVEL') + '}, icomPercent(' + value(block, 'VALUE') + '))\n';
       }, function(block) {
-        checkRange(block, 'VALUE', 0, 100, "The level must be between 0 and 100%");
+        checkRange(block, 'VALUE', 0, 100, Blockly.Msg.ICOM_LEVEL_OF_RANGE);
       }, {"civ": "14 + " + levels.map(function(o) { return civBytes(o[1]) + " (" + o[0] + ")"; }).join(" / ") + " + 0000 ~ 0255",
           "page": spec.levels.page});
 
       define("Settings", 'property', 'get_level', {
         "message0": "%1",
-        "args0": [{"type": "field_dropdown", "name": "LEVEL", "options": levels}],
+        "args0": [{"type": "field_dropdown", "name": "LEVEL", "options": termOptions(levels)}],
         "output": "Number",
-        "tooltip": "Reads a level (in %)"
+        "tooltip": Blockly.Msg.ICOM_GET_LEVEL_OF_TOOLTIP
       }, function(block) {
         Studio.use(['icomReadPercent']);
         return ['icomReadPercent({0x14, ' + block.getFieldValue('LEVEL') + '})', lua.Order.HIGH];
@@ -1322,34 +1374,33 @@ var Icom = (function() {
     if (spec.menu)
     {
       define("Settings", 'action', 'set_menu', {
-        "message0": "Set Menu Setting %1 to %2 %3",
+        "message0": Blockly.Msg.ICOM_SET_MENU,
         "args0": [
           {"type": "input_value", "name": "ITEM", "check": "Number"},
           {"type": "input_value", "name": "VALUE", "check": "Number"},
-          {"type": "field_dropdown", "name": "BYTES", "options": [["as 00 ~ 99", "1"], ["as 0000 ~ 9999", "2"]]}
+          {"type": "field_dropdown", "name": "BYTES", "options": [[Blockly.Msg.ICOM_MENU_1_BYTE, "1"], [Blockly.Msg.ICOM_MENU_2_BYTES, "2"]]}
         ],
         "inputsInline": true,
-        "tooltip": "Changes a setting of the menu (command 1A 05). The number of the setting and the format of its value " +
-                   "(00 ~ 99 or 0000 ~ 9999) are in the CI-V reference guide of the radio"
+        "tooltip": Blockly.Msg.ICOM_SET_MENU_TOOLTIP
       }, function(block) {
         Studio.use(['icomMenuCmd', 'numberToBcd']);
         return 'sendCommand(icomMenuCmd(' + value(block, 'ITEM') + '), numberToBcd(' + value(block, 'VALUE') + ', ' +
                block.getFieldValue('BYTES') + '))\n';
       }, function(block) {
-        checkRange(block, 'ITEM', 1, 9999, "The number of the setting must be between 1 and 9999");
+        checkRange(block, 'ITEM', 1, 9999, Blockly.Msg.ICOM_MENU_RANGE);
       }, {"civ": "1A 05 + number of the setting (2 bytes BCD) + value (BCD)", "page": spec.menu.page});
 
       define("Settings", 'property', 'get_menu', {
-        "message0": "Menu Setting %1",
+        "message0": Blockly.Msg.ICOM_GET_MENU,
         "args0": [{"type": "input_value", "name": "ITEM", "check": "Number"}],
         "inputsInline": true,
         "output": "Number",
-        "tooltip": "Reads a setting of the menu (command 1A 05) as number"
+        "tooltip": Blockly.Msg.ICOM_GET_MENU_TOOLTIP
       }, function(block) {
         Studio.use(['icomMenuCmd', 'icomReadNumber']);
         return ['icomReadNumber(icomMenuCmd(' + value(block, 'ITEM') + '))', lua.Order.HIGH];
       }, function(block) {
-        checkRange(block, 'ITEM', 1, 9999, "The number of the setting must be between 1 and 9999");
+        checkRange(block, 'ITEM', 1, 9999, Blockly.Msg.ICOM_MENU_RANGE);
       }, {"civ": "1A 05 + number of the setting (2 bytes BCD) -> value (BCD)", "page": spec.menu.page});
     }
 
@@ -1359,7 +1410,7 @@ var Icom = (function() {
       {
         return;
       }
-      var handle = category.group(name);
+      var handle = category.group(GROUP_NAMES[name]);
       groups[name].blocks.forEach(function(block) {
         handle[block.kind](block.type);
       });

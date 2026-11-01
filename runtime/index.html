@@ -181,9 +181,24 @@
         {
           document.body.classList.add('zoomin-animation');
           setTimeout(() => {
-            window.location.href = './studio/index.html';
+            window.location.href = './studio/index.html' + window.location.search;   // keeps ?lang=...
           }, 1000);
         }
+    }
+
+    /*
+    * The language of the studio: ?lang=de, otherwise the first supported language of the browser, otherwise english.
+    * The same function is in studio/index.html
+    */
+    function studioLanguage(supported) {
+        const wanted = [new URLSearchParams(window.location.search).get('lang')].concat(navigator.languages || [navigator.language]);
+        for (const entry of wanted) {
+            const language = (entry || '').substring(0, 2).toLowerCase();
+            if (supported.includes(language)) {
+                return language;
+            }
+        }
+        return 'en';
     }
 
     /*
@@ -195,6 +210,7 @@
             {"name":"gui framework",          "url":"studio/blockly/blockly_compressed.js"},
             {"name":"default blocks",         "url":"studio/blockly/blocks_compressed.js"},
             {"name":"english language files", "url":"studio/blockly/en.js"},
+            {"name":"english language files", "url":"studio/msg/en.js"},
             {"name":"compiler",               "url":"studio/blockly/lua_compressed.js"},
             {"name":"multiline text block",   "url":"studio/blockly/field-multilineinput.js"},
             {"name":"file download",          "url":"studio/filesaver.js"},
@@ -226,6 +242,13 @@
             {"name":"radio functionality",    "url":"studio/radio/ic2730.js"},
             {"name":"radio functionality",    "url":"studio/radio/ica120e.js"},
         ];
+
+        // the texts of the language the studio will show (chosen like in studio/index.html)
+        const language = studioLanguage(["en", "de"]);
+        if (language != "en") {
+            filesToLoad.push({"name":"language files", "url":"studio/blockly/" + language + ".js"},
+                             {"name":"language files", "url":"studio/msg/" + language + ".js"});
+        }
 
         let loadedFiles = 0;
 

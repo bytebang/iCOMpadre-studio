@@ -25,7 +25,8 @@ runtime/
     ├── studio.css
     ├── filesaver.js      download of files (export)
     ├── img/              toolbar icons
-    └── blockly/          blockly 13: core, default blocks, english texts, lua generator, media, multiline text plugin
+    ├── msg/              the texts of the studio: en.js (master) and its translations (de.js, ...)
+    └── blockly/          blockly 13: core, default blocks, texts (en.js, de.js), lua generator, media, multiline text plugin
 documentation/            user documentation (merged into the iCOMpadre userguide by the CI)
 ├── .pages                order and titles of the pages in the menu (also in the sub folders)
 ├── index.md, editor.md, tutorial.md, blocks.md, about.md
@@ -135,6 +136,29 @@ A command which several radios have belongs into `Icom.radio()` as a new entry. 
 5. Write the blocks (see conventions below). The CI-V reference guide of the radio lists the commands.
 6. Document the blocks in `documentation/radio/<radio>.md`, named like the js file (see *Help* below), and add it to the lists like in step 4 above.
 
+## Languages
+
+The studio follows the language of the browser, or the one given with `?lang=de`. English is used when the language isn't offered.
+
+* Every text shown to the user is in `runtime/studio/msg/en.js` (`Blockly.Msg.ICP_<BLOCKTYPE>`, `..._TOOLTIP`) and is used as `Blockly.Msg.ICP_...` in the block files.
+* A translation `msg/<language>.js` is loaded **after** `en.js` and overwrites the texts it has. A missing translation shows the english text, so new blocks only need english texts at first.
+* Only texts are translated, never block types, field names or dropdown values. Sketches therefore open in every language.
+* `tests/test_i18n.py` checks that translations have no unknown texts and keep the placeholders (`%1`, `%2`, ...), that every text exists and is used,
+  and that the files in its `TRANSLATED_FILES` list contain no texts of their own. It also lists the texts which aren't translated yet.
+
+The radios:
+
+* The texts of the blocks which `Icom.radio()` creates are in `msg/en.js` as `ICOM_...`.
+* The descriptions of the radios (`radio/ic705.js`, ...) stay english. A text of a description (e.g. the option `"Noise Blanker"`) is shown translated
+  if `msg/<language>.js` has it as `ICOM_TERM_<the english text>`, e.g. `ICOM_TERM_Noise_Blanker` (upper and lower case as in the text). Otherwise it is shown as it is.
+  `msg/en.js` has the same key with the english text. If the text in the description is changed, `test_i18n.py` reports the key as unused.
+* The names which read blocks return to the program (e.g. `"USB"` from *Operating Mode*, `"FAST"` from *AGC*) are **never** translated:
+  a program has to work the same in every language. `test_generated_code.py` checks that the iCOMpadre blocks generate the same lua code in every language.
+
+So far `studio.js`, `base.js`, `radio/icom.js` and the names of the standard categories take their texts from `msg/`. The toolbar and the dialogs in `index.html` are still english.
+
+A new language needs `msg/<language>.js`, `blockly/<language>.js` (from `blockly/msg/` of the npm package) and its code in the two `studioLanguage([...])` calls in `runtime/index.html` and `runtime/studio/index.html`.
+
 ## Block conventions
 
 * **Naming:** block types start with the radio, e.g. `ic705_set_rf_gain`, `ic705_get_rf_gain`. Names have to be unique across all files.
@@ -143,6 +167,7 @@ A command which several radios have belongs into `Icom.radio()` as a new entry. 
   * *property*: `output` with a type (`"Number"`, `"String"`, `"Array"`), the generator returns `[code, lua.Order.ATOMIC]`
   * *event*: a statement input, the generator returns a lua function that the firmware calls
 * **Definition:** use `jsonInit()` and set the tooltip only there.
+* **Texts:** in files which are already translated, the texts come from `msg/en.js`, see *Languages* above.
 * **CI-V:** put the command and the data format in a comment above the block, e.g. `// CI-V: 0x14 0x01 + level as 2 byte BCD`.
 * **Values for the user:** blocks work with values people understand (percent, Hz, mode names). Converting them to what the radio expects happens in the generator.
 * **Validation:** use `onchange` and `setWarningText()` to warn about invalid inputs.
@@ -215,7 +240,7 @@ The files in `runtime/studio/blockly/` come unchanged from the npm packages `blo
 | File | From the package |
 | --- | --- |
 | `blockly_compressed.js`, `blocks_compressed.js`, `lua_compressed.js` | `blockly/` |
-| `en.js` | `blockly/msg/en.js` |
+| `en.js`, `de.js` | `blockly/msg/en.js`, `blockly/msg/de.js` |
 | `sprites.svg`, `delete-icon.svg`, `foldout-icon.svg`, `resize-handle.svg`, `handclosed.cur`, `handdelete.cur` | `blockly/media/` (the sounds are not needed, the studio runs with `sounds: false`) |
 | `field-multilineinput.js` | `@blockly/field-multilineinput/dist/index.js` (the `text_multiline` block, which is no longer part of blockly) |
 

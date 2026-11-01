@@ -8,6 +8,30 @@
   <script src="./blockly/blockly_compressed.js"></script>
   <script src="./blockly/blocks_compressed.js"></script>
   <script src="./blockly/en.js"></script>
+  <script src="./msg/en.js"></script>
+  <script>
+    // The language of the studio: ?lang=de, otherwise the first supported language of the browser, otherwise english.
+    // The same function is in ../index.html (the preloader)
+    function studioLanguage(supported) {
+      var wanted = [new URLSearchParams(window.location.search).get('lang')].concat(navigator.languages || [navigator.language]);
+      for (var i = 0; i < wanted.length; i++) {
+        var language = (wanted[i] || '').substring(0, 2).toLowerCase();
+        if (supported.indexOf(language) >= 0) {
+          return language;
+        }
+      }
+      return 'en';
+    }
+
+    // The texts of another language are loaded after the english ones and overwrite them,
+    // so a text which is not translated (yet) is shown in english
+    var language = studioLanguage(["en", "de"]);
+    document.documentElement.lang = language;
+    if (language != 'en') {
+      document.write('<script src="./blockly/' + language + '.js"><\/script>' +
+                     '<script src="./msg/' + language + '.js"><\/script>');
+    }
+  </script>
   <script src="./blockly/lua_compressed.js"></script>
   <!-- the multiline text block is a plugin since blockly 12. It expects the lua generator module under this name -->
   <script>window['Blockly.Lua'] = window.lua;</script>
@@ -75,7 +99,7 @@
   // standard blockly categories. Everything else is registered via Studio.category()
   var baseCategories = [
           {
-              "kind": "category", "name": "Logic",
+              "kind": "category", "name": Blockly.Msg.STUDIO_CATEGORY_LOGIC,
               "contents": [
                   {"kind": "block",  "type": "logic_compare"},
                   {"kind": "block",  "type": "logic_operation"},
@@ -83,7 +107,7 @@
                   {"kind": "block",  "type": "logic_negate"},
               ]
           },
-          {"kind": "category", "name": "Control",
+          {"kind": "category", "name": Blockly.Msg.STUDIO_CATEGORY_CONTROL,
               "contents": [
                   {"kind": "BLOCK",  "type": "controls_if"},
                   {"kind": "BLOCK",  "type": "logic_ternary"},
@@ -91,7 +115,7 @@
                   {"kind": "BLOCK",  "type": "controls_flow_statements"},
               ]
           },
-          {"kind": "category",  "name": "Math",
+          {"kind": "category",  "name": Blockly.Msg.STUDIO_CATEGORY_MATH,
               "contents": [
                   {"kind": "BLOCK",  "type": "math_number"},
                   {"kind": "BLOCK",  "type": "math_arithmetic"},
@@ -103,7 +127,7 @@
                   {"kind": "BLOCK",  "type": "math_single"},
               ]
           },
-          {"kind": "category",  "name": "Lists",
+          {"kind": "category",  "name": Blockly.Msg.STUDIO_CATEGORY_LISTS,
               "contents": [
                   {"kind": "BLOCK",  "type": "lists_create_with"},
                   {"kind": "BLOCK",  "type": "lists_length"},
@@ -115,7 +139,7 @@
                   {"kind": "BLOCK",  "type": "lists_split"},
               ]
           },
-          {"kind": "category",  "name": "Text",
+          {"kind": "category",  "name": Blockly.Msg.STUDIO_CATEGORY_TEXT,
               "contents": [
                   {"kind": "BLOCK",  "type": "text"},
                   {"kind": "BLOCK",  "type": "text_multiline"},
@@ -129,8 +153,8 @@
                   {"kind": "BLOCK",  "type": "text_reverse"},
               ]
           },
-          {"kind": "category",  "name": "Variables",  "custom": "VARIABLE"},
-          {"kind": "category",  "name": "Functions",  "custom": "PROCEDURE"},
+          {"kind": "category",  "name": Blockly.Msg.STUDIO_CATEGORY_VARIABLES,  "custom": "VARIABLE"},
+          {"kind": "category",  "name": Blockly.Msg.STUDIO_CATEGORY_FUNCTIONS,  "custom": "PROCEDURE"},
   ];
   </script>
 

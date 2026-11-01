@@ -3,7 +3,7 @@ import os
 import subprocess
 import sys
 
-TESTS = ["test_generated_code.py", "test_lua.py", "test_ui.py"]
+TESTS = ["test_i18n.py", "test_generated_code.py", "test_lua.py", "test_ui.py"]
 
 
 def main():
