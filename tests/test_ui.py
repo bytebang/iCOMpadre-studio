@@ -181,6 +181,8 @@ def main():
         help_url = page.eval("new Blockly.Workspace().newBlock('ic705_set_frequency').helpUrl")
         check("the online demo links to the online help",
               help_url == "https://bytebang.github.io/iCOMpadre-studio/radio/ic705/#ic705_set_frequency", help_url)
+        problems = page.problems(ignore=("Saving failed",))
+        check("no console problems in the online demo", not problems, problems)
         page.eval("localStorage.clear()")
 
         # the loader shows an error instead of waiting forever

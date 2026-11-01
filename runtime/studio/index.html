@@ -497,7 +497,6 @@
       offerBackup();
       onSketchChanged();
     }
-    openLastProjectFromServer();
 
     // -------------- Save on iCOMpadre -----------------
     // Uploads a file to the microcontroller, throws if it didn't work
@@ -773,6 +772,10 @@
         showShareMessage('Could not import - ' + error.message, 'error');
       }
     });
+
+    // -------------- Start -----------------
+    // Last, when everything above is set up: opening the sketch already updates the lua panel, the backup, ...
+    openLastProjectFromServer();
 
   </script>
 </body>
