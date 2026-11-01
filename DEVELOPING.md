@@ -199,11 +199,12 @@ On the SD card the built documentation is next to the studio (`/studio/documenta
 
 | Block file | Documentation | Help link of a block |
 | --- | --- | --- |
-| `studio/radio/ic705.js` | `documentation/radio/ic705.md` | `../documentation/radio/ic705/#<blocktype>` |
-| `studio/base.js`, group `base.group("Pins", "pins", "pins")` | `documentation/base/pins.md` | `../documentation/base/pins/#<blocktype>` |
+| `studio/radio/ic705.js` | `documentation/radio/ic705.md` | `../documentation/radio/ic705.html#<blocktype>` |
+| `studio/base.js`, group `base.group("Pins", "pins", "pins")` | `documentation/base/pins.md` | `../documentation/base/pins.html#<blocktype>` |
 
 They work on every copy of the SD card, e.g. on GitHub Pages. Only the studio served by githack (the repository itself, without the built documentation)
-links to GitHub Pages: `https://bytebang.github.io/iCOMpadre-studio/studio/documentation/radio/ic705/#<blocktype>`.
+links to GitHub Pages: `https://bytebang.github.io/iCOMpadre-studio/studio/documentation/radio/ic705.html#<blocktype>`.
+The pages are files (`use_directory_urls: false`), so the documentation also works without web server, e.g. opened from the SD card in a card reader.
 
 `Studio.category()` remembers which file registered the category, and `Studio.buildToolbox()` gives every block of it this link (*Help* in the context menu of the block).
 A group with a third parameter gets its own page in a folder named like the file; groups without it (e.g. the topics of the radios) share the page of their category.
@@ -235,8 +236,8 @@ mkdocs build --site-dir runtime/documentation # the help links of the local stud
 The second command puts the documentation where the studio looks for it, like `/studio/documentation/` on the SD card (`runtime/documentation/` is not committed).
 The order and the titles of the pages in the menu come from the `.pages` files (plugin `mkdocs-awesome-pages-plugin`); a new page has to be added there.
 
-The documentation of iCOMpadre itself is separate, on the SD card in `/documentation/`. Links to it are written with their path on the SD card,
-e.g. `[Radios](/documentation/radios/)`: on iCOMpadre the SD card is the root of the web server. In a local build and online they lead nowhere.
+The documentation of iCOMpadre itself is separate, on the SD card in `/documentation/`. Links to it are written with the path
+of its markdown file on the SD card, e.g. `[Radios](/documentation/radios.md)`: on the SD card the CI makes them relative links to the page. In a local build and online they lead nowhere.
 On the SD card the CI of the iCOMpadre repository builds `documentation/` with the settings of the iCOMpadre documentation, `mkdocs.yml` only gives the title.
 
 `.github/workflows/docs.yml` builds the documentation on every push and pull request (strict: broken links fail the build) and publishes the studio

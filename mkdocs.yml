@@ -3,6 +3,7 @@
 # it only takes the title from here.
 site_name: iCOMpadre Studio
 docs_dir: documentation
+use_directory_urls: false   # like on the SD card: the pages are files (radio/ic705.html), the help links of the blocks point to them
 
 markdown_extensions:
   - attr_list   # explicit heading ids, e.g. "## Set AF Level {#ic705_set_af_level}" for the help links of the blocks

@@ -180,7 +180,7 @@ def main():
         check("the online demo doesn't save on a device", open(server.file("main.lua"), encoding="utf-8").read() == before)
         help_url = page.eval("new Blockly.Workspace().newBlock('ic705_set_frequency').helpUrl")
         check("the online demo links to the documentation next to it, like on the SD card",
-              help_url == "../documentation/radio/ic705/#ic705_set_frequency", help_url)
+              help_url == "../documentation/radio/ic705.html#ic705_set_frequency", help_url)
         problems = page.problems(ignore=("Saving failed",))
         check("no console problems in the online demo", not problems, problems)
         page.eval("localStorage.clear()")

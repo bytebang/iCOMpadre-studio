@@ -68,7 +68,8 @@ var Studio = (function() {
   var luaFunctions = {};    // name -> array of lua source lines
   var eventTypes = [];      // block types registered with .event()
 
-  // Returns the help page of the block file which is currently executed, or null for inline scripts
+  // Returns the help page of the block file which is currently executed (without .html), or null for inline scripts.
+  // The pages of the documentation are files (radio/ic705.html), so the links also work without web server
   function helpPageOfCurrentScript()
   {
     var script = document.currentScript;
@@ -77,7 +78,7 @@ var Studio = (function() {
     {
       return null;
     }
-    return HELP_ROOT + src.replace(/^\.\//, "").replace(/\.js$/, "") + "/";
+    return HELP_ROOT + src.replace(/^\.\//, "").replace(/\.js$/, "");
   }
 
   // Applies the conventions to a block type: the style of its group and a link to its documentation
@@ -97,7 +98,7 @@ var Studio = (function() {
       }
       if (helpPage && !this.helpUrl)
       {
-        this.setHelpUrl(helpPage + "#" + blocktype);
+        this.setHelpUrl(helpPage + ".html#" + blocktype);
       }
     };
     definition.studioConventionsApplied = true;
@@ -146,7 +147,7 @@ var Studio = (function() {
     {
       handle.group = function(name, style, page) {
         checkStyle(style);
-        var helpPage = (page && container.helpPage) ? container.helpPage + page + "/" : container.helpPage;
+        var helpPage = (page && container.helpPage) ? container.helpPage + "/" + page : container.helpPage;
         var group = createContainer(name, style || container.style, helpPage);
         container.groups.push(group);
         return createHandle(group, false);
@@ -167,7 +168,7 @@ var Studio = (function() {
    * @property {function(string, Object=): CategoryHandle} helper   adds a helper block (conversions, utilities)
    * @property {function(string, string=, string=): CategoryHandle} [group] adds a sub category with its own style (only on categories).
    *           The optional third parameter gives the group an own documentation page below the one of the category,
-   *           e.g. base.group("Pins", "pins", "pins") -> ../documentation/base/pins/#<blocktype>
+   *           e.g. base.group("Pins", "pins", "pins") -> ../documentation/base/pins.html#<blocktype>
    */
 
   /**
@@ -177,7 +178,7 @@ var Studio = (function() {
    *
    * All blocks of the category get the colour of its style (radio blocks use "radio").
    * Blocks without an own helpUrl link to the documentation of the file which created the category:
-   * radio/ic705.js -> ../documentation/radio/ic705/#<blocktype>
+   * radio/ic705.js -> ../documentation/radio/ic705.html#<blocktype>
    * @param {string} name the name shown in the toolbox, e.g. "IC-705"
    * @param {string=} style one of the keys of STYLES: program, radio, pins, serial, storage, helpers
    * @returns {CategoryHandle} handle to add blocks or groups to the category
