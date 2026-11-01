@@ -64,6 +64,22 @@ var Studio = (function() {
   var HELP_ROOT = /(^|\.)githack\.com$/.test(location.hostname) ? "https://bytebang.github.io/iCOMpadre-studio/studio/documentation/"
                                                                  : "../documentation/";
 
+  // The blocks of blockly itself (loaded before this file) link to the wiki of blockly or to wikipedia.
+  // They link to our documentation instead: the standard ones to documentation/blockly/<page>.html, the others (print) to their category
+  var BLOCKLY_BLOCKS = Object.keys(Blockly.Blocks);
+  var BLOCKLY_HELP = {
+    "logic":     ["logic_compare", "logic_operation", "logic_boolean", "logic_negate"],
+    "control":   ["controls_if", "logic_ternary", "controls_forEach", "controls_flow_statements"],
+    "math":      ["math_number", "math_arithmetic", "math_constrain", "math_modulo", "math_on_list", "math_number_property",
+                  "math_constant", "math_single"],
+    "lists":     ["lists_create_with", "lists_length", "lists_isEmpty", "lists_indexOf", "lists_getIndex", "lists_setIndex",
+                  "lists_getSublist", "lists_split"],
+    "text":      ["text", "text_multiline", "text_join", "text_append", "text_length", "text_isEmpty", "text_indexOf", "text_count",
+                  "text_replace", "text_reverse"],
+    "variables": ["variables_set", "variables_get", "math_change"],
+    "functions": ["procedures_defnoreturn", "procedures_defreturn", "procedures_ifreturn", "procedures_callnoreturn", "procedures_callreturn"],
+  };
+
   var contributions = [];   // categories and separators in registration order
   var luaFunctions = {};    // name -> array of lua source lines
   var eventTypes = [];      // block types registered with .event()
@@ -81,7 +97,8 @@ var Studio = (function() {
     return HELP_ROOT + src.replace(/^\.\//, "").replace(/\.js$/, "");
   }
 
-  // Applies the conventions to a block type: the style of its group and a link to its documentation
+  // Applies the conventions to a block type: the style of its group and a link to its documentation.
+  // The link a block of blockly brings itself is replaced
   function applyConventions(blocktype, helpPage, style)
   {
     var definition = Blockly.Blocks[blocktype];
@@ -96,7 +113,7 @@ var Studio = (function() {
       {
         this.setStyle(style + "_blocks");
       }
-      if (helpPage && !this.helpUrl)
+      if (helpPage && (!this.helpUrl || BLOCKLY_BLOCKS.indexOf(blocktype) >= 0))
       {
         this.setHelpUrl(helpPage + ".html#" + blocktype);
       }
@@ -272,6 +289,10 @@ var Studio = (function() {
   function buildToolbox(baseCategories)
   {
     var contents = baseCategories.slice();
+
+    Object.keys(BLOCKLY_HELP).forEach(function(page) {
+      BLOCKLY_HELP[page].forEach((blocktype) => applyConventions(blocktype, HELP_ROOT + "blockly/" + page, null));
+    });
 
     contributions.forEach(function(contribution) {
       contents.push(contribution.separator ? {"kind": "sep"} : toToolboxCategory(contribution));

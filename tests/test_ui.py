@@ -2,6 +2,7 @@
 open / import / share, the lua panel, dark mode, phone width and the loader."""
 import json
 import os
+import re
 import sys
 
 from harness import STUDIO_READY, Browser, Checks, Server, open_studio
@@ -9,6 +10,7 @@ from harness import STUDIO_READY, Browser, Checks, Server, open_studio
 ON_STARTUP_WITH_PRINT = {"type": "onstartup", "x": 40, "y": 40,
                          "inputs": {"actions": {"block": {"type": "text_print",
                                                           "inputs": {"TEXT": {"block": {"type": "text", "fields": {"TEXT": "hello"}}}}}}}}
+DOCUMENTATION = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "documentation")
 
 
 def main():
@@ -181,6 +183,22 @@ def main():
         help_url = page.eval("new Blockly.Workspace().newBlock('ic705_set_frequency').helpUrl")
         check("the online demo links to the documentation next to it, like on the SD card",
               help_url == "../documentation/radio/ic705.html#ic705_set_frequency", help_url)
+
+        # every block links to a heading of the documentation of the studio, also the standard blocks of blockly (#if, ...)
+        types = set(re.findall(r'"type":"([^"]+)"', page.eval("JSON.stringify(toolbox)")))
+        types |= {"variables_set", "variables_get", "procedures_defnoreturn", "procedures_defreturn", "procedures_ifreturn",
+                  "procedures_callnoreturn", "procedures_callreturn"}
+        urls = page.eval("JSON.stringify(Object.fromEntries(%s.map((type) => [type, new Blockly.Workspace().newBlock(type).helpUrl])))"
+                         % json.dumps(sorted(types)))
+        wrong = []
+        for blocktype, url in json.loads(urls).items():
+            match = re.match(r"\.\./documentation/(.+)\.html#(.+)$", url or "")
+            source = os.path.join(DOCUMENTATION, match.group(1) + ".md") if match else None
+            if url.startswith("https://www.lua.org/"):
+                continue   # the lua block links to the lua manual on purpose
+            if not source or not os.path.isfile(source) or "{#%s}" % match.group(2) not in open(source, encoding="utf-8").read():
+                wrong.append("%s: %s" % (blocktype, url))
+        check("every block of the toolbox links to its heading in the documentation (%d blocks)" % len(types), not wrong, wrong)
         problems = page.problems(ignore=("Saving failed",))
         check("no console problems in the online demo", not problems, problems)
         page.eval("localStorage.clear()")
