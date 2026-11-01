@@ -127,3 +127,9 @@ Converts between texts and lists:
     cmd = list_string_split('14,1', ',')
     print(table.concat(cmd, ','))
     ```
+
+---
+
+## Keeping the last values
+
+A list which always holds the last values is a *ring buffer*. The blocks for it are in the group [Helpers](../base/helpers.md#ringbuffer_add).

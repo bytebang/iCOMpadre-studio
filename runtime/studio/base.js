@@ -1256,3 +1256,170 @@ Blockly.Lua.forBlock['asByte'] = function(block) {
 };
 
 helpers.helper("asByte");
+
+//-------------------------------------------------------------------
+// Ring buffer: a normal list in a variable, which keeps the last values. The oldest value is item 1, the newest the last one.
+// The list is created by the first value. Until then all values of the buffer are 0, so a program can read it right from the start.
+Studio.luaFunction("ringAdd", [
+  "function ringAdd(list, value, size)",
+  "  list = list or {}",
+  "  table.insert(list, value)",
+  "  while #list > math.max(size, 1) do table.remove(list, 1) end",
+  "  return list",
+  "end"]);
+Studio.luaFunction("ringCount", [
+  "function ringCount(list)",
+  "  return list and #list or 0",
+  "end"]);
+Studio.luaFunction("ringSum", [
+  "function ringSum(list)",
+  "  local sum = 0",
+  "  for _, v in ipairs(list or {}) do sum = sum + v end",
+  "  return sum",
+  "end"]);
+Studio.luaFunction("ringAverage", [
+  "function ringAverage(list)",
+  "  if ringCount(list) == 0 then return 0 end",
+  "  return ringSum(list) / #list",
+  "end"], ["ringCount", "ringSum"]);
+Studio.luaFunction("ringMin", [
+  "function ringMin(list)",
+  "  local result = 0",
+  "  for i, v in ipairs(list or {}) do",
+  "    if i == 1 or v < result then result = v end",
+  "  end",
+  "  return result",
+  "end"]);
+Studio.luaFunction("ringMax", [
+  "function ringMax(list)",
+  "  local result = 0",
+  "  for i, v in ipairs(list or {}) do",
+  "    if i == 1 or v > result then result = v end",
+  "  end",
+  "  return result",
+  "end"]);
+Studio.luaFunction("ringRange", [
+  "function ringRange(list)",
+  "  return ringMax(list) - ringMin(list)",
+  "end"], ["ringMax", "ringMin"]);
+Studio.luaFunction("ringMedian", [
+  "function ringMedian(list)",
+  "  local n = ringCount(list)",
+  "  if n == 0 then return 0 end",
+  "  local sorted = {}",
+  "  for i, v in ipairs(list) do sorted[i] = v end",
+  "  table.sort(sorted)",
+  "  if n % 2 == 1 then return sorted[(n + 1) // 2] end",
+  "  return (sorted[n // 2] + sorted[n // 2 + 1]) / 2",
+  "end"], ["ringCount"]);
+Studio.luaFunction("ringStdDev", [
+  "function ringStdDev(list)",
+  "  local n = ringCount(list)",
+  "  if n == 0 then return 0 end",
+  "  local average, sum = ringAverage(list), 0",
+  "  for _, v in ipairs(list) do sum = sum + (v - average) ^ 2 end",
+  "  return math.sqrt(sum / n)",
+  "end"], ["ringCount", "ringAverage"]);
+Studio.luaFunction("ringNewest", [
+  "function ringNewest(list)",
+  "  return list and list[#list] or 0",
+  "end"]);
+Studio.luaFunction("ringOldest", [
+  "function ringOldest(list)",
+  "  return list and list[1] or 0",
+  "end"]);
+Studio.luaFunction("ringChange", [
+  "function ringChange(list)",
+  "  return ringNewest(list) - ringOldest(list)",
+  "end"], ["ringNewest", "ringOldest"]);
+
+Blockly.Blocks['ringbuffer_add'] = {
+  init: function() {
+    this.jsonInit({
+      "type": "ringbuffer_add",
+      "message0": Blockly.Msg.ICP_RINGBUFFER_ADD,
+      "args0": [
+        {"type": "input_value", "name": "VALUE"},
+        {"type": "field_variable", "name": "VAR", "variable": "buffer"},
+        {"type": "input_value", "name": "SIZE", "check": "Number"}
+      ],
+      "inputsInline": true,
+      "previousStatement": null,
+      "nextStatement": null,
+      "tooltip": Blockly.Msg.ICP_RINGBUFFER_ADD_TOOLTIP
+    });
+  }
+};
+
+Blockly.Lua.forBlock['ringbuffer_add'] = function(block) {
+  var name = Blockly.Lua.getVariableName(block.getFieldValue('VAR'));
+  var value = Blockly.Lua.valueToCode(block, 'VALUE', lua.Order.NONE) || 'nil';
+  var size = Blockly.Lua.valueToCode(block, 'SIZE', lua.Order.NONE) || '1';
+  Studio.use('ringAdd');
+  return name + ' = ringAdd(' + name + ', ' + value + ', ' + size + ')\n';
+};
+
+helpers.action("ringbuffer_add", {"inputs": {
+  "VALUE": {"shadow": {"type": "math_number", "fields": {"NUM": 0}}},
+  "SIZE":  {"shadow": {"type": "math_number", "fields": {"NUM": 20}}}
+}});
+
+Blockly.Blocks['ringbuffer_clear'] = {
+  init: function() {
+    this.jsonInit({
+      "type": "ringbuffer_clear",
+      "message0": Blockly.Msg.ICP_RINGBUFFER_CLEAR,
+      "args0": [
+        {"type": "field_variable", "name": "VAR", "variable": "buffer"}
+      ],
+      "previousStatement": null,
+      "nextStatement": null,
+      "tooltip": Blockly.Msg.ICP_RINGBUFFER_CLEAR_TOOLTIP
+    });
+  }
+};
+
+Blockly.Lua.forBlock['ringbuffer_clear'] = function(block) {
+  return Blockly.Lua.getVariableName(block.getFieldValue('VAR')) + ' = {}\n';
+};
+
+helpers.action("ringbuffer_clear");
+
+Blockly.Blocks['ringbuffer_get'] = {
+  init: function() {
+    this.jsonInit({
+      "type": "ringbuffer_get",
+      "message0": Blockly.Msg.ICP_RINGBUFFER_GET,
+      "args0": [
+        {
+          "type": "field_dropdown",
+          "name": "WHAT",
+          "options": [
+            [Blockly.Msg.ICP_RINGBUFFER_AVERAGE, "ringAverage"],
+            [Blockly.Msg.ICP_RINGBUFFER_MIN,     "ringMin"],
+            [Blockly.Msg.ICP_RINGBUFFER_MAX,     "ringMax"],
+            [Blockly.Msg.ICP_RINGBUFFER_RANGE,   "ringRange"],
+            [Blockly.Msg.ICP_RINGBUFFER_MEDIAN,  "ringMedian"],
+            [Blockly.Msg.ICP_RINGBUFFER_STDDEV,  "ringStdDev"],
+            [Blockly.Msg.ICP_RINGBUFFER_SUM,     "ringSum"],
+            [Blockly.Msg.ICP_RINGBUFFER_NEWEST,  "ringNewest"],
+            [Blockly.Msg.ICP_RINGBUFFER_OLDEST,  "ringOldest"],
+            [Blockly.Msg.ICP_RINGBUFFER_CHANGE,  "ringChange"],
+            [Blockly.Msg.ICP_RINGBUFFER_COUNT,   "ringCount"]
+          ]
+        },
+        {"type": "field_variable", "name": "VAR", "variable": "buffer"}
+      ],
+      "output": null,
+      "tooltip": Blockly.Msg.ICP_RINGBUFFER_GET_TOOLTIP
+    });
+  }
+};
+
+Blockly.Lua.forBlock['ringbuffer_get'] = function(block) {
+  var what = block.getFieldValue('WHAT');
+  Studio.use(what);
+  return [what + '(' + Blockly.Lua.getVariableName(block.getFieldValue('VAR')) + ')', lua.Order.ATOMIC];
+};
+
+helpers.property("ringbuffer_get");

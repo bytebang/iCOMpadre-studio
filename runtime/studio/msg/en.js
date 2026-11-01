@@ -124,6 +124,23 @@ Blockly.Msg.ICP_ASCHAR = "char of";
 Blockly.Msg.ICP_ASCHAR_TOOLTIP = "Converts the number to a character";
 Blockly.Msg.ICP_ASBYTE = "byte of character %1";
 Blockly.Msg.ICP_ASBYTE_TOOLTIP = "Converts the first character of the given string to a numeric byte value";
+Blockly.Msg.ICP_RINGBUFFER_ADD = "add %1 to ring buffer %2 keep last %3";
+Blockly.Msg.ICP_RINGBUFFER_ADD_TOOLTIP = "Adds a value to a list and removes the oldest values, so that the list always holds the last values";
+Blockly.Msg.ICP_RINGBUFFER_CLEAR = "clear ring buffer %1";
+Blockly.Msg.ICP_RINGBUFFER_CLEAR_TOOLTIP = "Removes all values from the ring buffer";
+Blockly.Msg.ICP_RINGBUFFER_GET = "%1 of ring buffer %2";
+Blockly.Msg.ICP_RINGBUFFER_GET_TOOLTIP = "Calculates a value from the numbers in the ring buffer. It is 0 as long as the buffer is empty";
+Blockly.Msg.ICP_RINGBUFFER_AVERAGE = "average";
+Blockly.Msg.ICP_RINGBUFFER_MIN = "minimum";
+Blockly.Msg.ICP_RINGBUFFER_MAX = "maximum";
+Blockly.Msg.ICP_RINGBUFFER_RANGE = "range (max - min)";
+Blockly.Msg.ICP_RINGBUFFER_MEDIAN = "median";
+Blockly.Msg.ICP_RINGBUFFER_STDDEV = "standard deviation";
+Blockly.Msg.ICP_RINGBUFFER_SUM = "sum";
+Blockly.Msg.ICP_RINGBUFFER_NEWEST = "newest value";
+Blockly.Msg.ICP_RINGBUFFER_OLDEST = "oldest value";
+Blockly.Msg.ICP_RINGBUFFER_CHANGE = "change (newest - oldest)";
+Blockly.Msg.ICP_RINGBUFFER_COUNT = "number of values";
 
 // ----------------------------------------------- radio/icom.js: groups, words used everywhere
 Blockly.Msg.ICOM_GROUP_FREQUENCY_MODE = "Frequency & Mode";

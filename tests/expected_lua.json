@@ -4522,6 +4522,24 @@
    "code": "readDigitalInput(PIN_A)",
    "uses": []
   },
+  "ringbuffer_add": {
+   "code": "buffer = ringAdd(buffer, 0, 20)\n",
+   "uses": [
+    "ringAdd"
+   ]
+  },
+  "ringbuffer_clear": {
+   "code": "buffer = {}\n",
+   "uses": []
+  },
+  "ringbuffer_get": {
+   "code": "ringAverage(buffer)",
+   "uses": [
+    "ringAverage",
+    "ringCount",
+    "ringSum"
+   ]
+  },
   "sendcommand": {
    "code": "sendCommand(, )\n",
    "uses": []
@@ -4715,6 +4733,10 @@
   "math_sum": "function math_sum(t)\n  local result = 0\n  for _, v in ipairs(t) do\n    result = result + v\n  end\n  return result\nend",
   "numberToBcd": "function numberToBcd(number, tblsize)\n  number = math.floor(number)\n  local bcdTable = {}\n  while number > 0 do\n    local nibble = number % 10\n    table.insert(bcdTable, 1, nibble)\n    number = math.floor(number / 10)\n  end\n  if #bcdTable % 2 == 1 then\n    table.insert(bcdTable, 1, 0)\n  end\n  local finalTable = {}\n  for i = 1, #bcdTable, 2 do\n    local nibble1 = bcdTable[i]\n    local nibble2 = bcdTable[i+1]\n    local bcdValue = nibble2 + nibble1 * 16\n    table.insert(finalTable, bcdValue)\n  end\n  if(tblsize ~= nil) then\n    while #finalTable < tblsize do\n      table.insert(finalTable, 1, 0x00)\n    end\n  end\n  return finalTable\nend",
   "pretty": "function pretty(tbl)\n  hex = {}\n  for i, name in ipairs(tbl) do\n    hex[i] = string.format('0x%02x ', name)\n  end\n  return '{' .. table.concat(hex, ',') .. '}'\nend",
+  "ringAdd": "function ringAdd(list, value, size)\n  list = list or {}\n  table.insert(list, value)\n  while #list > math.max(size, 1) do table.remove(list, 1) end\n  return list\nend",
+  "ringAverage": "function ringAverage(list)\n  if ringCount(list) == 0 then return 0 end\n  return ringSum(list) / #list\nend",
+  "ringCount": "function ringCount(list)\n  return list and #list or 0\nend",
+  "ringSum": "function ringSum(list)\n  local sum = 0\n  for _, v in ipairs(list or {}) do sum = sum + v end\n  return sum\nend",
   "storageAppendLine": "function storageAppendLine(name, text)\n  return storageCheck(storageWrite(name, tostring(text) .. '\\n', 'a'))\nend",
   "storageCheck": "function storageCheck(ok, err)\n  if not ok then print('Storage: ' .. tostring(err)) end\n  return ok == true\nend",
   "storageCsvLine": "function storageCsvLine(list)\n  local fields = {}\n  for i, v in ipairs(list) do\n    local s = tostring(v)\n    if string.find(s, '[,\"\\n]') then s = '\"' .. string.gsub(s, '\"', '\"\"') .. '\"' end\n    fields[i] = s\n  end\n  return table.concat(fields, ',')\nend",

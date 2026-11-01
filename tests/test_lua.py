@@ -3,6 +3,7 @@
 Like on iCOMpadre, the bytes of the answers of the radio are floats (the firmware uses lua_pushnumber),
 e.g. tostring(18.0) is "18.0" and not "18". Needs the python package lupa (pip install lupa).
 """
+import json
 import re
 import sys
 
@@ -43,6 +44,24 @@ ANY_ANSWER = ("setmetatable(answers, {__index = function() return {0x01, 0x20, 0
               " 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x20, 0x24, 0x10, 0x31, 0x12, 0x30, 0x15} end})")
 
 
+# The helper functions of every option of the ring buffer block (the toolbox only generates the first option)
+RING_BUFFER_HELPERS = r"""
+(function() {
+  var out = {};
+  var ws = new Blockly.Workspace();
+  var block = ws.newBlock('ringbuffer_get');
+  block.getField('WHAT').getOptions().forEach(function(option) {
+    block.setFieldValue(option[1], 'WHAT');
+    Blockly.Lua.init(ws);
+    Blockly.Lua.blockToCode(block);
+    Object.assign(out, Blockly.Lua.definitions_);
+  });
+  ws.dispose();
+  return JSON.stringify(out);
+})()
+"""
+
+
 def runtime(answers=None, helpers=None):
     lua = lua53.LuaRuntime(unpack_returned_tuples=True)
     lua.execute(FIRMWARE)
@@ -65,11 +84,12 @@ def main():
         open_studio(browser.page, server)
         generated = generate_all(browser.page)
         prefixes = browser.page.eval("Icom.radios.map(function(r) { return r.spec.prefix + '_'; })") + ["ic705_"]
+        ring_helpers = json.loads(browser.page.eval(RING_BUFFER_HELPERS))
     finally:
         browser.close()
         server.close()
 
-    full, helpers = generated["full"], generated["helpers"]
+    full, helpers = generated["full"], dict(generated["helpers"], **ring_helpers)
     radio_blocks = sorted(k for k in full if k.startswith(tuple(prefixes)))
 
     # 1. every radio block runs: right after the start (no answers yet) and with answers
@@ -132,6 +152,30 @@ def main():
     helper("IC-705 DTCS data 023 TX reverse", ["icomDtcsData"], "icomDtcsData(23, 0x10)", [0x10, 0, 0x23])
     helper("IC-705 menu command 0312", ["numberToBcd", "icomMenuCmd"], "icomMenuCmd(312)", [0x1A, 0x05, 0x03, 0x12])
     helper("IC-705 CW pitch 600 Hz is 0128", ["numberToBcd", "icomLevel"], "icomLevel(600, 300, 900)", [0x01, 0x28])
+
+    # the ring buffer: the values are floats on the device as well, e.g. the answers of the radio
+    ring = ["ringAdd", "ringCount", "ringSum", "ringAverage", "ringMin", "ringMax", "ringRange", "ringMedian", "ringStdDev",
+            "ringNewest", "ringOldest", "ringChange"]
+    fill = "(function() local b; for _, v in ipairs({%s}) do b = ringAdd(b, v, %s) end return %s end)()"
+
+    helper("ring buffer keeps the last values, oldest first", ring, fill % ("1, 2, 3, 4, 5", "3", "b"), [3, 4, 5])
+    helper("ring buffer not full yet", ring, fill % ("1, 2", "3", "b"), [1, 2])
+    helper("ring buffer with size 0 keeps one value", ring, fill % ("1, 2", "0", "b"), [2])
+    helper("ring buffer with a negative size keeps one value", ring, fill % ("1, 2", "-5", "b"), [2])
+    helper("ring buffer gets smaller with a smaller size", ring, "ringAdd({1, 2, 3, 4}, 5, 2)", [4, 5])
+    helper("ring buffer takes floats", ring, fill % ("1.5, 2.5", "3", "b"), [1.5, 2.5])
+
+    for function, expected in (("ringAverage", 4), ("ringMin", 1), ("ringMax", 9), ("ringRange", 8), ("ringMedian", 3), ("ringSum", 20),
+                               ("ringNewest", 3), ("ringOldest", 2), ("ringChange", 1), ("ringCount", 5)):
+        helper("ring buffer %s" % function, ring, fill % ("2, 9, 1, 5, 3", "5", function + "(b)"), expected)
+    helper("ring buffer median of an even number of values", ring, "ringMedian({4, 1, 3, 2})", 2.5)
+    helper("ring buffer median does not sort the buffer", ring, "(function() local b = {3, 1, 2}; ringMedian(b); return b end)()", [3, 1, 2])
+    helper("ring buffer standard deviation", ring, "ringStdDev({2, 4, 4, 4, 5, 5, 7, 9})", 2)
+
+    for function in ("ringAverage", "ringMin", "ringMax", "ringRange", "ringMedian", "ringStdDev", "ringSum", "ringNewest", "ringOldest",
+                     "ringChange", "ringCount"):
+        helper("ring buffer %s is 0 before the first value" % function, ring, function + "(nil)", 0)
+        helper("ring buffer %s is 0 when it is empty" % function, ring, function + "({})", 0)
 
     # 4. what the action blocks send
     def sends(label, block, expected):
