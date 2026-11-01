@@ -295,8 +295,8 @@
     }
 
     // The folder of the studio on the SD card (/<folder>/studio/index.html). The first line of the program names it,
-    // so the list of the apps of iCOMpadre shows which app the program comes from
-    var APP_FOLDER = location.pathname.split('/').filter(Boolean).slice(0, -2).pop() || 'studio';
+    // so the list of the apps of iCOMpadre shows which app the program comes from. The online demo (/demo/studio/) is the studio as well
+    var APP_FOLDER = (!Studio.online && location.pathname.split('/').filter(Boolean).slice(0, -2).pop()) || 'studio';
 
     function luaCode()
     {

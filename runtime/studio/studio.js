@@ -60,9 +60,11 @@ var Studio = (function() {
   var ONLINE = /(^|\.)(github\.io|githack\.com)$/.test(location.hostname) || new URLSearchParams(location.search).has("online");
 
   // The help is the documentation of the studio next to it: /studio/documentation/ on the SD card (and on every copy of it).
+  // On GitHub Pages the demo and the documentation are side by side (/demo/studio/ and /documentation/).
   // githack serves the repository itself, without the built documentation: it links to the one on GitHub Pages
-  var HELP_ROOT = /(^|\.)githack\.com$/.test(location.hostname) ? "https://bytebang.github.io/iCOMpadre-studio/studio/documentation/"
-                                                                 : "../documentation/";
+  var HELP_ROOT = /(^|\.)githack\.com$/.test(location.hostname) ? "https://bytebang.github.io/iCOMpadre-studio/documentation/"
+                : /(^|\.)github\.io$/.test(location.hostname) ? "../../documentation/"
+                                                               : "../documentation/";
 
   // The blocks of blockly itself (loaded before this file) link to the wiki of blockly or to wikipedia.
   // They link to our documentation instead: the standard ones to documentation/blockly/<page>.html, the others (print) to their category

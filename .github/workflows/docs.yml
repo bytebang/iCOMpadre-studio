@@ -1,9 +1,10 @@
 name: Documentation
 
 # Builds the documentation of the studio (on every push and pull request, so broken links show up before a merge)
-# and publishes the studio with its documentation on GitHub Pages, laid out like on the SD card of iCOMpadre:
-#   https://bytebang.github.io/iCOMpadre-studio/studio/                the studio as online demo
-#   https://bytebang.github.io/iCOMpadre-studio/studio/documentation/  its documentation
+# and publishes the studio with its documentation on GitHub Pages:
+#   https://bytebang.github.io/iCOMpadre-studio/demo/           the studio as online demo
+#   https://bytebang.github.io/iCOMpadre-studio/documentation/  its documentation
+# The old addresses below /studio/ (the layout of the SD card) lead there.
 on:
   push:
   pull_request:
@@ -33,13 +34,29 @@ jobs:
         run: pip install mkdocs mkdocs-awesome-pages-plugin pymdown-extensions
 
       - name: Build the documentation
-        run: mkdocs build --strict --site-dir "$PWD/site/studio/documentation"
+        run: mkdocs build --strict --site-dir "$PWD/site/documentation"
 
-      - name: Add the studio, like on the SD card
+      - name: Add the studio as online demo
         run: |
-          cp -r runtime/. site/studio/
-          rm -f site/studio/main.lua site/studio/icompadre.json
-          printf '<!DOCTYPE html><meta charset="utf-8"><meta http-equiv="refresh" content="0; url=studio/"><a href="studio/">iCOMpadre Studio</a>\n' > site/index.html
+          mkdir -p site/demo
+          cp -r runtime/. site/demo/
+          rm -f site/demo/main.lua site/demo/icompadre.json
+          printf '<!DOCTYPE html><meta charset="utf-8"><meta http-equiv="refresh" content="0; url=demo/"><a href="demo/">iCOMpadre Studio</a>\n' > site/index.html
+
+      # links to the old addresses (e.g. /studio/documentation/tutorial.html#limit) keep working, with their anchor
+      - name: Forward the old addresses
+        run: |
+          redirect() {
+            mkdir -p "$(dirname "$1")"
+            printf '<!DOCTYPE html><meta charset="utf-8"><script>location.replace("%s" + location.hash)</script><a href="%s">%s</a>\n' "$2" "$2" "$2" > "$1"
+          }
+          redirect site/studio/index.html ../demo/
+          redirect site/studio/studio/index.html ../../demo/studio/index.html
+          (cd site/documentation && find . -name '*.html') | while read -r page; do
+            page="${page#./}"
+            up=$(echo "$page" | sed 's|[^/]*/|../|g; s|[^/]*$||')
+            redirect "site/studio/documentation/$page" "../../${up}documentation/$page"
+          done
 
       - uses: actions/upload-pages-artifact@v3
         if: github.event_name == 'push' && github.ref == 'refs/heads/main'
