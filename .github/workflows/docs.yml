@@ -39,6 +39,11 @@ jobs:
       - name: Build the documentation
         run: mkdocs build --strict --site-dir site
 
+      # The studio itself as online demo: https://bytebang.github.io/iCOMpadre-studio/app/
+      # It notices that it runs online (Studio.online): nothing to save to, the help links point to the online help
+      - name: Add the studio as online demo
+        run: cp -r runtime site/app
+
       - uses: actions/upload-pages-artifact@v3
         with:
           path: site

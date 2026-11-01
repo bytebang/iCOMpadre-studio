@@ -55,10 +55,12 @@ var Studio = (function() {
   });
 
   // The documentation mirrors the block files: radio/ic705.js -> radio/ic705.md, base.js with its group "program" -> base/program.md
-  // On the device the help is the userguide on the SD card. The online version of the studio (served by githack
-  // from the repository) has no userguide next to it: it uses the online help instead, built by .github/workflows/docs.yml
-  var HELP_ROOT = /(^|\.)githack\.com$/.test(location.hostname) ? "https://bytebang.github.io/iCOMpadre-studio/"
-                                                                 : "../userguide/studio/";
+  // True if the studio runs online (the demo on GitHub Pages, or served by githack from the repository) instead of on iCOMpadre:
+  // there is no device to save to, and no userguide next to it. ?online simulates this (e.g. for the tests)
+  var ONLINE = /(^|\.)(github\.io|githack\.com)$/.test(location.hostname) || new URLSearchParams(location.search).has("online");
+
+  // On the device the help is the userguide on the SD card, online it is the online help built by .github/workflows/docs.yml
+  var HELP_ROOT = ONLINE ? "https://bytebang.github.io/iCOMpadre-studio/" : "../userguide/studio/";
 
   var contributions = [];   // categories and separators in registration order
   var luaFunctions = {};    // name -> array of lua source lines
@@ -303,5 +305,6 @@ var Studio = (function() {
     "use": use,
     "buildToolbox": buildToolbox,
     "checkEvents": checkEvents,
+    "online": ONLINE,
   };
 })();

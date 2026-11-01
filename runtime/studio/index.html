@@ -457,7 +457,8 @@
     });
 
     window.addEventListener('beforeunload', function(event) {
-      if (isDirty())
+      // the online demo can't save anyway, and its changes are kept in the browser: no question when leaving
+      if (isDirty() && !Studio.online)
       {
         event.preventDefault();
         event.returnValue = '';
@@ -468,7 +469,12 @@
     // Load the latest project from the server
     async function openLastProjectFromServer()
     {
-      try
+      if (Studio.online)
+      {
+        // the online demo has no iCOMpadre to load from: start empty, unsaved changes are kept in the browser
+        showStatus('Online demo: your sketch stays in this browser. Download it to keep it.', 'info');
+      }
+      else try
       {
         var response = await fetch('/icompadre.json', {cache: 'no-cache'});
         if (response.status === 200)
@@ -532,6 +538,11 @@
       var button = document.getElementById('saveButton');
       if (saving || button.disabled)
       {
+        return;
+      }
+      if (Studio.online)
+      {
+        showStatus('Saving needs iCOMpadre. In the online demo use Download instead.', 'info');
         return;
       }
       saving = true;

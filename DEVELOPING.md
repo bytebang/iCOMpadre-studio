@@ -200,7 +200,7 @@ The documentation under `documentation/` mirrors the block files under `runtime/
 | `studio/radio/ic705.js` | `documentation/radio/ic705.md` | `../userguide/studio/radio/ic705/#<blocktype>` |
 | `studio/base.js`, group `base.group("Pins", "pins", "pins")` | `documentation/base/pins.md` | `../userguide/studio/base/pins/#<blocktype>` |
 
-The online version of the studio (githack) links to the online help instead: `https://bytebang.github.io/iCOMpadre-studio/radio/ic705/#<blocktype>`.
+The online demo of the studio (`Studio.online`) links to the online help instead: `https://bytebang.github.io/iCOMpadre-studio/radio/ic705/#<blocktype>`.
 
 `Studio.category()` remembers which file registered the category, and `Studio.buildToolbox()` gives every block of it this link (*Help* in the context menu of the block).
 A group with a third parameter gets its own page in a folder named like the file; groups without it (e.g. the topics of the radios) share the page of their category.
@@ -225,6 +225,9 @@ Help links don't work locally, because the userguide only exists in the CI build
 The documentation of the studio alone can be viewed with `mkdocs serve` in this folder (`pip install mkdocs mkdocs-awesome-pages-plugin pymdown-extensions`).
 The same is published as online help on every push to `main` by `.github/workflows/docs.yml`: https://bytebang.github.io/iCOMpadre-studio/.
 Links to other chapters of the iCOMpadre userguide (`../../radios.md`) are plain text there.
+The workflow also publishes `runtime/` as online demo: https://bytebang.github.io/iCOMpadre-studio/app/.
+The studio notices that it runs online (`Studio.online`, on github.io and githack.com, or with `?online` in the address):
+it starts empty, *Save* points to *Download*, and the help links point to the online help.
 
 To build the userguide with the studio documentation locally, do what the CI does: copy `documentation/` of this app (including the hidden `.pages` files) to `documentation/studio/` of the iCOMpadre repository and run `mkdocs build` there.
 The order and the titles of the pages in the menu come from the `.pages` files (plugin `mkdocs-awesome-pages-plugin`); a new page has to be added there.
