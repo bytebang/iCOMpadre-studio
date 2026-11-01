@@ -55,7 +55,10 @@ var Studio = (function() {
   });
 
   // The documentation mirrors the block files: radio/ic705.js -> radio/ic705.md, base.js with its group "program" -> base/program.md
-  var HELP_ROOT = "../userguide/studio/";
+  // On the device the help is the userguide on the SD card. The online version of the studio (served by githack
+  // from the repository) has no userguide next to it: it uses the online help instead, built by .github/workflows/docs.yml
+  var HELP_ROOT = /(^|\.)githack\.com$/.test(location.hostname) ? "https://bytebang.github.io/iCOMpadre-studio/"
+                                                                 : "../userguide/studio/";
 
   var contributions = [];   // categories and separators in registration order
   var luaFunctions = {};    // name -> array of lua source lines

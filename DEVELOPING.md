@@ -200,6 +200,8 @@ The documentation under `documentation/` mirrors the block files under `runtime/
 | `studio/radio/ic705.js` | `documentation/radio/ic705.md` | `../userguide/studio/radio/ic705/#<blocktype>` |
 | `studio/base.js`, group `base.group("Pins", "pins", "pins")` | `documentation/base/pins.md` | `../userguide/studio/base/pins/#<blocktype>` |
 
+The online version of the studio (githack) links to the online help instead: `https://bytebang.github.io/iCOMpadre-studio/radio/ic705/#<blocktype>`.
+
 `Studio.category()` remembers which file registered the category, and `Studio.buildToolbox()` gives every block of it this link (*Help* in the context menu of the block).
 A group with a third parameter gets its own page in a folder named like the file; groups without it (e.g. the topics of the radios) share the page of their category.
 To make the link jump to the right place, give the heading of the block its block type as id:
@@ -219,6 +221,10 @@ python ../webserver.py
 
 Enter a port between 8000 and 8100 and open `http://localhost:<port>/`. The server serves `runtime/` and accepts `PUT` for `.lua` and `.json` files, like the device does.
 Help links don't work locally, because the userguide only exists in the CI build.
+
+The documentation of the studio alone can be viewed with `mkdocs serve` in this folder (`pip install mkdocs mkdocs-awesome-pages-plugin pymdown-extensions`).
+The same is published as online help on every push to `main` by `.github/workflows/docs.yml`: https://bytebang.github.io/iCOMpadre-studio/.
+Links to other chapters of the iCOMpadre userguide (`../../radios.md`) are plain text there.
 
 To build the userguide with the studio documentation locally, do what the CI does: copy `documentation/` of this app (including the hidden `.pages` files) to `documentation/studio/` of the iCOMpadre repository and run `mkdocs build` there.
 The order and the titles of the pages in the menu come from the `.pages` files (plugin `mkdocs-awesome-pages-plugin`); a new page has to be added there.

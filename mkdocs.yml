@@ -1,0 +1,18 @@
+# The online help of the studio: https://bytebang.github.io/iCOMpadre-studio/
+# Built and published by .github/workflows/docs.yml. On the device the same pages are part of the
+# iCOMpadre userguide (the CI of the iCOMpadre repository copies documentation/ to its studio/ folder).
+site_name: iCOMpadre Studio
+site_url: https://bytebang.github.io/iCOMpadre-studio/
+docs_dir: documentation
+repo_url: https://github.com/bytebang/iCOMpadre-studio
+edit_uri: ""
+
+markdown_extensions:
+  - attr_list   # explicit heading ids, e.g. "## Set AF Level {#ic705_set_af_level}" for the help links of the blocks
+  - admonition  # note / tip / warning boxes: "!!! note"
+  - pymdownx.details      # collapsible boxes: "??? info"
+  - pymdownx.superfences  # code blocks inside boxes
+
+plugins:
+  - search
+  - awesome-pages   # order and titles of the menu from the .pages files

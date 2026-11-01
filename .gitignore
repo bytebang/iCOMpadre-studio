@@ -1,3 +1,6 @@
 main.lua
 icompadre.json
 __pycache__/
+
+# output of "mkdocs build"
+site/
