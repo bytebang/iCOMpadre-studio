@@ -103,6 +103,9 @@
     The swiss army knife for iCOM radios !<br>
   </div>
 
+  <!-- the list of the radios, their files are preloaded as well -->
+  <script src="studio/radio/radios.js"></script>
+
   <script>
 
     /*
@@ -233,18 +236,11 @@
             {"name":"block registry",         "url":"studio/studio.js"},
             {"name":"base functionality",     "url":"studio/base.js"},
             {"name":"radio functionality",    "url":"studio/radio/icom.js"},
-            {"name":"radio functionality",    "url":"studio/radio/ic705.js"},
-            {"name":"radio functionality",    "url":"studio/radio/ic7300.js"},
-            {"name":"radio functionality",    "url":"studio/radio/ic7300mk2.js"},
-            {"name":"radio functionality",    "url":"studio/radio/ic7100.js"},
-            {"name":"radio functionality",    "url":"studio/radio/ic7610.js"},
-            {"name":"radio functionality",    "url":"studio/radio/ic7851.js"},
-            {"name":"radio functionality",    "url":"studio/radio/ic9700.js"},
-            {"name":"radio functionality",    "url":"studio/radio/ic718.js"},
-            {"name":"radio functionality",    "url":"studio/radio/ic78.js"},
-            {"name":"radio functionality",    "url":"studio/radio/ic2730.js"},
-            {"name":"radio functionality",    "url":"studio/radio/ica120e.js"},
+            {"name":"list of the radios",     "url":"studio/radio/radios.js"},
         ];
+
+        // the descriptions of the radios (STUDIO_RADIOS comes from studio/radio/radios.js)
+        (window.STUDIO_RADIOS || []).forEach((radio) => filesToLoad.push({"name":"radio functionality", "url":"studio/radio/" + radio + ".js"}));
 
         // the texts of the language the studio will show (chosen like in studio/index.html)
         const language = studioLanguage(["en", "de"]);

@@ -167,19 +167,14 @@
   <!-- separator -->
   <script>Studio.separator();</script>
 
-  <!-- the radios, described with the common Icom commands. The order of the files is the order in the toolbox -->
+  <!-- the radios, described with the common Icom commands. radio/radios.js lists them in the order of the toolbox -->
   <script src="radio/icom.js"></script>
-  <script src="radio/ic705.js"></script>
-  <script src="radio/ic7300.js"></script>
-  <script src="radio/ic7300mk2.js"></script>
-  <script src="radio/ic7100.js"></script>
-  <script src="radio/ic7610.js"></script>
-  <script src="radio/ic7851.js"></script>
-  <script src="radio/ic9700.js"></script>
-  <script src="radio/ic718.js"></script>
-  <script src="radio/ic78.js"></script>
-  <script src="radio/ic2730.js"></script>
-  <script src="radio/ica120e.js"></script>
+  <script src="radio/radios.js"></script>
+  <script>
+    STUDIO_RADIOS.forEach(function(radio) {
+      document.write('<script src="radio/' + radio + '.js"><\/script>');
+    });
+  </script>
 
 
   <!------------------ Rendering of the workspace code ----------------- -->

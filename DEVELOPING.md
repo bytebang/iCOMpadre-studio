@@ -21,6 +21,7 @@ runtime/
     ├── radio.js          template for a new radio (not loaded)
     ├── radio/
     │   ├── icom.js       Icom.radio(): creates the blocks of a radio from a description of its CI-V commands
+    │   ├── radios.js     the list of the radios, in the order of the toolbox (the only place where they are listed)
     │   └── ic705.js ...  descriptions of the IC-705, IC-7300, IC-7300MK2, IC-7100, IC-7610, IC-7851, IC-9700, IC-718, IC-78, IC-2730 and IC-A120E
     ├── studio.css
     ├── filesaver.js      download of files (export)
@@ -48,14 +49,15 @@ webserver.py              local development server
    1. blockly, filesaver
    2. the inline `baseCategories` (Logic, Control, Math, ...)
    3. `studio.js`
-   4. `base.js`, then `Studio.separator()`, then the radio files
+   4. `base.js`, then `Studio.separator()`, then `radio/icom.js` and the radios of `radio/radios.js`
    5. `Studio.buildToolbox(baseCategories)` and `Blockly.inject(...)`
 4. The last workspace is loaded from `/icompadre.json` on the device.
 5. If the browser holds unsaved changes of an earlier session (`localStorage`, key `icompadre-studio.backup`), the studio offers to restore them.
 
 Every file the studio loads (scripts, styles, images) has to be in the `filesToLoad` list of `runtime/index.html`, otherwise it is not preloaded.
+The radios are the exception: the preloader takes them from `radio/radios.js` as well.
 
-The order of the radio `<script>` tags is the order of the categories in the toolbox.
+The order in `radio/radios.js` is the order of the radio categories in the toolbox.
 
 ## Interface to the device
 
@@ -117,24 +119,21 @@ meter scales, memory channels, ...). For them it is enough to **describe** the r
    remove the entries of commands the radio doesn't have. `Icom.radio()` only creates blocks for the entries which are there.
    Every entry is explained in `runtime/studio/radio/icom.js`. The usual settings with more than on/off (`choices`) and the usual levels
    (`levels`) are given by their name, see `CHOICES` and `LEVELS` there.
-3. Include the file in `runtime/studio/index.html` below `radio/icom.js` (the order of the files is the order in the toolbox), and add it to the `filesToLoad` list in `runtime/index.html`.
+3. Add its name to `STUDIO_RADIOS` in `runtime/studio/radio/radios.js`, at the place where it belongs in the toolbox.
+   The studio and the preloader both take the radios from there.
 4. Write `documentation/radio/<radio>.md` (the existing ones show the structure: one section per block, with the CI-V command and the page)
    and add the radio to `documentation/radio/.pages`, `documentation/blocks.md` and the list of radios in `documentation/base/radio.md`.
 
 A command which several radios have belongs into `Icom.radio()` as a new entry. Blocks which only make sense for one radio can also be written by hand:
 
-1. Copy `runtime/studio/radio.js` to `runtime/studio/radio/<radio>.js`, e.g. `radio/ic7300.js`.
+1. Copy `runtime/studio/radio.js` to `runtime/studio/radio/<radio>.js`, e.g. `radio/ic7700.js`.
 2. Replace `myradio` / `My Radio` with the name of the radio and remove the example blocks you don't need.
-3. Include the file in `runtime/studio/index.html` below the IC-705:
-   ```html
-   <script src="radio/ic7300.js"></script>
-   ```
-4. Add it to the `filesToLoad` list in `runtime/index.html`, otherwise it is not preloaded:
+3. Add its name to `STUDIO_RADIOS` in `runtime/studio/radio/radios.js`:
    ```js
-   {"name":"radio functionality",    "url":"studio/radio/ic7300.js"},
+   "ic7700",
    ```
-5. Write the blocks (see conventions below). The CI-V reference guide of the radio lists the commands.
-6. Document the blocks in `documentation/radio/<radio>.md`, named like the js file (see *Help* below), and add it to the lists like in step 4 above.
+4. Write the blocks (see conventions below). The CI-V reference guide of the radio lists the commands.
+5. Document the blocks in `documentation/radio/<radio>.md`, named like the js file (see *Help* below), and add it to the lists like in step 4 above.
 
 ## Languages
 
@@ -231,7 +230,7 @@ The order and the titles of the pages in the menu come from the `.pages` files (
 * The studio loads without errors in the browser console.
 * Every new block can be dragged onto the workspace.
 * The *Lua* panel shows the generated lua code. Check it for every new block.
-* The new file is in both `studio/index.html` and the preloader list.
+* The new radio is in `radio/radios.js`.
 
 ## Updating blockly
 

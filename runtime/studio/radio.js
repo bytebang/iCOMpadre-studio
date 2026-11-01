@@ -1,8 +1,8 @@
 // Template for a new radio. See DEVELOPING.md for the step by step guide.
 //
-// 1. Copy this file to radio/<radio>.js (e.g. radio/ic7300.js)
+// 1. Copy this file to radio/<radio>.js (e.g. radio/ic7700.js)
 // 2. Replace "myradio" / "My Radio" with the name of your radio
-// 3. Include the file in studio/index.html (after base.js) and in the preloader list of ../index.html
+// 3. Add the name of the file to the list in radio/radios.js (e.g. "ic7700")
 // 4. Document the blocks in documentation/radio/<radio>.md (same name as this file)
 //
 // Conventions:
