@@ -21,7 +21,7 @@ runtime/
     ├── radio.js          template for a new radio (not loaded)
     ├── radio/
     │   ├── icom.js       Icom.radio(): creates the blocks of a radio from a description of its CI-V commands
-    │   └── ic705.js ...  descriptions of the IC-705, IC-7610, IC-7851, IC-9700, IC-718, IC-78, IC-2730 and IC-A120E
+    │   └── ic705.js ...  descriptions of the IC-705, IC-7300, IC-7300MK2, IC-7100, IC-7610, IC-7851, IC-9700, IC-718, IC-78, IC-2730 and IC-A120E
     ├── studio.css
     ├── filesaver.js      download of files (export)
     ├── img/              toolbar icons

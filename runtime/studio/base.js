@@ -335,7 +335,7 @@ Blockly.Blocks['connect_radio'] = {
         {
           "type": "field_dropdown",
           "name": "RADIO",
-          "options": [["IC-7300 (94h)", "0x94"], ["IC-705 (A4h)", "0xA4"], ["IC-7610 (98h)", "0x98"], ["IC-7851 (8Eh)", "0x8E"],
+          "options": [["IC-7300 (94h)", "0x94"], ["IC-7300MK2 (B6h)", "0xB6"], ["IC-705 (A4h)", "0xA4"], ["IC-7610 (98h)", "0x98"], ["IC-7851 (8Eh)", "0x8E"],
                       ["IC-9700 (A2h)", "0xA2"], ["IC-7100 (88h)", "0x88"], ["IC-718 (5Eh)", "0x5E"], ["IC-78 (62h)", "0x62"],
                       ["IC-2730 (90h)", "0x90"], ["IC-A120E (92h)", "0x92"]]
         },

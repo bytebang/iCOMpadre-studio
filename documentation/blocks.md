@@ -6,7 +6,7 @@ The blocks in the toolbox on the left side come in three groups:
 | ----- | ---------- | ------- |
 | **Blockly** | [Logic](blockly/logic.md), [Control](blockly/control.md), [Math](blockly/math.md), [Lists](blockly/lists.md), [Text](blockly/text.md), [Variables](blockly/variables.md), [Functions](blockly/functions.md) | the standard blocks, as you know them from the blockly ecosystem |
 | **iCOMpadre** | [Program](base/program.md), [Radio](base/radio.md), [Pins](base/pins.md), [Serial](base/serial.md), [Storage](base/storage.md), [Helpers](base/helpers.md) | the blocks which make iCOMpadre special: events, the connection to the radio, pins, serial interface and SD card |
-| **Radios** | [IC-705](radio/ic705.md), [IC-7610](radio/ic7610.md), [IC-7851](radio/ic7851.md), [IC-9700](radio/ic9700.md), [IC-718](radio/ic718.md), [IC-78](radio/ic78.md), [IC-2730](radio/ic2730.md), [IC-A120E](radio/ica120e.md) | the settings of the ICOM radios |
+| **Radios** | [IC-705](radio/ic705.md), [IC-7300](radio/ic7300.md), [IC-7300MK2](radio/ic7300mk2.md), [IC-7100](radio/ic7100.md), [IC-7610](radio/ic7610.md), [IC-7851](radio/ic7851.md), [IC-9700](radio/ic9700.md), [IC-718](radio/ic718.md), [IC-78](radio/ic78.md), [IC-2730](radio/ic2730.md), [IC-A120E](radio/ica120e.md) | the settings of the ICOM radios |
 
 The blocks of iCOMpadre and the radios have a *Help* entry in their context menu (right click), which leads to their description in this guide.
 

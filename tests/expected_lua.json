@@ -765,6 +765,530 @@
    "code": "sendCommand({0x16, 0x22}, {0x01})\n",
    "uses": []
   },
+  "ic7100_announce": {
+   "code": "sendCommand({0x13, 0x00})\n",
+   "uses": []
+  },
+  "ic7100_equalize_vfo": {
+   "code": "sendCommand({0x07, 0xA0})\n",
+   "uses": []
+  },
+  "ic7100_exchange_vfo": {
+   "code": "sendCommand({0x07, 0xB0})\n",
+   "uses": []
+  },
+  "ic7100_get_af_level": {
+   "code": "icomReadPercent({0x14, 0x01})",
+   "uses": [
+    "bcdToNumber",
+    "icomQuery",
+    "icomReadNumber",
+    "icomReadPercent"
+   ]
+  },
+  "ic7100_get_agc": {
+   "code": "icomName(icomQuery({0x16, 0x12}), {[1] = \"FAST\", [2] = \"MID\", [3] = \"SLOW\"}, \"\")",
+   "uses": [
+    "icomName",
+    "icomQuery"
+   ]
+  },
+  "ic7100_get_alc": {
+   "code": "icomMeter({0x15, 0x13}, {{0, 0}, {120, 100}})",
+   "uses": [
+    "bcdToNumber",
+    "icomMeter",
+    "icomQuery",
+    "icomReadNumber",
+    "icomScale"
+   ]
+  },
+  "ic7100_get_attenuator": {
+   "code": "icomName(icomQuery({0x11}), {[0] = \"OFF\", [18] = \"12 dB\"}, \"\")",
+   "uses": [
+    "icomName",
+    "icomQuery"
+   ]
+  },
+  "ic7100_get_break_in": {
+   "code": "icomName(icomQuery({0x16, 0x47}), {[0] = \"OFF\", [1] = \"semi\", [2] = \"full\"}, \"\")",
+   "uses": [
+    "icomName",
+    "icomQuery"
+   ]
+  },
+  "ic7100_get_break_in_delay": {
+   "code": "icomReadLevel({0x14, 0x0F}, 2, 13)",
+   "uses": [
+    "bcdToNumber",
+    "icomQuery",
+    "icomReadLevel",
+    "icomReadNumber"
+   ]
+  },
+  "ic7100_get_clock": {
+   "code": "icomClock({0x1A, 0x05, 0x01, 0x20}, {0x1A, 0x05, 0x01, 0x21}, \"time\")",
+   "uses": [
+    "icomClock",
+    "icomQuery"
+   ]
+  },
+  "ic7100_get_comp_level": {
+   "code": "icomReadLevel({0x14, 0x0E}, 0, 10)",
+   "uses": [
+    "bcdToNumber",
+    "icomQuery",
+    "icomReadLevel",
+    "icomReadNumber"
+   ]
+  },
+  "ic7100_get_comp_meter": {
+   "code": "icomMeter({0x15, 0x14}, {{0, 0}, {130, 15}, {241, 30}})",
+   "uses": [
+    "bcdToNumber",
+    "icomMeter",
+    "icomQuery",
+    "icomReadNumber",
+    "icomScale"
+   ]
+  },
+  "ic7100_get_cw_pitch": {
+   "code": "math.floor(300 + icomReadNumber({0x14, 0x09}) * 600 / 255 + 0.5)",
+   "uses": [
+    "bcdToNumber",
+    "icomQuery",
+    "icomReadNumber"
+   ]
+  },
+  "ic7100_get_digital_squelch": {
+   "code": "icomName(icomQuery({0x16, 0x5B}), {[0] = \"OFF\", [1] = \"DSQL\", [2] = \"CSQL\"}, \"\")",
+   "uses": [
+    "icomName",
+    "icomQuery"
+   ]
+  },
+  "ic7100_get_dsp_filter_type": {
+   "code": "icomName(icomQuery({0x16, 0x56}), {[0] = \"SHARP\", [1] = \"SOFT\"}, \"\")",
+   "uses": [
+    "icomName",
+    "icomQuery"
+   ]
+  },
+  "ic7100_get_dtcs_code": {
+   "code": "icomReadDtcs()",
+   "uses": [
+    "icomQuery",
+    "icomReadDtcs"
+   ]
+  },
+  "ic7100_get_keying_speed": {
+   "code": "math.floor(6 + icomReadNumber({0x14, 0x0C}) * 42 / 255 + 0.5)",
+   "uses": [
+    "bcdToNumber",
+    "icomQuery",
+    "icomReadNumber"
+   ]
+  },
+  "ic7100_get_lcd_brightness": {
+   "code": "icomReadPercent({0x14, 0x19})",
+   "uses": [
+    "bcdToNumber",
+    "icomQuery",
+    "icomReadNumber",
+    "icomReadPercent"
+   ]
+  },
+  "ic7100_get_level": {
+   "code": "icomReadPercent({0x14, 0x06})",
+   "uses": [
+    "bcdToNumber",
+    "icomQuery",
+    "icomReadNumber",
+    "icomReadPercent"
+   ]
+  },
+  "ic7100_get_menu": {
+   "code": "icomReadNumber(icomMenuCmd(0))",
+   "uses": [
+    "bcdToNumber",
+    "icomMenuCmd",
+    "icomQuery",
+    "icomReadNumber",
+    "numberToBcd"
+   ]
+  },
+  "ic7100_get_mic_gain": {
+   "code": "icomReadPercent({0x14, 0x0B})",
+   "uses": [
+    "bcdToNumber",
+    "icomQuery",
+    "icomReadNumber",
+    "icomReadPercent"
+   ]
+  },
+  "ic7100_get_notch_width": {
+   "code": "icomName(icomQuery({0x16, 0x57}), {[0] = \"WIDE\", [1] = \"MID\", [2] = \"NAR\"}, \"\")",
+   "uses": [
+    "icomName",
+    "icomQuery"
+   ]
+  },
+  "ic7100_get_operating_frequency": {
+   "code": "icomReadFrequency()",
+   "uses": [
+    "frequencyAsNumber",
+    "icomQuery",
+    "icomReadFrequency"
+   ]
+  },
+  "ic7100_get_operating_mode": {
+   "code": "icomName(icomQuery({0x04}), {[0] = \"LSB\", [1] = \"USB\", [2] = \"AM\", [3] = \"CW\", [4] = \"RTTY\", [5] = \"FM\", [6] = \"WFM\", [7] = \"CW-R\", [8] = \"RTTY-R\", [23] = \"DV\"}, \"Unknown\")",
+   "uses": [
+    "icomName",
+    "icomQuery"
+   ]
+  },
+  "ic7100_get_power_output": {
+   "code": "icomMeter({0x15, 0x11}, {{0, 0}, {143, 50}, {213, 100}})",
+   "uses": [
+    "bcdToNumber",
+    "icomMeter",
+    "icomQuery",
+    "icomReadNumber",
+    "icomScale"
+   ]
+  },
+  "ic7100_get_preamp": {
+   "code": "icomName(icomQuery({0x16, 0x02}), {[0] = \"OFF\", [1] = \"P.AMP1\", [2] = \"P.AMP2\"}, \"\")",
+   "uses": [
+    "icomName",
+    "icomQuery"
+   ]
+  },
+  "ic7100_get_rf_gain": {
+   "code": "icomReadPercent({0x14, 0x02})",
+   "uses": [
+    "bcdToNumber",
+    "icomQuery",
+    "icomReadNumber",
+    "icomReadPercent"
+   ]
+  },
+  "ic7100_get_rf_power": {
+   "code": "icomReadPercent({0x14, 0x0A})",
+   "uses": [
+    "bcdToNumber",
+    "icomQuery",
+    "icomReadNumber",
+    "icomReadPercent"
+   ]
+  },
+  "ic7100_get_s_meter": {
+   "code": "math.min(9, icomMeter({0x15, 0x02}, {{0, 0}, {120, 9}}))",
+   "uses": [
+    "bcdToNumber",
+    "icomMeter",
+    "icomQuery",
+    "icomReadNumber",
+    "icomScale"
+   ]
+  },
+  "ic7100_get_squelch_level": {
+   "code": "icomReadPercent({0x14, 0x03})",
+   "uses": [
+    "bcdToNumber",
+    "icomQuery",
+    "icomReadNumber",
+    "icomReadPercent"
+   ]
+  },
+  "ic7100_get_ssb_tx_bandwidth": {
+   "code": "icomName(icomQuery({0x16, 0x58}), {[0] = \"WIDE\", [1] = \"MID\", [2] = \"NAR\"}, \"\")",
+   "uses": [
+    "icomName",
+    "icomQuery"
+   ]
+  },
+  "ic7100_get_supply_current": {
+   "code": "icomMeter({0x15, 0x16}, {{0, 0}, {97, 10}, {146, 15}, {241, 25}})",
+   "uses": [
+    "bcdToNumber",
+    "icomMeter",
+    "icomQuery",
+    "icomReadNumber",
+    "icomScale"
+   ]
+  },
+  "ic7100_get_supply_voltage": {
+   "code": "icomMeter({0x15, 0x15}, {{0, 0}, {13, 10}, {241, 16}})",
+   "uses": [
+    "bcdToNumber",
+    "icomMeter",
+    "icomQuery",
+    "icomReadNumber",
+    "icomScale"
+   ]
+  },
+  "ic7100_get_swr_meter_level": {
+   "code": "icomMeter({0x15, 0x12}, {{0, 1}, {48, 1.5}, {80, 2}, {120, 3}})",
+   "uses": [
+    "bcdToNumber",
+    "icomMeter",
+    "icomQuery",
+    "icomReadNumber",
+    "icomScale"
+   ]
+  },
+  "ic7100_is_data_mode": {
+   "code": "icomReadByte({0x1A, 0x06}) ~= 0",
+   "uses": [
+    "icomQuery",
+    "icomReadByte"
+   ]
+  },
+  "ic7100_is_function_on": {
+   "code": "icomReadByte({0x16, 0x22}) ~= 0",
+   "uses": [
+    "icomQuery",
+    "icomReadByte"
+   ]
+  },
+  "ic7100_is_split": {
+   "code": "icomReadByte({0x0F}) == 1",
+   "uses": [
+    "icomQuery",
+    "icomReadByte"
+   ]
+  },
+  "ic7100_is_squelch_open": {
+   "code": "icomReadOn({0x15, 0x01})",
+   "uses": [
+    "icomQuery",
+    "icomReadByte",
+    "icomReadOn"
+   ]
+  },
+  "ic7100_is_tone_squelch_open": {
+   "code": "icomReadOn({0x15, 0x05})",
+   "uses": [
+    "icomQuery",
+    "icomReadByte",
+    "icomReadOn"
+   ]
+  },
+  "ic7100_is_transmitting": {
+   "code": "icomReadOn({0x1C, 0x00})",
+   "uses": [
+    "icomQuery",
+    "icomReadByte",
+    "icomReadOn"
+   ]
+  },
+  "ic7100_scan": {
+   "code": "sendCommand({0x0E, 0x00})\n",
+   "uses": []
+  },
+  "ic7100_select_memory": {
+   "code": "sendCommand({0x08})\nsendCommand({0x08}, numberToBcd(0, 2))\n",
+   "uses": [
+    "numberToBcd"
+   ]
+  },
+  "ic7100_select_vfo": {
+   "code": "sendCommand({0x07, 0x00})\n",
+   "uses": []
+  },
+  "ic7100_send_cw": {
+   "code": "sendCommand({0x17}, icomTextBytes(''))\n",
+   "uses": [
+    "icomTextBytes"
+   ]
+  },
+  "ic7100_set_af_level": {
+   "code": "sendCommand({0x14, 0x01}, icomPercent(0))\n",
+   "uses": [
+    "icomPercent",
+    "numberToBcd"
+   ]
+  },
+  "ic7100_set_agc": {
+   "code": "sendCommand({0x16, 0x12}, {0x01})\n",
+   "uses": []
+  },
+  "ic7100_set_attenuator": {
+   "code": "sendCommand({0x11}, {0x00})\n",
+   "uses": []
+  },
+  "ic7100_set_break_in": {
+   "code": "sendCommand({0x16, 0x47}, {0x00})\n",
+   "uses": []
+  },
+  "ic7100_set_break_in_delay": {
+   "code": "sendCommand({0x14, 0x0F}, icomLevel(0, 2, 13))\n",
+   "uses": [
+    "icomLevel",
+    "numberToBcd"
+   ]
+  },
+  "ic7100_set_comp_level": {
+   "code": "sendCommand({0x14, 0x0E}, icomLevel(0, 0, 10))\n",
+   "uses": [
+    "icomLevel",
+    "numberToBcd"
+   ]
+  },
+  "ic7100_set_csql_code": {
+   "code": "sendCommand({0x1B, 0x07}, numberToBcd(0, 1))\n",
+   "uses": [
+    "numberToBcd"
+   ]
+  },
+  "ic7100_set_cw_pitch": {
+   "code": "sendCommand({0x14, 0x09}, icomLevel(0, 300, 900))\n",
+   "uses": [
+    "icomLevel",
+    "numberToBcd"
+   ]
+  },
+  "ic7100_set_data_mode": {
+   "code": "sendCommand({0x1A, 0x06}, {0x01, 0x01})\n",
+   "uses": []
+  },
+  "ic7100_set_digital_squelch": {
+   "code": "sendCommand({0x16, 0x5B}, {0x00})\n",
+   "uses": []
+  },
+  "ic7100_set_dsp_filter_type": {
+   "code": "sendCommand({0x16, 0x56}, {0x00})\n",
+   "uses": []
+  },
+  "ic7100_set_dtcs_code": {
+   "code": "sendCommand({0x1B, 0x02}, icomDtcsData(0, 0x00))\n",
+   "uses": [
+    "icomDtcsData"
+   ]
+  },
+  "ic7100_set_frequency": {
+   "code": "sendCommand({0x05}, frequencyToBcd(0 * 1, 5))\n",
+   "uses": [
+    "frequencyToBcd"
+   ]
+  },
+  "ic7100_set_keying_speed": {
+   "code": "sendCommand({0x14, 0x0C}, icomWpm(0))\n",
+   "uses": [
+    "icomWpm",
+    "numberToBcd"
+   ]
+  },
+  "ic7100_set_lcd_brightness": {
+   "code": "sendCommand({0x14, 0x19}, icomPercent(0))\n",
+   "uses": [
+    "icomPercent",
+    "numberToBcd"
+   ]
+  },
+  "ic7100_set_level": {
+   "code": "sendCommand({0x14, 0x06}, icomPercent(0))\n",
+   "uses": [
+    "icomPercent",
+    "numberToBcd"
+   ]
+  },
+  "ic7100_set_menu": {
+   "code": "sendCommand(icomMenuCmd(0), numberToBcd(0, 1))\n",
+   "uses": [
+    "icomMenuCmd",
+    "numberToBcd"
+   ]
+  },
+  "ic7100_set_mic_gain": {
+   "code": "sendCommand({0x14, 0x0B}, icomPercent(0))\n",
+   "uses": [
+    "icomPercent",
+    "numberToBcd"
+   ]
+  },
+  "ic7100_set_notch_width": {
+   "code": "sendCommand({0x16, 0x57}, {0x00})\n",
+   "uses": []
+  },
+  "ic7100_set_operating_mode": {
+   "code": "sendCommand({0x06}, {0x00})\n",
+   "uses": []
+  },
+  "ic7100_set_power": {
+   "code": "sendCommand({0x18, 0x00})\n",
+   "uses": []
+  },
+  "ic7100_set_preamp": {
+   "code": "sendCommand({0x16, 0x02}, {0x00})\n",
+   "uses": []
+  },
+  "ic7100_set_rf_gain": {
+   "code": "sendCommand({0x14, 0x02}, icomPercent(0))\n",
+   "uses": [
+    "icomPercent",
+    "numberToBcd"
+   ]
+  },
+  "ic7100_set_rf_power": {
+   "code": "sendCommand({0x14, 0x0A}, icomPercent(0))\n",
+   "uses": [
+    "icomPercent",
+    "numberToBcd"
+   ]
+  },
+  "ic7100_set_rit": {
+   "code": "sendCommand({0x21, 0x01}, {0x01})\n",
+   "uses": []
+  },
+  "ic7100_set_rit_offset": {
+   "code": "sendCommand({0x21, 0x00}, icomRitData(0))\n",
+   "uses": [
+    "frequencyToBcd",
+    "icomRitData"
+   ]
+  },
+  "ic7100_set_split": {
+   "code": "sendCommand({0x0F, 0x01})\n",
+   "uses": []
+  },
+  "ic7100_set_squelch_level": {
+   "code": "sendCommand({0x14, 0x03}, icomPercent(0))\n",
+   "uses": [
+    "icomPercent",
+    "numberToBcd"
+   ]
+  },
+  "ic7100_set_ssb_tx_bandwidth": {
+   "code": "sendCommand({0x16, 0x58}, {0x00})\n",
+   "uses": []
+  },
+  "ic7100_set_tone_frequency": {
+   "code": "sendCommand({0x1B, 0x00}, numberToBcd(math.floor(0 * 10 + 0.5), 3))\n",
+   "uses": [
+    "numberToBcd"
+   ]
+  },
+  "ic7100_set_transmit": {
+   "code": "sendCommand({0x1C, 0x00}, {0x01})\n",
+   "uses": []
+  },
+  "ic7100_set_tsql_frequency": {
+   "code": "sendCommand({0x1B, 0x01}, numberToBcd(math.floor(0 * 10 + 0.5), 3))\n",
+   "uses": [
+    "numberToBcd"
+   ]
+  },
+  "ic7100_set_tuning_step": {
+   "code": "sendCommand({0x10, 0x00})\n",
+   "uses": []
+  },
+  "ic7100_switch_function": {
+   "code": "sendCommand({0x16, 0x22}, {0x01})\n",
+   "uses": []
+  },
   "ic718_equalize_vfo": {
    "code": "sendCommand({0x07, 0xA0})\n",
    "uses": []
@@ -1013,6 +1537,1018 @@
    ]
   },
   "ic718_switch_function": {
+   "code": "sendCommand({0x16, 0x22}, {0x01})\n",
+   "uses": []
+  },
+  "ic7300_announce": {
+   "code": "sendCommand({0x13, 0x00})\n",
+   "uses": []
+  },
+  "ic7300_equalize_vfo": {
+   "code": "sendCommand({0x07, 0xA0})\n",
+   "uses": []
+  },
+  "ic7300_exchange_vfo": {
+   "code": "sendCommand({0x07, 0xB0})\n",
+   "uses": []
+  },
+  "ic7300_get_af_level": {
+   "code": "icomReadPercent({0x14, 0x01})",
+   "uses": [
+    "bcdToNumber",
+    "icomQuery",
+    "icomReadNumber",
+    "icomReadPercent"
+   ]
+  },
+  "ic7300_get_agc": {
+   "code": "icomName(icomQuery({0x16, 0x12}), {[1] = \"FAST\", [2] = \"MID\", [3] = \"SLOW\"}, \"\")",
+   "uses": [
+    "icomName",
+    "icomQuery"
+   ]
+  },
+  "ic7300_get_alc": {
+   "code": "icomMeter({0x15, 0x13}, {{0, 0}, {120, 100}})",
+   "uses": [
+    "bcdToNumber",
+    "icomMeter",
+    "icomQuery",
+    "icomReadNumber",
+    "icomScale"
+   ]
+  },
+  "ic7300_get_attenuator": {
+   "code": "icomName(icomQuery({0x11}), {[0] = \"OFF\", [32] = \"20 dB\"}, \"\")",
+   "uses": [
+    "icomName",
+    "icomQuery"
+   ]
+  },
+  "ic7300_get_break_in": {
+   "code": "icomName(icomQuery({0x16, 0x47}), {[0] = \"OFF\", [1] = \"semi\", [2] = \"full\"}, \"\")",
+   "uses": [
+    "icomName",
+    "icomQuery"
+   ]
+  },
+  "ic7300_get_break_in_delay": {
+   "code": "icomReadLevel({0x14, 0x0F}, 2, 13)",
+   "uses": [
+    "bcdToNumber",
+    "icomQuery",
+    "icomReadLevel",
+    "icomReadNumber"
+   ]
+  },
+  "ic7300_get_clock": {
+   "code": "icomClock({0x1A, 0x05, 0x00, 0x94}, {0x1A, 0x05, 0x00, 0x95}, \"time\")",
+   "uses": [
+    "icomClock",
+    "icomQuery"
+   ]
+  },
+  "ic7300_get_comp_level": {
+   "code": "icomReadLevel({0x14, 0x0E}, 0, 10)",
+   "uses": [
+    "bcdToNumber",
+    "icomQuery",
+    "icomReadLevel",
+    "icomReadNumber"
+   ]
+  },
+  "ic7300_get_comp_meter": {
+   "code": "icomMeter({0x15, 0x14}, {{0, 0}, {130, 15}, {241, 30}})",
+   "uses": [
+    "bcdToNumber",
+    "icomMeter",
+    "icomQuery",
+    "icomReadNumber",
+    "icomScale"
+   ]
+  },
+  "ic7300_get_cw_pitch": {
+   "code": "math.floor(300 + icomReadNumber({0x14, 0x09}) * 600 / 255 + 0.5)",
+   "uses": [
+    "bcdToNumber",
+    "icomQuery",
+    "icomReadNumber"
+   ]
+  },
+  "ic7300_get_dsp_filter_type": {
+   "code": "icomName(icomQuery({0x16, 0x56}), {[0] = \"SHARP\", [1] = \"SOFT\"}, \"\")",
+   "uses": [
+    "icomName",
+    "icomQuery"
+   ]
+  },
+  "ic7300_get_keying_speed": {
+   "code": "math.floor(6 + icomReadNumber({0x14, 0x0C}) * 42 / 255 + 0.5)",
+   "uses": [
+    "bcdToNumber",
+    "icomQuery",
+    "icomReadNumber"
+   ]
+  },
+  "ic7300_get_lcd_brightness": {
+   "code": "icomReadPercent({0x14, 0x19})",
+   "uses": [
+    "bcdToNumber",
+    "icomQuery",
+    "icomReadNumber",
+    "icomReadPercent"
+   ]
+  },
+  "ic7300_get_level": {
+   "code": "icomReadPercent({0x14, 0x06})",
+   "uses": [
+    "bcdToNumber",
+    "icomQuery",
+    "icomReadNumber",
+    "icomReadPercent"
+   ]
+  },
+  "ic7300_get_menu": {
+   "code": "icomReadNumber(icomMenuCmd(0))",
+   "uses": [
+    "bcdToNumber",
+    "icomMenuCmd",
+    "icomQuery",
+    "icomReadNumber",
+    "numberToBcd"
+   ]
+  },
+  "ic7300_get_mic_gain": {
+   "code": "icomReadPercent({0x14, 0x0B})",
+   "uses": [
+    "bcdToNumber",
+    "icomQuery",
+    "icomReadNumber",
+    "icomReadPercent"
+   ]
+  },
+  "ic7300_get_notch_width": {
+   "code": "icomName(icomQuery({0x16, 0x57}), {[0] = \"WIDE\", [1] = \"MID\", [2] = \"NAR\"}, \"\")",
+   "uses": [
+    "icomName",
+    "icomQuery"
+   ]
+  },
+  "ic7300_get_operating_frequency": {
+   "code": "icomReadFrequency()",
+   "uses": [
+    "frequencyAsNumber",
+    "icomQuery",
+    "icomReadFrequency"
+   ]
+  },
+  "ic7300_get_operating_mode": {
+   "code": "icomName(icomQuery({0x04}), {[0] = \"LSB\", [1] = \"USB\", [2] = \"AM\", [3] = \"CW\", [4] = \"RTTY\", [5] = \"FM\", [7] = \"CW-R\", [8] = \"RTTY-R\"}, \"Unknown\")",
+   "uses": [
+    "icomName",
+    "icomQuery"
+   ]
+  },
+  "ic7300_get_power_output": {
+   "code": "icomMeter({0x15, 0x11}, {{0, 0}, {143, 50}, {213, 100}})",
+   "uses": [
+    "bcdToNumber",
+    "icomMeter",
+    "icomQuery",
+    "icomReadNumber",
+    "icomScale"
+   ]
+  },
+  "ic7300_get_preamp": {
+   "code": "icomName(icomQuery({0x16, 0x02}), {[0] = \"OFF\", [1] = \"P.AMP1\", [2] = \"P.AMP2\"}, \"\")",
+   "uses": [
+    "icomName",
+    "icomQuery"
+   ]
+  },
+  "ic7300_get_rf_gain": {
+   "code": "icomReadPercent({0x14, 0x02})",
+   "uses": [
+    "bcdToNumber",
+    "icomQuery",
+    "icomReadNumber",
+    "icomReadPercent"
+   ]
+  },
+  "ic7300_get_rf_power": {
+   "code": "icomReadPercent({0x14, 0x0A})",
+   "uses": [
+    "bcdToNumber",
+    "icomQuery",
+    "icomReadNumber",
+    "icomReadPercent"
+   ]
+  },
+  "ic7300_get_s_meter": {
+   "code": "math.min(9, icomMeter({0x15, 0x02}, {{0, 0}, {120, 9}}))",
+   "uses": [
+    "bcdToNumber",
+    "icomMeter",
+    "icomQuery",
+    "icomReadNumber",
+    "icomScale"
+   ]
+  },
+  "ic7300_get_squelch_level": {
+   "code": "icomReadPercent({0x14, 0x03})",
+   "uses": [
+    "bcdToNumber",
+    "icomQuery",
+    "icomReadNumber",
+    "icomReadPercent"
+   ]
+  },
+  "ic7300_get_ssb_tx_bandwidth": {
+   "code": "icomName(icomQuery({0x16, 0x58}), {[0] = \"WIDE\", [1] = \"MID\", [2] = \"NAR\"}, \"\")",
+   "uses": [
+    "icomName",
+    "icomQuery"
+   ]
+  },
+  "ic7300_get_supply_current": {
+   "code": "icomMeter({0x15, 0x16}, {{0, 0}, {97, 10}, {146, 15}, {241, 25}})",
+   "uses": [
+    "bcdToNumber",
+    "icomMeter",
+    "icomQuery",
+    "icomReadNumber",
+    "icomScale"
+   ]
+  },
+  "ic7300_get_supply_voltage": {
+   "code": "icomMeter({0x15, 0x15}, {{0, 0}, {13, 10}, {241, 16}})",
+   "uses": [
+    "bcdToNumber",
+    "icomMeter",
+    "icomQuery",
+    "icomReadNumber",
+    "icomScale"
+   ]
+  },
+  "ic7300_get_swr_meter_level": {
+   "code": "icomMeter({0x15, 0x12}, {{0, 1}, {48, 1.5}, {80, 2}, {120, 3}})",
+   "uses": [
+    "bcdToNumber",
+    "icomMeter",
+    "icomQuery",
+    "icomReadNumber",
+    "icomScale"
+   ]
+  },
+  "ic7300_is_data_mode": {
+   "code": "icomReadByte({0x1A, 0x06}) ~= 0",
+   "uses": [
+    "icomQuery",
+    "icomReadByte"
+   ]
+  },
+  "ic7300_is_function_on": {
+   "code": "icomReadByte({0x16, 0x22}) ~= 0",
+   "uses": [
+    "icomQuery",
+    "icomReadByte"
+   ]
+  },
+  "ic7300_is_overflow": {
+   "code": "icomReadOn({0x15, 0x07})",
+   "uses": [
+    "icomQuery",
+    "icomReadByte",
+    "icomReadOn"
+   ]
+  },
+  "ic7300_is_split": {
+   "code": "icomReadByte({0x0F}) == 1",
+   "uses": [
+    "icomQuery",
+    "icomReadByte"
+   ]
+  },
+  "ic7300_is_squelch_open": {
+   "code": "icomReadOn({0x15, 0x01})",
+   "uses": [
+    "icomQuery",
+    "icomReadByte",
+    "icomReadOn"
+   ]
+  },
+  "ic7300_is_tone_squelch_open": {
+   "code": "icomReadOn({0x15, 0x05})",
+   "uses": [
+    "icomQuery",
+    "icomReadByte",
+    "icomReadOn"
+   ]
+  },
+  "ic7300_is_transmitting": {
+   "code": "icomReadOn({0x1C, 0x00})",
+   "uses": [
+    "icomQuery",
+    "icomReadByte",
+    "icomReadOn"
+   ]
+  },
+  "ic7300_play_voice_memory": {
+   "code": "sendCommand({0x28, 0x00}, {0x01})\n",
+   "uses": []
+  },
+  "ic7300_scan": {
+   "code": "sendCommand({0x0E, 0x00})\n",
+   "uses": []
+  },
+  "ic7300_select_memory": {
+   "code": "sendCommand({0x08})\nsendCommand({0x08}, numberToBcd(0, 2))\n",
+   "uses": [
+    "numberToBcd"
+   ]
+  },
+  "ic7300_select_vfo": {
+   "code": "sendCommand({0x07, 0x00})\n",
+   "uses": []
+  },
+  "ic7300_send_cw": {
+   "code": "sendCommand({0x17}, icomTextBytes(''))\n",
+   "uses": [
+    "icomTextBytes"
+   ]
+  },
+  "ic7300_set_af_level": {
+   "code": "sendCommand({0x14, 0x01}, icomPercent(0))\n",
+   "uses": [
+    "icomPercent",
+    "numberToBcd"
+   ]
+  },
+  "ic7300_set_agc": {
+   "code": "sendCommand({0x16, 0x12}, {0x01})\n",
+   "uses": []
+  },
+  "ic7300_set_attenuator": {
+   "code": "sendCommand({0x11}, {0x00})\n",
+   "uses": []
+  },
+  "ic7300_set_break_in": {
+   "code": "sendCommand({0x16, 0x47}, {0x00})\n",
+   "uses": []
+  },
+  "ic7300_set_break_in_delay": {
+   "code": "sendCommand({0x14, 0x0F}, icomLevel(0, 2, 13))\n",
+   "uses": [
+    "icomLevel",
+    "numberToBcd"
+   ]
+  },
+  "ic7300_set_comp_level": {
+   "code": "sendCommand({0x14, 0x0E}, icomLevel(0, 0, 10))\n",
+   "uses": [
+    "icomLevel",
+    "numberToBcd"
+   ]
+  },
+  "ic7300_set_cw_pitch": {
+   "code": "sendCommand({0x14, 0x09}, icomLevel(0, 300, 900))\n",
+   "uses": [
+    "icomLevel",
+    "numberToBcd"
+   ]
+  },
+  "ic7300_set_data_mode": {
+   "code": "sendCommand({0x1A, 0x06}, {0x01, 0x01})\n",
+   "uses": []
+  },
+  "ic7300_set_dsp_filter_type": {
+   "code": "sendCommand({0x16, 0x56}, {0x00})\n",
+   "uses": []
+  },
+  "ic7300_set_frequency": {
+   "code": "sendCommand({0x05}, frequencyToBcd(0 * 1, 5))\n",
+   "uses": [
+    "frequencyToBcd"
+   ]
+  },
+  "ic7300_set_keying_speed": {
+   "code": "sendCommand({0x14, 0x0C}, icomWpm(0))\n",
+   "uses": [
+    "icomWpm",
+    "numberToBcd"
+   ]
+  },
+  "ic7300_set_lcd_brightness": {
+   "code": "sendCommand({0x14, 0x19}, icomPercent(0))\n",
+   "uses": [
+    "icomPercent",
+    "numberToBcd"
+   ]
+  },
+  "ic7300_set_level": {
+   "code": "sendCommand({0x14, 0x06}, icomPercent(0))\n",
+   "uses": [
+    "icomPercent",
+    "numberToBcd"
+   ]
+  },
+  "ic7300_set_menu": {
+   "code": "sendCommand(icomMenuCmd(0), numberToBcd(0, 1))\n",
+   "uses": [
+    "icomMenuCmd",
+    "numberToBcd"
+   ]
+  },
+  "ic7300_set_mic_gain": {
+   "code": "sendCommand({0x14, 0x0B}, icomPercent(0))\n",
+   "uses": [
+    "icomPercent",
+    "numberToBcd"
+   ]
+  },
+  "ic7300_set_notch_width": {
+   "code": "sendCommand({0x16, 0x57}, {0x00})\n",
+   "uses": []
+  },
+  "ic7300_set_operating_mode": {
+   "code": "sendCommand({0x06}, {0x00})\n",
+   "uses": []
+  },
+  "ic7300_set_power": {
+   "code": "sendCommand({0x18, 0x00})\n",
+   "uses": []
+  },
+  "ic7300_set_preamp": {
+   "code": "sendCommand({0x16, 0x02}, {0x00})\n",
+   "uses": []
+  },
+  "ic7300_set_rf_gain": {
+   "code": "sendCommand({0x14, 0x02}, icomPercent(0))\n",
+   "uses": [
+    "icomPercent",
+    "numberToBcd"
+   ]
+  },
+  "ic7300_set_rf_power": {
+   "code": "sendCommand({0x14, 0x0A}, icomPercent(0))\n",
+   "uses": [
+    "icomPercent",
+    "numberToBcd"
+   ]
+  },
+  "ic7300_set_rit": {
+   "code": "sendCommand({0x21, 0x01}, {0x01})\n",
+   "uses": []
+  },
+  "ic7300_set_rit_offset": {
+   "code": "sendCommand({0x21, 0x00}, icomRitData(0))\n",
+   "uses": [
+    "frequencyToBcd",
+    "icomRitData"
+   ]
+  },
+  "ic7300_set_split": {
+   "code": "sendCommand({0x0F, 0x01})\n",
+   "uses": []
+  },
+  "ic7300_set_squelch_level": {
+   "code": "sendCommand({0x14, 0x03}, icomPercent(0))\n",
+   "uses": [
+    "icomPercent",
+    "numberToBcd"
+   ]
+  },
+  "ic7300_set_ssb_tx_bandwidth": {
+   "code": "sendCommand({0x16, 0x58}, {0x00})\n",
+   "uses": []
+  },
+  "ic7300_set_tone_frequency": {
+   "code": "sendCommand({0x1B, 0x00}, numberToBcd(math.floor(0 * 10 + 0.5), 3))\n",
+   "uses": [
+    "numberToBcd"
+   ]
+  },
+  "ic7300_set_transmit": {
+   "code": "sendCommand({0x1C, 0x00}, {0x01})\n",
+   "uses": []
+  },
+  "ic7300_set_tsql_frequency": {
+   "code": "sendCommand({0x1B, 0x01}, numberToBcd(math.floor(0 * 10 + 0.5), 3))\n",
+   "uses": [
+    "numberToBcd"
+   ]
+  },
+  "ic7300_set_tuning_step": {
+   "code": "sendCommand({0x10, 0x00})\n",
+   "uses": []
+  },
+  "ic7300_switch_function": {
+   "code": "sendCommand({0x16, 0x22}, {0x01})\n",
+   "uses": []
+  },
+  "ic7300mk2_announce": {
+   "code": "sendCommand({0x13, 0x00})\n",
+   "uses": []
+  },
+  "ic7300mk2_equalize_vfo": {
+   "code": "sendCommand({0x07, 0xA0})\n",
+   "uses": []
+  },
+  "ic7300mk2_exchange_vfo": {
+   "code": "sendCommand({0x07, 0xB0})\n",
+   "uses": []
+  },
+  "ic7300mk2_get_af_level": {
+   "code": "icomReadPercent({0x14, 0x01})",
+   "uses": [
+    "bcdToNumber",
+    "icomQuery",
+    "icomReadNumber",
+    "icomReadPercent"
+   ]
+  },
+  "ic7300mk2_get_agc": {
+   "code": "icomName(icomQuery({0x16, 0x12}), {[1] = \"FAST\", [2] = \"MID\", [3] = \"SLOW\"}, \"\")",
+   "uses": [
+    "icomName",
+    "icomQuery"
+   ]
+  },
+  "ic7300mk2_get_alc": {
+   "code": "icomMeter({0x15, 0x13}, {{0, 0}, {120, 100}})",
+   "uses": [
+    "bcdToNumber",
+    "icomMeter",
+    "icomQuery",
+    "icomReadNumber",
+    "icomScale"
+   ]
+  },
+  "ic7300mk2_get_attenuator": {
+   "code": "icomName(icomQuery({0x11}), {[0] = \"OFF\", [32] = \"20 dB\"}, \"\")",
+   "uses": [
+    "icomName",
+    "icomQuery"
+   ]
+  },
+  "ic7300mk2_get_break_in": {
+   "code": "icomName(icomQuery({0x16, 0x47}), {[0] = \"OFF\", [1] = \"semi\", [2] = \"full\"}, \"\")",
+   "uses": [
+    "icomName",
+    "icomQuery"
+   ]
+  },
+  "ic7300mk2_get_break_in_delay": {
+   "code": "icomReadLevel({0x14, 0x0F}, 2, 13)",
+   "uses": [
+    "bcdToNumber",
+    "icomQuery",
+    "icomReadLevel",
+    "icomReadNumber"
+   ]
+  },
+  "ic7300mk2_get_clock": {
+   "code": "icomClock({0x1A, 0x05, 0x01, 0x32}, {0x1A, 0x05, 0x01, 0x33}, \"time\")",
+   "uses": [
+    "icomClock",
+    "icomQuery"
+   ]
+  },
+  "ic7300mk2_get_comp_level": {
+   "code": "icomReadLevel({0x14, 0x0E}, 0, 10)",
+   "uses": [
+    "bcdToNumber",
+    "icomQuery",
+    "icomReadLevel",
+    "icomReadNumber"
+   ]
+  },
+  "ic7300mk2_get_comp_meter": {
+   "code": "icomMeter({0x15, 0x14}, {{0, 0}, {130, 15}, {210, 30}})",
+   "uses": [
+    "bcdToNumber",
+    "icomMeter",
+    "icomQuery",
+    "icomReadNumber",
+    "icomScale"
+   ]
+  },
+  "ic7300mk2_get_cw_pitch": {
+   "code": "math.floor(300 + icomReadNumber({0x14, 0x09}) * 600 / 255 + 0.5)",
+   "uses": [
+    "bcdToNumber",
+    "icomQuery",
+    "icomReadNumber"
+   ]
+  },
+  "ic7300mk2_get_dsp_filter_type": {
+   "code": "icomName(icomQuery({0x16, 0x56}), {[0] = \"SHARP\", [1] = \"SOFT\"}, \"\")",
+   "uses": [
+    "icomName",
+    "icomQuery"
+   ]
+  },
+  "ic7300mk2_get_keying_speed": {
+   "code": "math.floor(6 + icomReadNumber({0x14, 0x0C}) * 42 / 255 + 0.5)",
+   "uses": [
+    "bcdToNumber",
+    "icomQuery",
+    "icomReadNumber"
+   ]
+  },
+  "ic7300mk2_get_lcd_brightness": {
+   "code": "icomReadPercent({0x14, 0x19})",
+   "uses": [
+    "bcdToNumber",
+    "icomQuery",
+    "icomReadNumber",
+    "icomReadPercent"
+   ]
+  },
+  "ic7300mk2_get_level": {
+   "code": "icomReadPercent({0x14, 0x06})",
+   "uses": [
+    "bcdToNumber",
+    "icomQuery",
+    "icomReadNumber",
+    "icomReadPercent"
+   ]
+  },
+  "ic7300mk2_get_menu": {
+   "code": "icomReadNumber(icomMenuCmd(0))",
+   "uses": [
+    "bcdToNumber",
+    "icomMenuCmd",
+    "icomQuery",
+    "icomReadNumber",
+    "numberToBcd"
+   ]
+  },
+  "ic7300mk2_get_mic_gain": {
+   "code": "icomReadPercent({0x14, 0x0B})",
+   "uses": [
+    "bcdToNumber",
+    "icomQuery",
+    "icomReadNumber",
+    "icomReadPercent"
+   ]
+  },
+  "ic7300mk2_get_notch_width": {
+   "code": "icomName(icomQuery({0x16, 0x57}), {[0] = \"WIDE\", [1] = \"MID\", [2] = \"NAR\"}, \"\")",
+   "uses": [
+    "icomName",
+    "icomQuery"
+   ]
+  },
+  "ic7300mk2_get_operating_frequency": {
+   "code": "icomReadFrequency()",
+   "uses": [
+    "frequencyAsNumber",
+    "icomQuery",
+    "icomReadFrequency"
+   ]
+  },
+  "ic7300mk2_get_operating_mode": {
+   "code": "icomName(icomQuery({0x04}), {[0] = \"LSB\", [1] = \"USB\", [2] = \"AM\", [3] = \"CW\", [4] = \"RTTY\", [5] = \"FM\", [7] = \"CW-R\", [8] = \"RTTY-R\"}, \"Unknown\")",
+   "uses": [
+    "icomName",
+    "icomQuery"
+   ]
+  },
+  "ic7300mk2_get_power_output": {
+   "code": "icomMeter({0x15, 0x11}, {{0, 0}, {143, 50}, {213, 100}})",
+   "uses": [
+    "bcdToNumber",
+    "icomMeter",
+    "icomQuery",
+    "icomReadNumber",
+    "icomScale"
+   ]
+  },
+  "ic7300mk2_get_preamp": {
+   "code": "icomName(icomQuery({0x16, 0x02}), {[0] = \"OFF\", [1] = \"P.AMP1\", [2] = \"P.AMP2\"}, \"\")",
+   "uses": [
+    "icomName",
+    "icomQuery"
+   ]
+  },
+  "ic7300mk2_get_rf_gain": {
+   "code": "icomReadPercent({0x14, 0x02})",
+   "uses": [
+    "bcdToNumber",
+    "icomQuery",
+    "icomReadNumber",
+    "icomReadPercent"
+   ]
+  },
+  "ic7300mk2_get_rf_power": {
+   "code": "icomReadPercent({0x14, 0x0A})",
+   "uses": [
+    "bcdToNumber",
+    "icomQuery",
+    "icomReadNumber",
+    "icomReadPercent"
+   ]
+  },
+  "ic7300mk2_get_s_meter": {
+   "code": "math.min(9, icomMeter({0x15, 0x02}, {{0, 0}, {120, 9}}))",
+   "uses": [
+    "bcdToNumber",
+    "icomMeter",
+    "icomQuery",
+    "icomReadNumber",
+    "icomScale"
+   ]
+  },
+  "ic7300mk2_get_squelch_level": {
+   "code": "icomReadPercent({0x14, 0x03})",
+   "uses": [
+    "bcdToNumber",
+    "icomQuery",
+    "icomReadNumber",
+    "icomReadPercent"
+   ]
+  },
+  "ic7300mk2_get_ssb_tx_bandwidth": {
+   "code": "icomName(icomQuery({0x16, 0x58}), {[0] = \"WIDE\", [1] = \"MID\", [2] = \"NAR\"}, \"\")",
+   "uses": [
+    "icomName",
+    "icomQuery"
+   ]
+  },
+  "ic7300mk2_get_supply_current": {
+   "code": "icomMeter({0x15, 0x16}, {{0, 0}, {97, 10}, {146, 15}, {241, 25}})",
+   "uses": [
+    "bcdToNumber",
+    "icomMeter",
+    "icomQuery",
+    "icomReadNumber",
+    "icomScale"
+   ]
+  },
+  "ic7300mk2_get_supply_voltage": {
+   "code": "icomMeter({0x15, 0x15}, {{0, 0}, {13, 10}, {241, 16}})",
+   "uses": [
+    "bcdToNumber",
+    "icomMeter",
+    "icomQuery",
+    "icomReadNumber",
+    "icomScale"
+   ]
+  },
+  "ic7300mk2_get_swr_meter_level": {
+   "code": "icomMeter({0x15, 0x12}, {{0, 1}, {48, 1.5}, {80, 2}, {120, 3}})",
+   "uses": [
+    "bcdToNumber",
+    "icomMeter",
+    "icomQuery",
+    "icomReadNumber",
+    "icomScale"
+   ]
+  },
+  "ic7300mk2_is_data_mode": {
+   "code": "icomReadByte({0x1A, 0x06}) ~= 0",
+   "uses": [
+    "icomQuery",
+    "icomReadByte"
+   ]
+  },
+  "ic7300mk2_is_function_on": {
+   "code": "icomReadByte({0x16, 0x22}) ~= 0",
+   "uses": [
+    "icomQuery",
+    "icomReadByte"
+   ]
+  },
+  "ic7300mk2_is_overflow": {
+   "code": "icomReadOn({0x15, 0x07})",
+   "uses": [
+    "icomQuery",
+    "icomReadByte",
+    "icomReadOn"
+   ]
+  },
+  "ic7300mk2_is_split": {
+   "code": "icomReadByte({0x0F}) == 1",
+   "uses": [
+    "icomQuery",
+    "icomReadByte"
+   ]
+  },
+  "ic7300mk2_is_squelch_open": {
+   "code": "icomReadOn({0x15, 0x01})",
+   "uses": [
+    "icomQuery",
+    "icomReadByte",
+    "icomReadOn"
+   ]
+  },
+  "ic7300mk2_is_tone_squelch_open": {
+   "code": "icomReadOn({0x15, 0x05})",
+   "uses": [
+    "icomQuery",
+    "icomReadByte",
+    "icomReadOn"
+   ]
+  },
+  "ic7300mk2_is_transmitting": {
+   "code": "icomReadOn({0x1C, 0x00})",
+   "uses": [
+    "icomQuery",
+    "icomReadByte",
+    "icomReadOn"
+   ]
+  },
+  "ic7300mk2_play_voice_memory": {
+   "code": "sendCommand({0x28, 0x00}, {0x01})\n",
+   "uses": []
+  },
+  "ic7300mk2_scan": {
+   "code": "sendCommand({0x0E, 0x00})\n",
+   "uses": []
+  },
+  "ic7300mk2_select_memory": {
+   "code": "sendCommand({0x08})\nsendCommand({0x08}, numberToBcd(0, 2))\n",
+   "uses": [
+    "numberToBcd"
+   ]
+  },
+  "ic7300mk2_select_vfo": {
+   "code": "sendCommand({0x07, 0x00})\n",
+   "uses": []
+  },
+  "ic7300mk2_send_cw": {
+   "code": "sendCommand({0x17}, icomTextBytes(''))\n",
+   "uses": [
+    "icomTextBytes"
+   ]
+  },
+  "ic7300mk2_set_af_level": {
+   "code": "sendCommand({0x14, 0x01}, icomPercent(0))\n",
+   "uses": [
+    "icomPercent",
+    "numberToBcd"
+   ]
+  },
+  "ic7300mk2_set_agc": {
+   "code": "sendCommand({0x16, 0x12}, {0x01})\n",
+   "uses": []
+  },
+  "ic7300mk2_set_attenuator": {
+   "code": "sendCommand({0x11}, {0x00})\n",
+   "uses": []
+  },
+  "ic7300mk2_set_break_in": {
+   "code": "sendCommand({0x16, 0x47}, {0x00})\n",
+   "uses": []
+  },
+  "ic7300mk2_set_break_in_delay": {
+   "code": "sendCommand({0x14, 0x0F}, icomLevel(0, 2, 13))\n",
+   "uses": [
+    "icomLevel",
+    "numberToBcd"
+   ]
+  },
+  "ic7300mk2_set_comp_level": {
+   "code": "sendCommand({0x14, 0x0E}, icomLevel(0, 0, 10))\n",
+   "uses": [
+    "icomLevel",
+    "numberToBcd"
+   ]
+  },
+  "ic7300mk2_set_cw_pitch": {
+   "code": "sendCommand({0x14, 0x09}, icomLevel(0, 300, 900))\n",
+   "uses": [
+    "icomLevel",
+    "numberToBcd"
+   ]
+  },
+  "ic7300mk2_set_data_mode": {
+   "code": "sendCommand({0x1A, 0x06}, {0x01, 0x01})\n",
+   "uses": []
+  },
+  "ic7300mk2_set_dsp_filter_type": {
+   "code": "sendCommand({0x16, 0x56}, {0x00})\n",
+   "uses": []
+  },
+  "ic7300mk2_set_frequency": {
+   "code": "sendCommand({0x05}, frequencyToBcd(0 * 1, 5))\n",
+   "uses": [
+    "frequencyToBcd"
+   ]
+  },
+  "ic7300mk2_set_keying_speed": {
+   "code": "sendCommand({0x14, 0x0C}, icomWpm(0))\n",
+   "uses": [
+    "icomWpm",
+    "numberToBcd"
+   ]
+  },
+  "ic7300mk2_set_lcd_brightness": {
+   "code": "sendCommand({0x14, 0x19}, icomPercent(0))\n",
+   "uses": [
+    "icomPercent",
+    "numberToBcd"
+   ]
+  },
+  "ic7300mk2_set_level": {
+   "code": "sendCommand({0x14, 0x06}, icomPercent(0))\n",
+   "uses": [
+    "icomPercent",
+    "numberToBcd"
+   ]
+  },
+  "ic7300mk2_set_menu": {
+   "code": "sendCommand(icomMenuCmd(0), numberToBcd(0, 1))\n",
+   "uses": [
+    "icomMenuCmd",
+    "numberToBcd"
+   ]
+  },
+  "ic7300mk2_set_mic_gain": {
+   "code": "sendCommand({0x14, 0x0B}, icomPercent(0))\n",
+   "uses": [
+    "icomPercent",
+    "numberToBcd"
+   ]
+  },
+  "ic7300mk2_set_notch_width": {
+   "code": "sendCommand({0x16, 0x57}, {0x00})\n",
+   "uses": []
+  },
+  "ic7300mk2_set_operating_mode": {
+   "code": "sendCommand({0x06}, {0x00})\n",
+   "uses": []
+  },
+  "ic7300mk2_set_power": {
+   "code": "sendCommand({0x18, 0x00})\n",
+   "uses": []
+  },
+  "ic7300mk2_set_preamp": {
+   "code": "sendCommand({0x16, 0x02}, {0x00})\n",
+   "uses": []
+  },
+  "ic7300mk2_set_rf_gain": {
+   "code": "sendCommand({0x14, 0x02}, icomPercent(0))\n",
+   "uses": [
+    "icomPercent",
+    "numberToBcd"
+   ]
+  },
+  "ic7300mk2_set_rf_power": {
+   "code": "sendCommand({0x14, 0x0A}, icomPercent(0))\n",
+   "uses": [
+    "icomPercent",
+    "numberToBcd"
+   ]
+  },
+  "ic7300mk2_set_rit": {
+   "code": "sendCommand({0x21, 0x01}, {0x01})\n",
+   "uses": []
+  },
+  "ic7300mk2_set_rit_offset": {
+   "code": "sendCommand({0x21, 0x00}, icomRitData(0))\n",
+   "uses": [
+    "frequencyToBcd",
+    "icomRitData"
+   ]
+  },
+  "ic7300mk2_set_split": {
+   "code": "sendCommand({0x0F, 0x01})\n",
+   "uses": []
+  },
+  "ic7300mk2_set_squelch_level": {
+   "code": "sendCommand({0x14, 0x03}, icomPercent(0))\n",
+   "uses": [
+    "icomPercent",
+    "numberToBcd"
+   ]
+  },
+  "ic7300mk2_set_ssb_tx_bandwidth": {
+   "code": "sendCommand({0x16, 0x58}, {0x00})\n",
+   "uses": []
+  },
+  "ic7300mk2_set_tone_frequency": {
+   "code": "sendCommand({0x1B, 0x00}, numberToBcd(math.floor(0 * 10 + 0.5), 3))\n",
+   "uses": [
+    "numberToBcd"
+   ]
+  },
+  "ic7300mk2_set_transmit": {
+   "code": "sendCommand({0x1C, 0x00}, {0x01})\n",
+   "uses": []
+  },
+  "ic7300mk2_set_tsql_frequency": {
+   "code": "sendCommand({0x1B, 0x01}, numberToBcd(math.floor(0 * 10 + 0.5), 3))\n",
+   "uses": [
+    "numberToBcd"
+   ]
+  },
+  "ic7300mk2_set_tuning_step": {
+   "code": "sendCommand({0x10, 0x00})\n",
+   "uses": []
+  },
+  "ic7300mk2_switch_function": {
    "code": "sendCommand({0x16, 0x22}, {0x01})\n",
    "uses": []
   },

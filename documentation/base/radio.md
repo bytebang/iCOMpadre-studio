@@ -10,6 +10,9 @@ The radios which have their own category in the toolbox, with their default CI-V
 | Radio | CI-V address | Connection |
 |-------|--------------|------------|
 | [IC-705](../radio/ic705.md) | A4h | Bluetooth (default, no *Connect* block needed) |
+| [IC-7300](../radio/ic7300.md) | 94h | cable |
+| [IC-7300MK2](../radio/ic7300mk2.md) | B6h | cable |
+| [IC-7100](../radio/ic7100.md) | 88h | cable |
 | [IC-7610](../radio/ic7610.md) | 98h | cable |
 | [IC-7851](../radio/ic7851.md) | 8Eh | cable |
 | [IC-9700](../radio/ic9700.md) | A2h | cable |
