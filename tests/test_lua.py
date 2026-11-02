@@ -61,6 +61,369 @@ RING_BUFFER_HELPERS = r"""
 })()
 """
 
+NESTED_LUA_TABLE = r"""
+(function() {
+  var ws = new Blockly.Workspace();
+  var outer = ws.newBlock('lua_table');
+  var inner = ws.newBlock('lua_table');
+  var outerFirst = outer.getInputTargetBlock('STACK');
+  var outerSecond = ws.newBlock('lua_table_entry');
+  outerFirst.nextConnection.connect(outerSecond.previousConnection);
+  var innerFirst = inner.getInputTargetBlock('STACK');
+  var innerSecond = ws.newBlock('lua_table_entry');
+  innerFirst.nextConnection.connect(innerSecond.previousConnection);
+  function text(value) {
+    var block = ws.newBlock('text');
+    block.setFieldValue(value, 'TEXT');
+    return block;
+  }
+  function connectText(parent, input, value) {
+    parent.getInput(input).connection.connect(text(value).outputConnection);
+  }
+  connectText(outerFirst, 'KEY', 'rdbutton_SchalteZuOe3');
+  outerFirst.getInput('VALUE').connection.connect(inner.outputConnection);
+  connectText(innerFirst, 'KEY', 'title');
+  connectText(innerFirst, 'VALUE', 'Ö3');
+  connectText(innerSecond, 'KEY', 'description');
+  connectText(innerSecond, 'VALUE', 'Schaltet auf Ö3 bei 98,6 MHz.');
+  connectText(outerSecond, 'KEY', 'rdbutton_SchalteZuLocal');
+  connectText(outerSecond, 'VALUE', 'Lokal');
+  var variable = ws.getVariableMap().createVariable('btn_Info');
+  var setter = ws.newBlock('variables_set');
+  setter.setFieldValue(variable.getId(), 'VAR');
+  setter.getInput('VALUE').connection.connect(outer.outputConnection);
+  var code = Blockly.Lua.workspaceToCode(ws);
+  ws.dispose();
+  return code;
+})()
+"""
+
+MIXED_LUA_TABLE = r"""
+(function() {
+  var ws = new Blockly.Workspace();
+  var table = ws.newBlock('lua_table');
+  var first = table.getInputTargetBlock('STACK');
+  var second = ws.newBlock('lua_table_list_item');
+  var third = ws.newBlock('lua_table_entry');
+  first.nextConnection.connect(second.previousConnection);
+  second.nextConnection.connect(third.previousConnection);
+  function text(value) {
+    var block = ws.newBlock('text');
+    block.setFieldValue(value, 'TEXT');
+    return block;
+  }
+  first.getInput('KEY').connection.connect(text('name').outputConnection);
+  first.getInput('VALUE').connection.connect(text('Ö3').outputConnection);
+  second.getInput('VALUE').connection.connect(text('Lokal').outputConnection);
+  third.getInput('KEY').connection.connect(text('frequency').outputConnection);
+  var frequency = ws.newBlock('math_number');
+  frequency.setFieldValue('98.6', 'NUM');
+  third.getInput('VALUE').connection.connect(frequency.outputConnection);
+  var variable = ws.getVariableMap().createVariable('channels');
+  var setter = ws.newBlock('variables_set');
+  setter.setFieldValue(variable.getId(), 'VAR');
+  setter.getInput('VALUE').connection.connect(table.outputConnection);
+  var code = Blockly.Lua.workspaceToCode(ws);
+  ws.dispose();
+  return code;
+})()
+"""
+
+LUA_TABLE_MIXED_MUTATOR = r"""
+(function() {
+  var sourceHost = document.createElement('div');
+  var mutatorHost = document.createElement('div');
+  sourceHost.style.display = 'none';
+  mutatorHost.style.display = 'none';
+  document.body.appendChild(sourceHost);
+  document.body.appendChild(mutatorHost);
+  var ws = Blockly.inject(sourceHost, {});
+  var mutatorWorkspace = Blockly.inject(mutatorHost, {});
+  try {
+    var table = ws.newBlock('lua_table');
+    var first = table.getInputTargetBlock('STACK');
+    var second = ws.newBlock('lua_table_list_item');
+    first.nextConnection.connect(second.previousConnection);
+    function text(value) {
+      var block = ws.newBlock('text');
+      block.setFieldValue(value, 'TEXT');
+      return block;
+    }
+    first.getInput('KEY').connection.connect(text('first').outputConnection);
+    first.getInput('VALUE').connection.connect(text('one').outputConnection);
+    second.getInput('VALUE').connection.connect(text('two').outputConnection);
+    function rows() {
+      var result = [];
+      var row = table.getInputTargetBlock('STACK');
+      while (row) {
+        result.push({
+          type: row.type,
+          key: row.type == 'lua_table_entry' && row.getInputTargetBlock('KEY') ?
+            row.getInputTargetBlock('KEY').getFieldValue('TEXT') : null,
+          value: row.getInputTargetBlock('VALUE') && row.getInputTargetBlock('VALUE').getFieldValue('TEXT')
+        });
+        row = row.getNextBlock();
+      }
+      return result;
+    }
+    function changeSecondType(type) {
+      var container = table.decompose(mutatorWorkspace);
+      table.saveConnections(container);
+      container.getInputTargetBlock('STACK').getNextBlock().setFieldValue(type, 'TYPE');
+      table.compose(container);
+      container.dispose(false);
+      return rows();
+    }
+    var original = rows();
+    var asKeyValue = changeSecondType('key_value');
+    var asListItem = changeSecondType('list');
+    return JSON.stringify({original: original, asKeyValue: asKeyValue, asListItem: asListItem});
+  } finally {
+    ws.dispose();
+    mutatorWorkspace.dispose();
+    sourceHost.remove();
+    mutatorHost.remove();
+  }
+})()
+"""
+
+EMPTY_LUA_TABLE = r"""
+(function() {
+  var ws = new Blockly.Workspace();
+  var table = ws.newBlock('lua_table');
+  Blockly.Lua.init(ws);
+  var code = Blockly.Lua.blockToCode(table)[0];
+  ws.dispose();
+  return code;
+})()
+"""
+
+STANDALONE_LUA_TABLE_ENTRY = r"""
+(function() {
+  var ws = new Blockly.Workspace();
+  var entry = ws.newBlock('lua_table_entry');
+  var key = ws.newBlock('text');
+  key.setFieldValue('standalone', 'TEXT');
+  var value = ws.newBlock('text');
+  value.setFieldValue('safe', 'TEXT');
+  entry.getInput('KEY').connection.connect(key.outputConnection);
+  entry.getInput('VALUE').connection.connect(value.outputConnection);
+  Blockly.Lua.init(ws);
+  var code = Blockly.Lua.workspaceToCode(ws);
+  ws.dispose();
+  return code;
+})()
+"""
+
+STANDALONE_LUA_TABLE_LIST_ITEM = r"""
+(function() {
+  var ws = new Blockly.Workspace();
+  var item = ws.newBlock('lua_table_list_item');
+  var value = ws.newBlock('text');
+  value.setFieldValue('standalone', 'TEXT');
+  item.getInput('VALUE').connection.connect(value.outputConnection);
+  Blockly.Lua.init(ws);
+  var code = Blockly.Lua.workspaceToCode(ws);
+  ws.dispose();
+  return code;
+})()
+"""
+
+INCOMPLETE_LUA_TABLE_LIST_ITEM = r"""
+(function() {
+  var ws = new Blockly.Workspace();
+  var item = ws.newBlock('lua_table_list_item');
+  Blockly.Lua.init(ws);
+  var code = Blockly.Lua.workspaceToCode(ws);
+  ws.dispose();
+  return code;
+})()
+"""
+
+INCOMPLETE_LUA_TABLE_ENTRY = r"""
+(function() {
+  var ws = new Blockly.Workspace();
+  var entry = ws.newBlock('lua_table_entry');
+  var key = ws.newBlock('text');
+  key.setFieldValue('incomplete', 'TEXT');
+  entry.getInput('KEY').connection.connect(key.outputConnection);
+  Blockly.Lua.init(ws);
+  var code = Blockly.Lua.workspaceToCode(ws);
+  ws.dispose();
+  return code;
+})()
+"""
+
+LUA_TABLE_ENTRY_WARNINGS = r"""
+(function() {
+  var host = document.createElement('div');
+  host.style.display = 'none';
+  document.body.appendChild(host);
+  var ws = Blockly.inject(host, {});
+  try {
+    var first = ws.newBlock('lua_table_entry');
+    var second = ws.newBlock('lua_table_list_item');
+    var third = ws.newBlock('lua_table_entry');
+    first.nextConnection.connect(second.previousConnection);
+    second.nextConnection.connect(third.previousConnection);
+    first.onchange();
+    second.onchange();
+    third.onchange();
+    var standaloneWarnings = [first, second, third].map(function(block) {
+      return block.getIcons().filter(function(icon) {
+        return icon.getText() == Blockly.Msg.ICP_LUA_TABLE_ENTRY_STANDALONE_WARNING;
+      }).length;
+    });
+    var table = ws.newBlock('lua_table');
+    var row = table.getInputTargetBlock('STACK');
+    row.onchange();
+    var listItem = ws.newBlock('lua_table_list_item');
+    row.nextConnection.connect(listItem.previousConnection);
+    listItem.onchange();
+    var tableWarnings = row.getIcons().concat(listItem.getIcons()).filter(function(icon) {
+      return icon.getText() == Blockly.Msg.ICP_LUA_TABLE_ENTRY_STANDALONE_WARNING;
+    }).length;
+    return JSON.stringify({standalone: standaloneWarnings, inTable: tableWarnings});
+  } finally {
+    ws.dispose();
+    host.remove();
+  }
+})()
+"""
+
+LUA_TABLE_LOOKUP = r"""
+(function() {
+  var ws = new Blockly.Workspace();
+  var table = ws.newBlock('lua_table');
+  var first = table.getInputTargetBlock('STACK');
+  function text(value) {
+    var block = ws.newBlock('text');
+    block.setFieldValue(value, 'TEXT');
+    return block;
+  }
+  first.getInput('KEY').connection.connect(text('title').outputConnection);
+  first.getInput('VALUE').connection.connect(text('Ö3').outputConnection);
+  var listItem = ws.newBlock('lua_table_list_item');
+  first.nextConnection.connect(listItem.previousConnection);
+  listItem.getInput('VALUE').connection.connect(text('not a key').outputConnection);
+  var second = ws.newBlock('lua_table_entry');
+  listItem.nextConnection.connect(second.previousConnection);
+  second.getInput('KEY').connection.connect(text('description').outputConnection);
+  second.getInput('VALUE').connection.connect(text('Station').outputConnection);
+  var variable = ws.getVariableMap().createVariable('btn_Info');
+  var setter = ws.newBlock('variables_set');
+  setter.setFieldValue(variable.getId(), 'VAR');
+  setter.getInput('VALUE').connection.connect(table.outputConnection);
+  var lookup = ws.newBlock('lua_table_get');
+  lookup.setFieldValue(variable.getId(), 'VAR');
+  var keyField = lookup.getField('KEY');
+  var options = keyField.getOptions(false);
+  keyField.setValue('text:description');
+  Blockly.Lua.init(ws);
+  var code = Blockly.Lua.blockToCode(lookup)[0];
+  ws.dispose();
+  return JSON.stringify({options: options, code: code});
+})()
+"""
+
+LUA_TABLE_SET = r"""
+(function() {
+  var ws = new Blockly.Workspace();
+  var table = ws.newBlock('lua_table');
+  var first = table.getInputTargetBlock('STACK');
+  function text(value) {
+    var block = ws.newBlock('text');
+    block.setFieldValue(value, 'TEXT');
+    return block;
+  }
+  first.getInput('KEY').connection.connect(text('title').outputConnection);
+  first.getInput('VALUE').connection.connect(text('old').outputConnection);
+  var variable = ws.getVariableMap().createVariable('btn_Info');
+  var setter = ws.newBlock('variables_set');
+  setter.setFieldValue(variable.getId(), 'VAR');
+  setter.getInput('VALUE').connection.connect(table.outputConnection);
+  var set = ws.newBlock('lua_table_set');
+  set.setFieldValue(variable.getId(), 'VAR');
+  set.getField('KEY').setValue('text:title');
+  set.getInput('VALUE').connection.connect(text('updated').outputConnection);
+  Blockly.Lua.init(ws);
+  var code = Blockly.Lua.workspaceToCode(ws);
+  ws.dispose();
+  return code;
+})()
+"""
+
+LUA_TABLE_MUTATOR = r"""
+(function() {
+  var sourceHost = document.createElement('div');
+  var mutatorHost = document.createElement('div');
+  sourceHost.style.display = 'none';
+  mutatorHost.style.display = 'none';
+  document.body.appendChild(sourceHost);
+  document.body.appendChild(mutatorHost);
+  var sourceWorkspace = Blockly.inject(sourceHost, {});
+  var mutatorWorkspace = Blockly.inject(mutatorHost, {});
+  try {
+    var table = sourceWorkspace.newBlock('lua_table');
+    function text(value) {
+      var block = sourceWorkspace.newBlock('text');
+      block.setFieldValue(value, 'TEXT');
+      return block;
+    }
+    function setEntry(entry, key, value) {
+      entry.getInput('KEY').connection.connect(text(key).outputConnection);
+      entry.getInput('VALUE').connection.connect(text(value).outputConnection);
+    }
+    function rows() {
+      var result = [];
+      var entry = table.getInputTargetBlock('STACK');
+      while (entry) {
+        result.push([
+          entry.getInputTargetBlock('KEY') && entry.getInputTargetBlock('KEY').getFieldValue('TEXT'),
+          entry.getInputTargetBlock('VALUE') && entry.getInputTargetBlock('VALUE').getFieldValue('TEXT')
+        ]);
+        entry = entry.getNextBlock();
+      }
+      return result;
+    }
+
+    var first = table.getInputTargetBlock('STACK');
+    setEntry(first, 'key1', 'value1');
+    var second = sourceWorkspace.newBlock('lua_table_entry');
+    first.nextConnection.connect(second.previousConnection);
+    setEntry(second, 'key2', 'value2');
+
+    var container = table.decompose(mutatorWorkspace);
+    table.saveConnections(container);
+    var firstItem = container.getInputTargetBlock('STACK');
+    var secondItem = firstItem.getNextBlock();
+    firstItem.nextConnection.disconnect();
+    container.getInput('STACK').connection.disconnect();
+    container.getInput('STACK').connection.connect(secondItem.previousConnection);
+    secondItem.nextConnection.connect(firstItem.previousConnection);
+    table.compose(container);
+    var reordered = rows();
+
+    container = table.decompose(mutatorWorkspace);
+    table.saveConnections(container);
+    firstItem = container.getInputTargetBlock('STACK');
+    secondItem = firstItem.getNextBlock();
+    firstItem.nextConnection.disconnect();
+    container.getInput('STACK').connection.disconnect();
+    container.getInput('STACK').connection.connect(secondItem.previousConnection);
+    table.compose(container);
+    var afterRemovingFirst = rows();
+
+    return JSON.stringify({reordered: reordered, afterRemovingFirst: afterRemovingFirst});
+  } finally {
+    sourceWorkspace.dispose();
+    mutatorWorkspace.dispose();
+    sourceHost.remove();
+    mutatorHost.remove();
+  }
+})()
+"""
+
 
 def runtime(answers=None, helpers=None):
     lua = lua53.LuaRuntime(unpack_returned_tuples=True)
@@ -85,6 +448,18 @@ def main():
         generated = generate_all(browser.page)
         prefixes = browser.page.eval("Icom.radios.map(function(r) { return r.spec.prefix + '_'; })") + ["ic705_"]
         ring_helpers = json.loads(browser.page.eval(RING_BUFFER_HELPERS))
+        nested_table = browser.page.eval(NESTED_LUA_TABLE)
+        mixed_table = browser.page.eval(MIXED_LUA_TABLE)
+        mixed_mutator = json.loads(browser.page.eval(LUA_TABLE_MIXED_MUTATOR))
+        empty_table = browser.page.eval(EMPTY_LUA_TABLE)
+        standalone_entry = browser.page.eval(STANDALONE_LUA_TABLE_ENTRY)
+        standalone_list_item = browser.page.eval(STANDALONE_LUA_TABLE_LIST_ITEM)
+        incomplete_list_item = browser.page.eval(INCOMPLETE_LUA_TABLE_LIST_ITEM)
+        incomplete_entry = browser.page.eval(INCOMPLETE_LUA_TABLE_ENTRY)
+        table_entry_warnings = json.loads(browser.page.eval(LUA_TABLE_ENTRY_WARNINGS))
+        table_lookup = json.loads(browser.page.eval(LUA_TABLE_LOOKUP))
+        table_set = browser.page.eval(LUA_TABLE_SET)
+        table_mutator = json.loads(browser.page.eval(LUA_TABLE_MUTATOR))
     finally:
         browser.close()
         server.close()
@@ -104,6 +479,91 @@ def main():
             except Exception as e:
                 failures.append("%s (%s): %s" % (name, "with answers" if with_answers else "no answers", str(e)[:150]))
     checks.check("%d radio blocks run without and with answers" % len(radio_blocks), not failures, failures)
+
+    table_lua = runtime()
+    table_lua.execute(nested_table)
+    checks.check("nested key-value tables assign a named variable with formatted Lua",
+                 table_lua.globals().btn_Info["rdbutton_SchalteZuOe3"]["title"] == "Ö3" and
+                 table_lua.globals().btn_Info["rdbutton_SchalteZuOe3"]["description"] ==
+                 "Schaltet auf Ö3 bei 98,6 MHz." and
+                 table_lua.globals().btn_Info["rdbutton_SchalteZuLocal"] == "Lokal",
+                 nested_table)
+    checks.check("key-value table rows are separate inline Blockly blocks",
+                 "  ['rdbutton_SchalteZuOe3'] = {" in nested_table and
+                 "    ['title'] = " in nested_table and
+                 nested_table.count("\n  [") >= 2,
+                 nested_table)
+    mixed_runtime = runtime()
+    mixed_runtime.execute(mixed_table)
+    mixed_channels = mixed_runtime.globals().channels
+    checks.check("tables combine list items and key-value pairs",
+                 mixed_channels["name"] == "Ö3" and mixed_channels[1] == "Lokal" and
+                 mixed_channels["frequency"] == 98.6,
+                 mixed_table)
+    checks.check("table mutator preserves values when changing row types",
+                 mixed_mutator["original"] == [
+                     {"type": "lua_table_entry", "key": "first", "value": "one"},
+                     {"type": "lua_table_list_item", "key": None, "value": "two"}
+                 ] and
+                 mixed_mutator["asKeyValue"][1]["type"] == "lua_table_entry" and
+                 mixed_mutator["asKeyValue"][1]["value"] == "two" and
+                 mixed_mutator["asListItem"][1]["type"] == "lua_table_list_item" and
+                 mixed_mutator["asListItem"][1]["value"] == "two",
+                 mixed_mutator)
+    checks.check("empty key-value row is omitted from generated table",
+                 empty_table == "{\n}",
+                 repr(empty_table))
+    standalone_runtime = runtime()
+    try:
+        standalone_runtime.execute(standalone_entry)
+        standalone_valid = True
+        standalone_error = ""
+    except Exception as error:
+        standalone_valid = False
+        standalone_error = str(error)
+    checks.check("standalone key-value pair generates valid Lua",
+                 standalone_valid and "local _ = { ['standalone'] = 'safe' }" in standalone_entry,
+                 standalone_error or standalone_entry)
+    checks.check("incomplete standalone key-value pair is omitted",
+                 incomplete_entry == "",
+                 repr(incomplete_entry))
+    standalone_list_runtime = runtime()
+    try:
+        standalone_list_runtime.execute(standalone_list_item)
+        standalone_list_valid = True
+        standalone_list_error = ""
+    except Exception as error:
+        standalone_list_valid = False
+        standalone_list_error = str(error)
+    checks.check("standalone list item generates valid Lua",
+                 standalone_list_valid and "local _ = {'standalone'}" in standalone_list_item,
+                 standalone_list_error or standalone_list_item)
+    checks.check("incomplete standalone list item is omitted",
+                 incomplete_list_item == "",
+                 repr(incomplete_list_item))
+    checks.check("a standalone chain of table rows shows only one warning",
+                 table_entry_warnings["standalone"] == [1, 0, 0],
+                 table_entry_warnings["standalone"])
+    checks.check("table rows show no standalone warning",
+                 table_entry_warnings["inTable"] == 0,
+                 table_entry_warnings["inTable"])
+    checks.check("table lookup dropdown contains keys from the selected variable",
+                 [option[1] for option in table_lookup["options"]] == ["text:title", "text:description"],
+                 table_lookup["options"])
+    checks.check("table lookup generates a Lua index expression",
+                 table_lookup["code"] == "btn_Info['description']",
+                 table_lookup["code"])
+    table_update_runtime = runtime()
+    table_update_runtime.execute(table_set)
+    checks.check("table set block updates the selected table value",
+                 table_update_runtime.globals().btn_Info["title"] == "updated",
+                 table_set)
+    checks.check("key-value table mutator reorders entries without losing values",
+                 table_mutator["reordered"] == [["key2", "value2"], ["key1", "value1"]],
+                 table_mutator["reordered"])
+    checks.check("key-value table mutator removes entries without shifting values",
+                 table_mutator["afterRemovingFirst"] == [["key1", "value1"]],
+                 table_mutator["afterRemovingFirst"])
 
     # 2. values of read blocks with known answers
     def value(label, block, answers, expected):

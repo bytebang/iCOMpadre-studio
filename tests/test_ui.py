@@ -185,6 +185,16 @@ def main():
         help_url = page.eval("new Blockly.Workspace().newBlock('ic705_set_frequency').helpUrl")
         check("the online demo links to the documentation next to it, like on the SD card",
               help_url == "../docs/radio/ic705.html#ic705_set_frequency", help_url)
+        check("the Tables category is directly below Variables",
+              page.eval("toolbox.contents.findIndex(function(c) { return c.custom === 'VARIABLE'; }) + 1 === toolbox.contents.findIndex(function(c) { return c.name === Blockly.Msg.ICP_GROUP_TABLES; })"))
+        check("the Tables category has no custom color",
+              page.eval("toolbox.contents.find(function(c) { return c.name === Blockly.Msg.ICP_GROUP_TABLES; }).categorystyle") is None)
+        check("the key-value pair block is selectable in Tables",
+              page.eval("toolbox.contents.find(function(c) { return c.name === Blockly.Msg.ICP_GROUP_TABLES; }).contents.some(function(item) { return item.type === 'lua_table_entry'; })"))
+        check("the list item block is selectable in Tables",
+              page.eval("toolbox.contents.find(function(c) { return c.name === Blockly.Msg.ICP_GROUP_TABLES; }).contents.some(function(item) { return item.type === 'lua_table_list_item'; })"))
+        check("table blocks keep their yellow color",
+              page.eval("Blockly.Themes.Classic.blockStyles.tables_blocks.colourPrimary") == "#e0b65e")
         page.eval("window.__openedHelp = null; window.__open = window.open; window.open = function(url) { window.__openedHelp = url; }; document.getElementById('helpButton').click()")
         check("the help button opens the documentation", page.eval("window.__openedHelp") == page.eval("Studio.documentationUrl"))
         page.eval("window.open = window.__open")

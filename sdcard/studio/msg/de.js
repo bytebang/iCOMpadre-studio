@@ -23,6 +23,16 @@ Blockly.Msg.ICP_GROUP_PINS = "Pins";
 Blockly.Msg.ICP_GROUP_SERIAL = "Seriell";
 Blockly.Msg.ICP_GROUP_STORAGE = "Speicher";
 Blockly.Msg.ICP_GROUP_HELPERS = "Hilfsmittel";
+Blockly.Msg.ICP_GROUP_TABLES = "Tabellen";
+Blockly.Msg.ICP_LUA_TABLE = "Tabelle";
+Blockly.Msg.ICP_LUA_TABLE_ITEM = "Schlüssel-Wert-Paar";
+Blockly.Msg.ICP_LUA_TABLE_LIST_ITEM = "Listeneintrag";
+Blockly.Msg.ICP_LUA_TABLE_GET = "Wert aus";
+Blockly.Msg.ICP_LUA_TABLE_SET = "Setze in";
+Blockly.Msg.ICP_LUA_TABLE_KEY = "mit Schlüssel";
+Blockly.Msg.ICP_LUA_TABLE_NO_KEYS = "(keine literalen Schlüssel)";
+Blockly.Msg.ICP_LUA_TABLE_TO = "den Wert auf";
+Blockly.Msg.ICP_LUA_TABLE_ENTRY_STANDALONE_WARNING = "Verwende diesen Block in einer Tabelle; allein erzeugt er eine temporäre Tabelle.";
 
 // ----------------------------------------------- base.js: program
 Blockly.Msg.ICP_ONSTARTUP = "Beim Start";

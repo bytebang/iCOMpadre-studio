@@ -46,6 +46,7 @@ var Studio = (function() {
     "serial":  "#b39ddb",   // lavender: serial interface
     "storage": "#e39fb6",   // rose:     files and remembered values on the SD card
     "helpers": "#a0a7ad",   // grey:     conversions and other utilities
+    "tables":  "#e0b65e",   // sand:     table blocks without coloring their category
   };
 
   // Register the styles in the default theme, so every workspace knows them
@@ -200,12 +201,17 @@ var Studio = (function() {
    * radio/ic705.js -> ../docs/radio/ic705.html#<blocktype>
    * @param {string} name the name shown in the toolbox, e.g. "IC-705"
    * @param {string=} style one of the keys of STYLES: program, radio, pins, serial, storage, helpers
+   * @param {string=} positionAfter custom category id after which to insert this category
+   * @param {string=} page documentation page below the current script's page
    * @returns {CategoryHandle} handle to add blocks or groups to the category
    */
-  function category(name, style)
+  function category(name, style, positionAfter, page)
   {
     checkStyle(style);
-    var cat = createContainer(name, style, helpPageOfCurrentScript());
+    var helpPage = helpPageOfCurrentScript();
+    if (page && helpPage) helpPage += "/" + page;
+    var cat = createContainer(name, style, helpPage);
+    cat.positionAfter = positionAfter || null;
     contributions.push(cat);
     return createHandle(cat, true);
   }
@@ -297,7 +303,19 @@ var Studio = (function() {
     });
 
     contributions.forEach(function(contribution) {
-      contents.push(contribution.separator ? {"kind": "sep"} : toToolboxCategory(contribution));
+      if (contribution.separator) {
+        contents.push({"kind": "sep"});
+        return;
+      }
+      var category = toToolboxCategory(contribution);
+      if (contribution.positionAfter) {
+        var index = contents.findIndex(function(entry) {
+          return entry.custom == contribution.positionAfter;
+        });
+        contents.splice(index < 0 ? contents.length : index + 1, 0, category);
+      } else {
+        contents.push(category);
+      }
     });
 
     return {"kind": "categoryToolbox", "contents": contents};

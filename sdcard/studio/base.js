@@ -16,6 +16,307 @@ var pins     = base.group(Blockly.Msg.ICP_GROUP_PINS, "pins", "pins");
 var serial   = base.group(Blockly.Msg.ICP_GROUP_SERIAL, "serial", "serial");
 var storage  = base.group(Blockly.Msg.ICP_GROUP_STORAGE, "storage", "storage");
 var helpers  = base.group(Blockly.Msg.ICP_GROUP_HELPERS, "helpers", "helpers");
+var tables   = Studio.category(Blockly.Msg.ICP_GROUP_TABLES, null, "VARIABLE", "tables");
+
+/* **************************************************************** */
+/*                         LUA TABLES                               */
+/* **************************************************************** */
+
+Blockly.Blocks['lua_table_item'] = {
+  init: function() {
+    this.appendDummyInput()
+        .appendField(new Blockly.FieldDropdown([
+          [Blockly.Msg.ICP_LUA_TABLE_ITEM, "key_value"],
+          [Blockly.Msg.ICP_LUA_TABLE_LIST_ITEM, "list"]
+        ]), "TYPE");
+    this.setPreviousStatement(true);
+    this.setNextStatement(true);
+    this.setStyle("tables_blocks");
+    this.contextMenu = false;
+  }
+};
+
+Blockly.Blocks['lua_table_entry'] = {
+  init: function() {
+    this.appendValueInput("KEY")
+        .appendField("[");
+    this.appendValueInput("VALUE")
+        .appendField("] =");
+    this.setPreviousStatement(true);
+    this.setNextStatement(true);
+    this.setInputsInline(true);
+    this.setStyle("tables_blocks");
+  },
+
+  onchange: function() {
+    var previous = this.getPreviousBlock();
+    var needsWarning = !luaTableRowIsInTable(this) && !luaTableRowIs(previous);
+    this.setWarningText(needsWarning ? Blockly.Msg.ICP_LUA_TABLE_ENTRY_STANDALONE_WARNING : null);
+  }
+};
+
+Blockly.Blocks['lua_table_list_item'] = {
+  init: function() {
+    this.appendValueInput("VALUE")
+        .appendField(Blockly.Msg.ICP_LUA_TABLE_LIST_ITEM);
+    this.setPreviousStatement(true);
+    this.setNextStatement(true);
+    this.setStyle("tables_blocks");
+  },
+
+  onchange: function() {
+    var previous = this.getPreviousBlock();
+    var needsWarning = !luaTableRowIsInTable(this) && !luaTableRowIs(previous);
+    this.setWarningText(needsWarning ? Blockly.Msg.ICP_LUA_TABLE_ENTRY_STANDALONE_WARNING : null);
+  }
+};
+
+function luaTableRowIs(block) {
+  return block && (block.type == "lua_table_entry" || block.type == "lua_table_list_item");
+}
+
+function luaTableRowIsInTable(block) {
+  if (!block) return false;
+  var parent = block.getParent();
+  while (parent) {
+    if (parent.type == "lua_table") return true;
+    parent = parent.getParent();
+  }
+  return false;
+}
+
+Blockly.Blocks['lua_table_container'] = {
+  init: function() {
+    this.appendDummyInput()
+        .appendField(Blockly.Msg.ICP_LUA_TABLE);
+    this.appendStatementInput("STACK");
+    this.setStyle("tables_blocks");
+    this.contextMenu = false;
+  }
+};
+
+Blockly.Blocks['lua_table'] = {
+  init: function() {
+    this.appendDummyInput("HEADER")
+        .appendField(Blockly.Msg.ICP_LUA_TABLE);
+    this.appendStatementInput("STACK");
+    this.setOutput(true);
+    this.setStyle("tables_blocks");
+    this.setMutator(new Blockly.icons.MutatorIcon(["lua_table_item"], this));
+    var entry = this.workspace.newBlock("lua_table_entry");
+    this.getInput("STACK").connection.connect(entry.previousConnection);
+  },
+
+  decompose: function(workspace) {
+    var container = workspace.newBlock("lua_table_container");
+    container.initSvg();
+    var connection = container.getInput("STACK").connection;
+    var entry = this.getInputTargetBlock("STACK");
+    while (entry) {
+      var item = workspace.newBlock("lua_table_item");
+      item.initSvg();
+      item.setFieldValue(entry.type == "lua_table_list_item" ? "list" : "key_value", "TYPE");
+      item.keyConnection_ = entry.type == "lua_table_entry" ?
+          entry.getInput("KEY").connection.targetConnection : null;
+      item.valueConnection_ = entry.getInput("VALUE").connection.targetConnection;
+      connection.connect(item.previousConnection);
+      connection = item.nextConnection;
+      entry = entry.getNextBlock();
+    }
+    return container;
+  },
+
+  compose: function(container) {
+    var rows = [];
+    var item = container.getInputTargetBlock("STACK");
+    while (item) {
+      if (!item.isInsertionMarker()) {
+        rows.push({
+          type: item.getFieldValue("TYPE"),
+          key: item.keyConnection_,
+          value: item.valueConnection_
+        });
+      }
+      item = item.getNextBlock();
+    }
+
+    var entries = [];
+    var entry = this.getInputTargetBlock("STACK");
+    while (entry) {
+      entries.push(entry);
+      entry = entry.getNextBlock();
+    }
+
+    entries.forEach(function(entry) {
+      (entry.type == "lua_table_entry" ? ["KEY", "VALUE"] : ["VALUE"]).forEach(function(inputName) {
+        var target = entry.getInput(inputName).connection.targetConnection;
+        if (target) target.disconnect();
+      });
+      if (entry.previousConnection.isConnected()) entry.previousConnection.disconnect();
+      if (entry.nextConnection.isConnected()) entry.nextConnection.disconnect();
+    });
+    entries.forEach(function(entry) {
+      entry.dispose(false);
+    });
+
+    var connection = this.getInput("STACK").connection;
+    rows.forEach(function(row) {
+      var newEntry = this.workspace.newBlock(
+          row.type == "list" ? "lua_table_list_item" : "lua_table_entry");
+      connection.connect(newEntry.previousConnection);
+      if (row.type != "list" && row.key) newEntry.getInput("KEY").connection.connect(row.key);
+      if (row.value) newEntry.getInput("VALUE").connection.connect(row.value);
+      connection = newEntry.nextConnection;
+    }, this);
+  },
+
+  saveConnections: function(container) {
+    var item = container.getInputTargetBlock("STACK");
+    var entry = this.getInputTargetBlock("STACK");
+    while (item && entry) {
+      if (!item.isInsertionMarker()) {
+        item.keyConnection_ = entry.type == "lua_table_entry" ?
+            entry.getInput("KEY").connection.targetConnection : null;
+        item.valueConnection_ = entry.getInput("VALUE").connection.targetConnection;
+        entry = entry.getNextBlock();
+      }
+      item = item.getNextBlock();
+    }
+  }
+};
+
+function luaTableKeyOptions(block) {
+  var options = [];
+  var seen = {};
+  var variableId = block.getFieldValue("VAR");
+  block.workspace.getAllBlocks(false).forEach(function(assignment) {
+    if (assignment.type != "variables_set" || assignment.getFieldValue("VAR") != variableId) return;
+    var table = assignment.getInputTargetBlock("VALUE");
+    if (!table || table.type != "lua_table") return;
+    var entry = table.getInputTargetBlock("STACK");
+    while (entry) {
+      if (entry.type == "lua_table_entry") {
+        var keyBlock = entry.getInputTargetBlock("KEY");
+        var type;
+        var value;
+        if (keyBlock && keyBlock.type == "text") {
+          type = "text";
+          value = keyBlock.getFieldValue("TEXT");
+        } else if (keyBlock && keyBlock.type == "math_number") {
+          type = "number";
+          value = keyBlock.getFieldValue("NUM");
+        } else if (keyBlock && keyBlock.type == "logic_boolean") {
+          type = "boolean";
+          value = keyBlock.getFieldValue("BOOL") == "TRUE" ? "true" : "false";
+        }
+        if (type) {
+          var id = type + ":" + value;
+          if (!seen[id]) {
+            options.push([value, id]);
+            seen[id] = true;
+          }
+        }
+      }
+      entry = entry.getNextBlock();
+    }
+  });
+  return options.length ? options : [[Blockly.Msg.ICP_LUA_TABLE_NO_KEYS, "__no_key__"]];
+}
+
+Blockly.Blocks['lua_table_get'] = {
+  init: function() {
+    var tableBlock = this;
+    this.appendDummyInput()
+        .appendField(Blockly.Msg.ICP_LUA_TABLE_GET)
+        .appendField(new Blockly.FieldVariable("table"), "VAR")
+        .appendField(Blockly.Msg.ICP_LUA_TABLE_KEY)
+        .appendField(new Blockly.FieldDropdown(function() {
+          return luaTableKeyOptions(tableBlock);
+        }), "KEY");
+    this.setOutput(true);
+    this.setStyle("tables_blocks");
+  }
+};
+
+Blockly.Blocks['lua_table_set'] = {
+  init: function() {
+    var tableBlock = this;
+    this.appendValueInput("VALUE")
+        .appendField(Blockly.Msg.ICP_LUA_TABLE_SET)
+        .appendField(new Blockly.FieldVariable("table"), "VAR")
+        .appendField(Blockly.Msg.ICP_LUA_TABLE_KEY)
+        .appendField(new Blockly.FieldDropdown(function() {
+          return luaTableKeyOptions(tableBlock);
+        }), "KEY")
+        .appendField(Blockly.Msg.ICP_LUA_TABLE_TO);
+    this.setPreviousStatement(true);
+    this.setNextStatement(true);
+    this.setStyle("tables_blocks");
+  }
+};
+
+Blockly.Lua.forBlock['lua_table_entry'] = function(block, generator) {
+  var key = generator.valueToCode(block, "KEY", Blockly.Lua.ORDER_NONE);
+  var value = generator.valueToCode(block, "VALUE", Blockly.Lua.ORDER_NONE);
+  if (!key || !value) return "";
+  if (!luaTableRowIsInTable(block)) {
+    return "local _ = { [" + key + "] = " + value + " }\n";
+  }
+  return "[" + key + "] = " + value + ",\n";
+};
+
+Blockly.Lua.forBlock['lua_table_list_item'] = function(block, generator) {
+  var value = generator.valueToCode(block, "VALUE", Blockly.Lua.ORDER_NONE);
+  if (!value) return "";
+  if (!luaTableRowIsInTable(block)) return "local _ = {" + value + "}\n";
+  return value + ",\n";
+};
+
+Blockly.Lua.forBlock['lua_table'] = function(block, generator) {
+  var depth = 0;
+  var parent = block.getParent();
+  while (parent) {
+    if (parent.type == "lua_table") depth++;
+    parent = parent.getParent();
+  }
+  var closingIndent = generator.INDENT.repeat(depth);
+  var entries = generator.statementToCode(block, "STACK").replace(/,\n$/, "\n");
+  return ["{\n" + entries + closingIndent + "}", Blockly.Lua.ORDER_ATOMIC];
+};
+
+Blockly.Lua.forBlock['lua_table_get'] = function(block, generator) {
+  var key = luaTableKeyCode(block, generator);
+  return [generator.getVariableName(block.getFieldValue("VAR")) + "[" + key + "]", Blockly.Lua.ORDER_ATOMIC];
+};
+
+function luaTableKeyCode(block, generator) {
+  var selected = block.getFieldValue("KEY");
+  var key;
+  if (selected == "__no_key__") {
+    var options = luaTableKeyOptions(block);
+    selected = options[0][1];
+  }
+  var separator = selected.indexOf(":");
+  var type = selected.substring(0, separator);
+  var value = selected.substring(separator + 1);
+  if (type == "text") key = generator.quote_(value);
+  else if (type == "number" || type == "boolean") key = value;
+  else key = "nil";
+  return key;
+}
+
+Blockly.Lua.forBlock['lua_table_set'] = function(block, generator) {
+  var variable = generator.getVariableName(block.getFieldValue("VAR"));
+  var key = luaTableKeyCode(block, generator);
+  var value = generator.valueToCode(block, "VALUE", Blockly.Lua.ORDER_NONE) || "nil";
+  return variable + "[" + key + "] = " + value + "\n";
+};
+
+tables.helper("lua_table_entry");
+tables.helper("lua_table_list_item");
+tables.helper("lua_table");
+tables.helper("lua_table_get");
+tables.helper("lua_table_set");
 
 // Pins of the iCOMpadre connector
 var PINS_ALL   = [["PIN A", "PIN_A"], ["PIN B", "PIN_B"], ["PIN C", "PIN_C"], ["PIN D", "PIN_D"],

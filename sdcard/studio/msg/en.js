@@ -28,6 +28,16 @@ Blockly.Msg.ICP_GROUP_PINS = "Pins";
 Blockly.Msg.ICP_GROUP_SERIAL = "Serial";
 Blockly.Msg.ICP_GROUP_STORAGE = "Storage";
 Blockly.Msg.ICP_GROUP_HELPERS = "Helpers";
+Blockly.Msg.ICP_GROUP_TABLES = "Tables";
+Blockly.Msg.ICP_LUA_TABLE = "table";
+Blockly.Msg.ICP_LUA_TABLE_ITEM = "key-value pair";
+Blockly.Msg.ICP_LUA_TABLE_LIST_ITEM = "list item";
+Blockly.Msg.ICP_LUA_TABLE_GET = "value of";
+Blockly.Msg.ICP_LUA_TABLE_SET = "set in";
+Blockly.Msg.ICP_LUA_TABLE_KEY = "key";
+Blockly.Msg.ICP_LUA_TABLE_NO_KEYS = "(no literal keys)";
+Blockly.Msg.ICP_LUA_TABLE_TO = "to";
+Blockly.Msg.ICP_LUA_TABLE_ENTRY_STANDALONE_WARNING = "Use this block inside a table; alone it creates a temporary table.";
 
 // ----------------------------------------------- base.js: program
 Blockly.Msg.ICP_ONSTARTUP = "OnStartup";

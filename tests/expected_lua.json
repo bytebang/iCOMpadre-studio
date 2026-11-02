@@ -4432,6 +4432,26 @@
    "code": "false and nil or nil",
    "uses": []
   },
+  "lua_table": {
+   "code": "{\n}",
+   "uses": []
+  },
+  "lua_table_entry": {
+   "code": "",
+   "uses": []
+  },
+  "lua_table_get": {
+   "code": "table2[nil]",
+   "uses": []
+  },
+  "lua_table_list_item": {
+   "code": "",
+   "uses": []
+  },
+  "lua_table_set": {
+   "code": "table2[nil] = nil\n",
+   "uses": []
+  },
   "mapnumber": {
    "code": "map(, , , , )",
    "uses": [
