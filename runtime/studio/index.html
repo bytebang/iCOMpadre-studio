@@ -54,6 +54,7 @@
       <button class="action" id="openButton" title="Open a sketch from your computer. You can also drop the file here."><img src="img/open.svg" alt=""><span>Open</span></button>
       <button class="action" id="shareButton" title="Show the sketch as text, to share it with others"><img src="img/share.svg" alt=""><span>Share</span></button>
       <button class="action" id="luaButton" title="Show the lua code which is generated from the sketch" aria-pressed="false"><img src="img/code.svg" alt=""><span>Lua</span></button>
+      <button class="action" id="helpButton" title="Show the help"><img src="img/help.svg" alt=""><span>Help</span></button>      
       <input type="file" id="fileInput" accept=".json,application/json">
     </nav>
   </header>
@@ -775,6 +776,11 @@
       {
         showShareMessage('Could not import - ' + error.message, 'error');
       }
+    });
+
+    // -----------------help--------------------
+    document.getElementById('helpButton').addEventListener('click', function() {
+      window.open('./documentation/', '_blank');
     });
 
     // -------------- Start -----------------

@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" fill="none" stroke="#333333" stroke-width="6" stroke-linecap="round" stroke-linejoin="round">
+  <!-- Buchumriss -->
+  <path d="M50 30 C40 22 24 21 11 25 V75 C24 71 40 72 50 80 C60 72 76 71 89 75 V25 C76 21 60 22 50 30 Z"/>
+  <!-- Buchrücken -->
+  <path d="M50 30 V80"/>
+  <!-- Fragezeichen (5 Einheiten nach oben verschoben) -->
+  <path d="M64 39 a7 7 0 1 1 10 6 c-3 2 -4 4 -4 8"/>
+  <path d="M70 62 v.01"/>
+</svg>
