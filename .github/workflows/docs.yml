@@ -39,11 +39,11 @@ jobs:
       - name: Add the studio as online demo
         run: |
           mkdir -p site/demo
-          cp -r runtime/. site/demo/
+          cp -r sdcard/. site/demo/
           rm -f site/demo/main.lua site/demo/icompadre.json
           printf '<!DOCTYPE html><meta charset="utf-8"><meta http-equiv="refresh" content="0; url=demo/"><a href="demo/">iCOMpadre Studio</a>\n' > site/index.html
 
-      # links to the old addresses (e.g. /studio/documentation/tutorial.html#limit) keep working, with their anchor
+      # links to both documentation paths on the SD card keep working, with their anchors
       - name: Forward the old addresses
         run: |
           redirect() {
@@ -56,6 +56,7 @@ jobs:
             page="${page#./}"
             up=$(echo "$page" | sed 's|[^/]*/|../|g; s|[^/]*$||')
             redirect "site/studio/documentation/$page" "../../${up}documentation/$page"
+            redirect "site/studio/docs/$page" "../../${up}documentation/$page"
           done
 
       - uses: actions/upload-pages-artifact@v3
