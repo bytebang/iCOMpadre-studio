@@ -6,22 +6,17 @@ Lua tables can be used as lists or as key-value maps, and can mix both kinds of 
 
 ![Table block](../img/lua_table.png){ width="338" }
 
-For example, a table can describe Radio Desk buttons:
+For example, a table can hold settings:
 
-```lua
-btn_Info = {
-  ["rdbutton_SchalteZuOe3"] = {
-    ["title"] = "Ö3",
-    ["description"] = "Schaltet auf Ö3 bei 98,6 MHz."
-  },
-  ["rdbutton_SchalteZuLocal"] = {
-    ["title"] = "Lokal",
-    ["description"] = "Schaltet auf den lokalen Kanal."
-  }
-}
-```
+??? info "Lua code"
+    ```lua
+    {
+      ["mode"] = "standby",
+      ["volume"] = 42
+    }
+    ```
 
-In Blockly, create the outer table with two key-value rows. For each value, create another table with the `title` and `description` rows. Connect text blocks to the keys and values, then assign the result to a variable with the **set variable** block.
+In Blockly, add a key-value row for each setting. Connect text blocks to the keys and values, then assign the result to a variable with the **set variable** block.
 
 The generated Lua uses bracketed keys (`["name"] = value`), so keys can be expressions or strings that contain spaces and punctuation.
 
@@ -31,12 +26,10 @@ The generated Lua uses bracketed keys (`["name"] = value`), so keys can be expre
 
 Choose **list item** in the table's gear menu to add a value without a key. Lua assigns these values integer keys starting at 1:
 
-```lua
-channels = {
-  "Ö3",
-  "Lokal"
-}
-```
+??? info "Lua code"
+    ```lua
+    "80m",
+    ```
 
 List items and key-value pairs can be mixed in one table. List items are also available in the Tables category; when used outside a table, a complete item creates a temporary table and Blockly shows a warning. An item without a value is omitted.
 
@@ -48,17 +41,23 @@ The **key-value pair** block is also available on its own in the Tables category
 
 For safety, a complete pair used outside a table generates a temporary local table instead of invalid Lua. Blockly also warns that the pair belongs inside a table. Rows with a missing key or value are omitted.
 
+??? info "Lua code"
+    ```lua
+    ["mode"] = "standby",
+    ```
+
 ## Read a value by key {#lua_table_get}
 
 ![Value of block](../img/lua_table_get.png){ width="338" }
 
 Use the **value of** block to read an entry from a table variable. Select the table variable, then choose a key from the dropdown. The dropdown is populated from literal text, number, and boolean keys in tables assigned directly to that variable.
 
-For example, after assigning the button table above to `btn_Info`, choose `btn_Info` and `rdbutton_SchalteZuOe3` to generate:
+For example, after assigning the settings table above to `settings`, choose `settings` and `mode` to generate:
 
-```lua
-btn_Info["rdbutton_SchalteZuOe3"]
-```
+??? info "Lua code"
+    ```lua
+    settings["mode"]
+    ```
 
 Keys made from other expressions are not listed in the dropdown.
 
@@ -68,8 +67,9 @@ Keys made from other expressions are not listed in the dropdown.
 
 Use the **set in** block to update one entry in a table variable. Select the table and key, then connect the new value. The key dropdown uses the same literal keys as the read block.
 
-For example, selecting `btn_Info` and `rdbutton_SchalteZuOe3` generates:
+For example, selecting `settings` and `mode` generates:
 
-```lua
-btn_Info["rdbutton_SchalteZuOe3"] = "New title"
-```
+??? info "Lua code"
+    ```lua
+    settings["mode"] = "active"
+    ```
