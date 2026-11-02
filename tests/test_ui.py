@@ -3,7 +3,9 @@ open / import / share, the lua panel, dark mode, phone width and the loader."""
 import json
 import os
 import re
+import shutil
 import sys
+from pathlib import Path
 
 from harness import STUDIO_READY, Browser, Checks, Server, open_studio
 
@@ -205,6 +207,22 @@ def main():
         problems = page.problems(ignore=("Saving failed",))
         check("no console problems in the online demo", not problems, problems)
         page.eval("localStorage.clear()")
+
+        # opening the standalone package directly (file://) must skip XHR preloading
+        local_app = os.path.join(server.dir, "local-package", "studio")
+        os.makedirs(os.path.dirname(local_app))
+        shutil.copytree(os.path.join(os.path.dirname(__file__), "..", "sdcard"), local_app)
+        os.makedirs(os.path.join(local_app, "docs", "radio"))
+        page.call("Page.navigate", url=Path(local_app, "index.html").as_uri())
+        page.wait(STUDIO_READY, 60)
+        check("the local-file loader opens the editor", page.eval("location.pathname").endswith("/studio/studio/index.html"))
+        check("the local-file preview does not use device storage", page.eval("Studio.online && Studio.localFile"))
+        check("the local-file preview explains download-only saving",
+              "Local preview" in page.eval(status + ".textContent"))
+        check("the local-file preview links to its local help",
+              page.eval("new Blockly.Workspace().newBlock('ic705_set_frequency').helpUrl") == "../docs/radio/ic705.html#ic705_set_frequency")
+        problems = page.problems(ignore=("Saving failed",))
+        check("no console problems in the local-file preview", not problems, problems)
 
         # the loader shows an error instead of waiting forever
         icon = server.file(os.path.join("studio", "img", "code.svg"))

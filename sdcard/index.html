@@ -209,6 +209,12 @@
     * This prevents problems with slow sd cards and cuncurrently too many open files
     */
     async function loadFilesSequentially() {
+        // Browsers block XHR from file:// pages. The editor loads these scripts directly.
+        if (window.location.protocol === 'file:') {
+            window.location.href = './studio/index.html' + window.location.search;
+            return;
+        }
+
         const filesToLoad = [
             {"name":"gui framework",          "url":"studio/blockly/blockly_compressed.js"},
             {"name":"default blocks",         "url":"studio/blockly/blocks_compressed.js"},

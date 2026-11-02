@@ -57,7 +57,8 @@ var Studio = (function() {
   // The documentation mirrors the block files: radio/ic705.js -> radio/ic705.md, base.js with its group "program" -> base/program.md
   // True if the studio runs online (the demo on GitHub Pages, or served by githack from the repository) instead of on iCOMpadre:
   // there is no device to save to. ?online simulates this (e.g. for the tests)
-  var ONLINE = /(^|\.)(github\.io|githack\.com)$/.test(location.hostname) || new URLSearchParams(location.search).has("online");
+  var LOCAL_FILE = location.protocol === "file:";
+  var ONLINE = LOCAL_FILE || /(^|\.)(github\.io|githack\.com)$/.test(location.hostname) || new URLSearchParams(location.search).has("online");
 
   // The help is at /studio/docs/ on the SD card and GitHub Pages. On Pages, docs/ is relative to /studio/index.html.
   // githack serves the repository itself, without the built documentation: it links to the one on GitHub Pages
@@ -331,6 +332,7 @@ var Studio = (function() {
     "buildToolbox": buildToolbox,
     "checkEvents": checkEvents,
     "online": ONLINE,
+    "localFile": LOCAL_FILE,
     "documentationUrl": HELP_ROOT,
   };
 })();

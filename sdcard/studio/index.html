@@ -477,7 +477,8 @@
       if (Studio.online)
       {
         // the online demo has no iCOMpadre to load from: start empty, unsaved changes are kept in the browser
-        showStatus('Online demo: your sketch stays in this browser. Download it to keep it.', 'info');
+        showStatus(Studio.localFile ? 'Local preview: your sketch stays in this browser. Download it to keep it.'
+                                    : 'Online demo: your sketch stays in this browser. Download it to keep it.', 'info');
       }
       else try
       {
@@ -546,7 +547,8 @@
       }
       if (Studio.online)
       {
-        showStatus('Saving needs iCOMpadre. In the online demo use Download instead.', 'info');
+        showStatus(Studio.localFile ? 'Saving needs iCOMpadre. In this local preview use Download instead.'
+                                    : 'Saving needs iCOMpadre. In the online demo use Download instead.', 'info');
         return;
       }
       saving = true;

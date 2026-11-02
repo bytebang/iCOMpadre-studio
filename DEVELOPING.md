@@ -55,6 +55,8 @@ webserver.py              local development server
 4. The last workspace is loaded from `/icompadre.json` on the device.
 5. If the browser holds unsaved changes of an earlier session (`localStorage`, key `icompadre-studio.backup`), the studio offers to restore them.
 
+When an extracted package is opened directly as `file://`, the preloader skips its XHR cache pass (browsers block XHR from local files) and opens the editor, which loads the scripts directly. This local preview keeps sketches in the browser; use *Download* to save one. On the device, the normal sequential preload is still used.
+
 Every file the studio loads (scripts, styles, images) has to be in the `filesToLoad` list of `sdcard/index.html`, otherwise it is not preloaded.
 The radios are the exception: the preloader takes them from `radio/radios.js` as well.
 
