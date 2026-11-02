@@ -3,8 +3,7 @@ name: Publish Studio demo and documentation
 # Builds the documentation of the studio (on every push and pull request, so broken links show up before a merge)
 # and publishes the studio with its documentation on GitHub Pages:
 #   https://bytebang.github.io/iCOMpadre-studio/demo/           the studio as online demo
-#   https://bytebang.github.io/iCOMpadre-studio/documentation/  its documentation
-# The old addresses below /studio/ (the layout of the SD card) lead there.
+#   https://bytebang.github.io/iCOMpadre-studio/studio/docs/    its documentation
 on:
   push:
   pull_request:
@@ -34,30 +33,14 @@ jobs:
         run: pip install mkdocs mkdocs-awesome-pages-plugin pymdown-extensions
 
       - name: Build the documentation
-        run: mkdocs build --strict --site-dir "$PWD/site/documentation"
+        run: mkdocs build --strict --site-dir "$PWD/site/studio/docs"
 
       - name: Add the studio as online demo
         run: |
           mkdir -p site/demo
           cp -r sdcard/. site/demo/
           rm -f site/demo/main.lua site/demo/icompadre.json
-          printf '<!DOCTYPE html><meta charset="utf-8"><meta http-equiv="refresh" content="0; url=demo/"><a href="demo/">iCOMpadre Studio</a>\n' > site/index.html
-
-      # links to both documentation paths on the SD card keep working, with their anchors
-      - name: Forward the old addresses
-        run: |
-          redirect() {
-            mkdir -p "$(dirname "$1")"
-            printf '<!DOCTYPE html><meta charset="utf-8"><script>location.replace("%s" + location.hash)</script><a href="%s">%s</a>\n' "$2" "$2" "$2" > "$1"
-          }
-          redirect site/studio/index.html ../demo/
-          redirect site/studio/studio/index.html ../../demo/studio/index.html
-          (cd site/documentation && find . -name '*.html') | while read -r page; do
-            page="${page#./}"
-            up=$(echo "$page" | sed 's|[^/]*/|../|g; s|[^/]*$||')
-            redirect "site/studio/documentation/$page" "../../${up}documentation/$page"
-            redirect "site/studio/docs/$page" "../../${up}documentation/$page"
-          done
+          printf '<!DOCTYPE html><meta charset="utf-8"><title>iCOMpadre Studio</title><h1>iCOMpadre Studio</h1><ul><li><a href="demo/">Online demo</a></li><li><a href="studio/docs/">Documentation</a></li></ul>\n' > site/index.html
 
       - uses: actions/upload-pages-artifact@v3
         if: github.event_name == 'push' && github.ref == 'refs/heads/main'

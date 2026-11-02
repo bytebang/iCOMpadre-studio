@@ -202,8 +202,8 @@ On the SD card the built documentation is next to the studio (`/studio/docs/`), 
 | `studio/radio/ic705.js` | `docs/radio/ic705.md` | `../docs/radio/ic705.html#<blocktype>` |
 | `studio/base.js`, group `base.group("Pins", "pins", "pins")` | `docs/base/pins.md` | `../docs/base/pins.html#<blocktype>` |
 
-They work on every copy of the SD card. On GitHub Pages the demo and the documentation are side by side, the links start with `../../documentation/`.
-The studio served by githack (the repository itself, without the built documentation) links to GitHub Pages: `https://bytebang.github.io/iCOMpadre-studio/documentation/radio/ic705.html#<blocktype>`.
+They work on every copy of the SD card. On GitHub Pages the documentation is at `/studio/docs/`, so the demo links start with `../../studio/docs/`.
+The studio served by githack (the repository itself, without the built documentation) links to GitHub Pages: `https://bytebang.github.io/iCOMpadre-studio/studio/docs/radio/ic705.html#<blocktype>`.
 The pages are files (`use_directory_urls: false`), so the documentation also works without web server, e.g. opened from the SD card in a card reader.
 
 `Studio.category()` remembers which file registered the category, and `Studio.buildToolbox()` gives every block of it this link (*Help* in the context menu of the block).
@@ -242,7 +242,7 @@ On the SD card the CI of the iCOMpadre repository builds `docs/` with the settin
 
 `.github/workflows/docs.yml` builds the documentation on every push and pull request (strict: broken links fail the build) and publishes the studio
 with its documentation on GitHub Pages: https://bytebang.github.io/iCOMpadre-studio/demo/ is the studio as online demo,
-https://bytebang.github.io/iCOMpadre-studio/documentation/ its documentation. The old addresses below `/studio/` lead there.
+https://bytebang.github.io/iCOMpadre-studio/studio/docs/ its documentation. The project page links to both directly.
 The studio notices that it runs online (`Studio.online`, on github.io and githack.com, or with `?online` in the address):
 it starts empty and *Save* points to *Download*.
 
