@@ -26,9 +26,14 @@ jobs:
           mkdir -p package/studio
           cp -R sdcard/. package/studio/
           mkdocs build --strict --site-dir "$PWD/package/studio/docs"
+
+      - name: Verify the SD card package layout
+        run: |
           test -f package/studio/index.html
           test -f package/studio/studio/index.html
           test -f package/studio/docs/index.html
+          test ! -e package/index.html
+          test "$(find package -mindepth 1 -maxdepth 1 | wc -l)" -eq 1
 
       - name: Upload the SD card package
         uses: actions/upload-artifact@v4

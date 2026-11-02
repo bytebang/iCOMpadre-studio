@@ -58,6 +58,10 @@ webserver.py              local development server
 Every file the studio loads (scripts, styles, images) has to be in the `filesToLoad` list of `sdcard/index.html`, otherwise it is not preloaded.
 The radios are the exception: the preloader takes them from `radio/radios.js` as well.
 
+On the SD card, the app is installed under `/studio/`: the preloader is `/studio/index.html` and the editor is `/studio/studio/index.html`.
+The online preview serves the same source files from the site root, so its preloader is `/` and its editor is `/studio/index.html`.
+The help is `/studio/docs/` in both layouts.
+
 The order in `radio/radios.js` is the order of the radio categories in the toolbox.
 
 ## Interface to the device

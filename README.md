@@ -7,6 +7,7 @@ This is a blockly based IDE for iCOMpadre.
 Download the `sdcard-studio` artifact from the latest successful
 [Studio SD card package workflow run](https://github.com/bytebang/iCOMpadre-studio/actions/workflows/sdcard.yml)
 and extract its contents to the root of the SD card. The artifact contains a `studio/` folder with the Studio app and its built-in help.
+It keeps the SD-card preloader at `/studio/index.html`, the editor at `/studio/studio/index.html`, and the help at `/studio/docs/`; it does not add an `index.html` to the card root.
 
 Try the [latest version of iCOMpadre Studio](https://bytebang.github.io/iCOMpadre-studio/) online, or read the [user guide](https://bytebang.github.io/iCOMpadre-studio/studio/docs/).
 
