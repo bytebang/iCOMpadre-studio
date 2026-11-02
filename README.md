@@ -4,7 +4,7 @@
 [![SD card package](https://github.com/bytebang/iCOMpadre-studio/actions/workflows/sdcard.yml/badge.svg?branch=main)](https://github.com/bytebang/iCOMpadre-studio/actions/workflows/sdcard.yml)
 [![Online demo and documentation](https://github.com/bytebang/iCOMpadre-studio/actions/workflows/docs.yml/badge.svg?branch=main)](https://github.com/bytebang/iCOMpadre-studio/actions/workflows/docs.yml)
 
-This is a blockly based IDE for iCOMpadre.
+This is a blockly based IDE for iCOMpadre. Try the [latest version of iCOMpadre Studio](https://bytebang.github.io/iCOMpadre-studio/) online, or read the [user guide](https://bytebang.github.io/iCOMpadre-studio/studio/docs/).
 
 ## Deployment
 
@@ -12,11 +12,12 @@ This is a blockly based IDE for iCOMpadre.
 
 1. Open the [latest Studio SD card package build on `main`](https://github.com/bytebang/iCOMpadre-studio/actions/workflows/sdcard.yml?query=branch%3Amain+event%3Apush).
 2. Select the most recent successful run and download the **`sdcard-studio`** artifact from its *Artifacts* section.
-3. Extract the downloaded ZIP to the root of the SD card. It contains a `studio/` folder with the app and built-in help.
 
-It keeps the SD-card preloader at `/studio/index.html`, the editor at `/studio/studio/index.html`, and the help at `/studio/docs/`; it does not add an `index.html` to the card root.
+The ZIP contains an outer `studio/` folder. Where you extract that folder determines how Studio starts:
 
-Try the [latest version of iCOMpadre Studio](https://bytebang.github.io/iCOMpadre-studio/) online, or read the [user guide](https://bytebang.github.io/iCOMpadre-studio/studio/docs/).
+* **Studio is the only app:** extract the *contents* of the outer `studio/` folder to the SD card root. Its `index.html` starts Studio automatically; the editor is at `/studio/index.html` and the help at `/docs/`.
+* **Several apps:** extract the full ZIP to the SD card root, keeping the outer `studio/` folder. Studio is one app among the others; its preloader is `/studio/index.html`, the editor is `/studio/studio/index.html`, and the help is `/studio/docs/`.
+
 
 ## See it in action
 

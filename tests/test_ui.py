@@ -224,6 +224,24 @@ def main():
         problems = page.problems(ignore=("Saving failed",))
         check("no console problems in the local-file preview", not problems, problems)
 
+        # if Studio is the only app, the outer app folder is omitted and its contents go to the card root
+        standalone = os.path.join(server.dir, "standalone")
+        os.makedirs(standalone)
+        shutil.copytree(os.path.join(os.path.dirname(__file__), "..", "sdcard"), standalone, dirs_exist_ok=True)
+        shutil.copytree(os.path.join(os.path.dirname(__file__), "..", "docs"), os.path.join(standalone, "docs"), dirs_exist_ok=True)
+        page.call("Page.navigate", url=Path(standalone, "index.html").as_uri())
+        page.wait(STUDIO_READY, 60)
+        check("standalone root preloader opens the editor", page.eval("location.pathname").endswith("/standalone/studio/index.html"))
+        check("standalone root editor links to Studio help",
+              page.eval("new Blockly.Workspace().newBlock('ic705_set_frequency').helpUrl")
+              == "../docs/radio/ic705.html#ic705_set_frequency")
+        check("the standalone Help button opens Studio help",
+              page.eval("window.__openedHelp = null; window.__open = window.open; window.open = function(url) { window.__openedHelp = url; }; document.getElementById('helpButton').click(); window.__openedHelp")
+              == "../docs/")
+        page.eval("window.open = window.__open")
+        problems = page.problems(ignore=("Saving failed",))
+        check("no console problems in the standalone root editor", not problems, problems)
+
         # the loader shows an error instead of waiting forever
         icon = server.file(os.path.join("studio", "img", "code.svg"))
         os.rename(icon, icon + ".off")
