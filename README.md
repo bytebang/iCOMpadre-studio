@@ -1,12 +1,19 @@
 # iCOMpadre-studio
 
+[![Tests](https://github.com/bytebang/iCOMpadre-studio/actions/workflows/tests.yml/badge.svg?branch=main)](https://github.com/bytebang/iCOMpadre-studio/actions/workflows/tests.yml)
+[![SD card package](https://github.com/bytebang/iCOMpadre-studio/actions/workflows/sdcard.yml/badge.svg?branch=main)](https://github.com/bytebang/iCOMpadre-studio/actions/workflows/sdcard.yml)
+[![Online demo and documentation](https://github.com/bytebang/iCOMpadre-studio/actions/workflows/docs.yml/badge.svg?branch=main)](https://github.com/bytebang/iCOMpadre-studio/actions/workflows/docs.yml)
+
 This is a blockly based IDE for iCOMpadre.
 
 ## Deployment
 
-Download the `sdcard-studio` artifact from the latest successful
-[Studio SD card package workflow run](https://github.com/bytebang/iCOMpadre-studio/actions/workflows/sdcard.yml)
-and extract its contents to the root of the SD card. The artifact contains a `studio/` folder with the Studio app and its built-in help.
+### Install on an SD card
+
+1. Open the [latest Studio SD card package build on `main`](https://github.com/bytebang/iCOMpadre-studio/actions/workflows/sdcard.yml?query=branch%3Amain+event%3Apush).
+2. Select the most recent successful run and download the **`sdcard-studio`** artifact from its *Artifacts* section.
+3. Extract the downloaded ZIP to the root of the SD card. It contains a `studio/` folder with the app and built-in help.
+
 It keeps the SD-card preloader at `/studio/index.html`, the editor at `/studio/studio/index.html`, and the help at `/studio/docs/`; it does not add an `index.html` to the card root.
 
 Try the [latest version of iCOMpadre Studio](https://bytebang.github.io/iCOMpadre-studio/) online, or read the [user guide](https://bytebang.github.io/iCOMpadre-studio/studio/docs/).
