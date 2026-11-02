@@ -2,7 +2,7 @@ name: Publish Studio demo and documentation
 
 # Builds the documentation of the studio (on every push and pull request, so broken links show up before a merge)
 # and publishes the studio with its documentation on GitHub Pages:
-#   https://bytebang.github.io/iCOMpadre-studio/demo/           the studio as online demo
+#   https://bytebang.github.io/iCOMpadre-studio/                the studio as online demo
 #   https://bytebang.github.io/iCOMpadre-studio/studio/docs/    its documentation
 on:
   push:
@@ -33,14 +33,15 @@ jobs:
         run: pip install mkdocs mkdocs-awesome-pages-plugin pymdown-extensions
 
       - name: Build the documentation
-        run: mkdocs build --strict --site-dir "$PWD/site/studio/docs"
+        run: mkdocs build --strict --site-dir "$PWD/docs-site"
 
-      - name: Add the studio as online demo
+      - name: Publish the studio at the project root
         run: |
-          mkdir -p site/demo
-          cp -r sdcard/. site/demo/
-          rm -f site/demo/main.lua site/demo/icompadre.json
-          printf '<!DOCTYPE html><meta charset="utf-8"><title>iCOMpadre Studio</title><h1>iCOMpadre Studio</h1><ul><li><a href="demo/">Online demo</a></li><li><a href="studio/docs/">Documentation</a></li></ul>\n' > site/index.html
+          mkdir -p site
+          cp -R sdcard/. site/
+          rm -f site/main.lua site/icompadre.json
+          mkdir -p site/studio/docs
+          cp -R docs-site/. site/studio/docs/
 
       - uses: actions/upload-pages-artifact@v3
         if: github.event_name == 'push' && github.ref == 'refs/heads/main'

@@ -183,6 +183,9 @@ def main():
         help_url = page.eval("new Blockly.Workspace().newBlock('ic705_set_frequency').helpUrl")
         check("the online demo links to the documentation next to it, like on the SD card",
               help_url == "../docs/radio/ic705.html#ic705_set_frequency", help_url)
+        page.eval("window.__openedHelp = null; window.__open = window.open; window.open = function(url) { window.__openedHelp = url; }; document.getElementById('helpButton').click()")
+        check("the help button opens the documentation", page.eval("window.__openedHelp") == page.eval("Studio.documentationUrl"))
+        page.eval("window.open = window.__open")
 
         # every block links to a heading of the documentation of the studio, also the standard blocks of blockly (#if, ...)
         types = set(re.findall(r'"type":"([^"]+)"', page.eval("JSON.stringify(toolbox)")))
