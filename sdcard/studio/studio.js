@@ -59,15 +59,15 @@ var Studio = (function() {
   // there is no device to save to. ?online simulates this (e.g. for the tests)
   var ONLINE = /(^|\.)(github\.io|githack\.com)$/.test(location.hostname) || new URLSearchParams(location.search).has("online");
 
-  // The help is the documentation of the studio next to it: /studio/documentation/ on the SD card (and on every copy of it).
+  // The help is the documentation of the studio next to it: /studio/docs/ on the SD card (and on every copy of it).
   // On GitHub Pages the demo and the documentation are side by side (/demo/studio/ and /documentation/).
   // githack serves the repository itself, without the built documentation: it links to the one on GitHub Pages
   var HELP_ROOT = /(^|\.)githack\.com$/.test(location.hostname) ? "https://bytebang.github.io/iCOMpadre-studio/documentation/"
                 : /(^|\.)github\.io$/.test(location.hostname) ? "../../documentation/"
-                                                               : "../documentation/";
+                                                               : "../docs/";
 
   // The blocks of blockly itself (loaded before this file) link to the wiki of blockly or to wikipedia.
-  // They link to our documentation instead: the standard ones to documentation/blockly/<page>.html, the others (print) to their category
+  // They link to our documentation instead: the standard ones to docs/blockly/<page>.html, the others (print) to their category
   var BLOCKLY_BLOCKS = Object.keys(Blockly.Blocks);
   var BLOCKLY_HELP = {
     "logic":     ["logic_compare", "logic_operation", "logic_boolean", "logic_negate"],
@@ -187,7 +187,7 @@ var Studio = (function() {
    * @property {function(string, Object=): CategoryHandle} helper   adds a helper block (conversions, utilities)
    * @property {function(string, string=, string=): CategoryHandle} [group] adds a sub category with its own style (only on categories).
    *           The optional third parameter gives the group an own documentation page below the one of the category,
-   *           e.g. base.group("Pins", "pins", "pins") -> ../documentation/base/pins.html#<blocktype>
+   *           e.g. base.group("Pins", "pins", "pins") -> ../docs/base/pins.html#<blocktype>
    */
 
   /**
@@ -197,7 +197,7 @@ var Studio = (function() {
    *
    * All blocks of the category get the colour of its style (radio blocks use "radio").
    * Blocks without an own helpUrl link to the documentation of the file which created the category:
-   * radio/ic705.js -> ../documentation/radio/ic705.html#<blocktype>
+   * radio/ic705.js -> ../docs/radio/ic705.html#<blocktype>
    * @param {string} name the name shown in the toolbox, e.g. "IC-705"
    * @param {string=} style one of the keys of STYLES: program, radio, pins, serial, storage, helpers
    * @returns {CategoryHandle} handle to add blocks or groups to the category

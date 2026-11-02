@@ -1,18 +1,18 @@
 # Developing iCOMpadre Studio
 
 This guide is for people who want to extend the studio, especially by adding support for another radio.
-The user facing documentation lives in [documentation/](documentation/).
+The user facing documentation lives in [docs/](docs/).
 
 ## Design constraints
 
 * The studio is served by iCOMpadre from its SD card, so it has to work **completely offline**: no CDNs, no web fonts, no online services.
-* There is **no build step**. The files in `runtime/` are exactly what ends up on the SD card. Plain JavaScript, loaded via `<script>` tags.
+* There is **no build step**. The files in `sdcard/` are exactly what ends up on the SD card. Plain JavaScript, loaded via `<script>` tags.
 * The device is slow at serving files. Keep the number and size of files small.
 
 ## File structure
 
 ```text
-runtime/
+sdcard/
 ├── index.html            preloader: loads all files sequentially into the browser cache, then opens the studio
 └── studio/
     ├── index.html        the editor: toolbox base categories, workspace, load/save/share
@@ -28,7 +28,7 @@ runtime/
     ├── img/              toolbar icons
     ├── msg/              the texts of the studio: en.js (master) and its translations (de.js, ...)
     └── blockly/          blockly 13: core, default blocks, texts (en.js, de.js), lua generator, media, multiline text plugin
-documentation/            the user documentation (markdown). On the SD card it is built to /studio/documentation/
+docs/                     the user documentation (markdown). On the SD card it is built to /studio/docs/
 ├── .pages                order and titles of the pages in the menu (also in the sub folders)
 ├── index.md, editor.md, tutorial.md, blocks.md, about.md
 ├── tutorial/             the programs of the tutorial (.json to open in the studio) and their pictures
@@ -44,7 +44,7 @@ webserver.py              local development server
 
 ## How the studio starts
 
-1. `runtime/index.html` loads every file of its `filesToLoad` list one after another. Loading them sequentially avoids too many concurrent requests on the SD card.
+1. `sdcard/index.html` loads every file of its `filesToLoad` list one after another. Loading them sequentially avoids too many concurrent requests on the SD card.
 2. It then redirects to `studio/index.html`, which finds the files in the browser cache.
 3. `studio/index.html` loads its scripts in this order:
    1. blockly, filesaver
@@ -55,7 +55,7 @@ webserver.py              local development server
 4. The last workspace is loaded from `/icompadre.json` on the device.
 5. If the browser holds unsaved changes of an earlier session (`localStorage`, key `icompadre-studio.backup`), the studio offers to restore them.
 
-Every file the studio loads (scripts, styles, images) has to be in the `filesToLoad` list of `runtime/index.html`, otherwise it is not preloaded.
+Every file the studio loads (scripts, styles, images) has to be in the `filesToLoad` list of `sdcard/index.html`, otherwise it is not preloaded.
 The radios are the exception: the preloader takes them from `radio/radios.js` as well.
 
 The order in `radio/radios.js` is the order of the radio categories in the toolbox.
@@ -82,7 +82,7 @@ Things to know when talking to a radio:
 
 ## The registration API
 
-Block files never touch the toolbox directly. They register their blocks with `Studio` (see `runtime/studio/studio.js`):
+Block files never touch the toolbox directly. They register their blocks with `Studio` (see `sdcard/studio/studio.js`):
 
 ```js
 var ic705 = Studio.category("IC-705", "radio"); // new category in the toolbox, with the colour "radio"
@@ -115,32 +115,32 @@ Blockly.Lua.forBlock['ic705_set_af_level'] = function(block) {
 Most Icom radios understand the same CI-V commands as the IC-705 and differ only in details (modes, attenuator steps,
 meter scales, memory channels, ...). For them it is enough to **describe** the radio:
 
-1. Copy `runtime/studio/radio/ic9700.js` (it uses almost every entry) to `runtime/studio/radio/<radio>.js`.
+1. Copy `sdcard/studio/radio/ic9700.js` (it uses almost every entry) to `sdcard/studio/radio/<radio>.js`.
 2. Go through the command table of the CI-V reference guide and adapt the entries: change the options and the page numbers,
    remove the entries of commands the radio doesn't have. `Icom.radio()` only creates blocks for the entries which are there.
-   Every entry is explained in `runtime/studio/radio/icom.js`. The usual settings with more than on/off (`choices`) and the usual levels
+   Every entry is explained in `sdcard/studio/radio/icom.js`. The usual settings with more than on/off (`choices`) and the usual levels
    (`levels`) are given by their name, see `CHOICES` and `LEVELS` there.
-3. Add its name to `STUDIO_RADIOS` in `runtime/studio/radio/radios.js`, at the place where it belongs in the toolbox.
+3. Add its name to `STUDIO_RADIOS` in `sdcard/studio/radio/radios.js`, at the place where it belongs in the toolbox.
    The studio and the preloader both take the radios from there.
-4. Write `documentation/radio/<radio>.md` (the existing ones show the structure: one section per block, with the CI-V command and the page)
-   and add the radio to `documentation/radio/.pages`, `documentation/blocks.md` and the list of radios in `documentation/base/radio.md`.
+4. Write `docs/radio/<radio>.md` (the existing ones show the structure: one section per block, with the CI-V command and the page)
+   and add the radio to `docs/radio/.pages`, `docs/blocks.md` and the list of radios in `docs/base/radio.md`.
 
 A command which several radios have belongs into `Icom.radio()` as a new entry. Blocks which only make sense for one radio can also be written by hand:
 
-1. Copy `runtime/studio/radio.js` to `runtime/studio/radio/<radio>.js`, e.g. `radio/ic7700.js`.
+1. Copy `sdcard/studio/radio.js` to `sdcard/studio/radio/<radio>.js`, e.g. `radio/ic7700.js`.
 2. Replace `myradio` / `My Radio` with the name of the radio and remove the example blocks you don't need.
-3. Add its name to `STUDIO_RADIOS` in `runtime/studio/radio/radios.js`:
+3. Add its name to `STUDIO_RADIOS` in `sdcard/studio/radio/radios.js`:
    ```js
    "ic7700",
    ```
 4. Write the blocks (see conventions below). The CI-V reference guide of the radio lists the commands.
-5. Document the blocks in `documentation/radio/<radio>.md`, named like the js file (see *Help* below), and add it to the lists like in step 4 above.
+5. Document the blocks in `docs/radio/<radio>.md`, named like the js file (see *Help* below), and add it to the lists like in step 4 above.
 
 ## Languages
 
 The studio follows the language of the browser, or the one given with `?lang=de`. English is used when the language isn't offered.
 
-* Every text shown to the user is in `runtime/studio/msg/en.js` (`Blockly.Msg.ICP_<BLOCKTYPE>`, `..._TOOLTIP`) and is used as `Blockly.Msg.ICP_...` in the block files.
+* Every text shown to the user is in `sdcard/studio/msg/en.js` (`Blockly.Msg.ICP_<BLOCKTYPE>`, `..._TOOLTIP`) and is used as `Blockly.Msg.ICP_...` in the block files.
 * A translation `msg/<language>.js` is loaded **after** `en.js` and overwrites the texts it has. A missing translation shows the english text, so new blocks only need english texts at first.
 * Only texts are translated, never block types, field names or dropdown values. Sketches therefore open in every language.
 * `tests/test_i18n.py` checks that translations have no unknown texts and keep the placeholders (`%1`, `%2`, ...), that every text exists and is used,
@@ -157,7 +157,7 @@ The radios:
 
 So far `studio.js`, `base.js`, `radio/icom.js` and the names of the standard categories take their texts from `msg/`. The toolbar and the dialogs in `index.html` are still english.
 
-A new language needs `msg/<language>.js`, `blockly/<language>.js` (from `blockly/msg/` of the npm package) and its code in the two `studioLanguage([...])` calls in `runtime/index.html` and `runtime/studio/index.html`.
+A new language needs `msg/<language>.js`, `blockly/<language>.js` (from `blockly/msg/` of the npm package) and its code in the two `studioLanguage([...])` calls in `sdcard/index.html` and `sdcard/studio/index.html`.
 
 ## Block conventions
 
@@ -178,7 +178,7 @@ A new language needs `msg/<language>.js`, `blockly/<language>.js` (from `blockly
 
 ## Colours (convention over configuration)
 
-The colour of a block says what it works with. The palette is defined once, in `STYLES` of `runtime/studio/studio.js`:
+The colour of a block says what it works with. The palette is defined once, in `STYLES` of `sdcard/studio/studio.js`:
 
 | Style | Colour | Used for |
 | --- | --- | --- |
@@ -194,13 +194,13 @@ The colours don't collide with the standard blockly categories. A new radio simp
 
 ## Help (convention over configuration)
 
-The documentation under `documentation/` mirrors the block files under `runtime/studio/`.
-On the SD card the built documentation is next to the studio (`/studio/documentation/`), so the help links are relative:
+The documentation under `docs/` mirrors the block files under `sdcard/studio/`.
+On the SD card the built documentation is next to the studio (`/studio/docs/`), so the help links are relative:
 
 | Block file | Documentation | Help link of a block |
 | --- | --- | --- |
-| `studio/radio/ic705.js` | `documentation/radio/ic705.md` | `../documentation/radio/ic705.html#<blocktype>` |
-| `studio/base.js`, group `base.group("Pins", "pins", "pins")` | `documentation/base/pins.md` | `../documentation/base/pins.html#<blocktype>` |
+| `studio/radio/ic705.js` | `docs/radio/ic705.md` | `../docs/radio/ic705.html#<blocktype>` |
+| `studio/base.js`, group `base.group("Pins", "pins", "pins")` | `docs/base/pins.md` | `../docs/base/pins.html#<blocktype>` |
 
 They work on every copy of the SD card. On GitHub Pages the demo and the documentation are side by side, the links start with `../../documentation/`.
 The studio served by githack (the repository itself, without the built documentation) links to GitHub Pages: `https://bytebang.github.io/iCOMpadre-studio/documentation/radio/ic705.html#<blocktype>`.
@@ -219,26 +219,26 @@ Without the id the help still opens the right page, just at the top. A block tha
 ## Local development
 
 ```sh
-cd runtime
+cd sdcard
 python ../webserver.py
 ```
 
-Enter a port between 8000 and 8100 and open `http://localhost:<port>/`. The server serves `runtime/` and accepts `PUT` for `.lua` and `.json` files, like the device does.
+Enter a port between 8000 and 8100 and open `http://localhost:<port>/`. The server serves `sdcard/` and accepts `PUT` for `.lua` and `.json` files, like the device does.
 ### The documentation
 
 The documentation is plain markdown, built with mkdocs (`pip install mkdocs mkdocs-awesome-pages-plugin pymdown-extensions`):
 
 ```sh
 mkdocs serve                                  # preview while writing
-mkdocs build --site-dir runtime/documentation # the help links of the local studio work
+mkdocs build --site-dir sdcard/docs # the help links of the local studio work
 ```
 
-The second command puts the documentation where the studio looks for it, like `/studio/documentation/` on the SD card (`runtime/documentation/` is not committed).
+The second command puts the documentation where the studio looks for it, like `/studio/docs/` on the SD card (`sdcard/docs/` is not committed).
 The order and the titles of the pages in the menu come from the `.pages` files (plugin `mkdocs-awesome-pages-plugin`); a new page has to be added there.
 
-The documentation of iCOMpadre itself is separate, on the SD card in `/documentation/`. Links to it are written with the path
-of its markdown file on the SD card, e.g. `[Radios](/documentation/radios.md)`: on the SD card the CI makes them relative links to the page. In a local build and online they lead nowhere.
-On the SD card the CI of the iCOMpadre repository builds `documentation/` with the settings of the iCOMpadre documentation, `mkdocs.yml` only gives the title.
+The documentation of iCOMpadre itself is separate, on the SD card in `/docs/`. Links to it are written with the path
+of its markdown file on the SD card, e.g. `[Radios](/docs/radios.md)`: on the SD card the CI makes them relative links to the page. In a local build and online they lead nowhere.
+On the SD card the CI of the iCOMpadre repository builds `docs/` with the settings of the iCOMpadre documentation, `mkdocs.yml` only gives the title.
 
 `.github/workflows/docs.yml` builds the documentation on every push and pull request (strict: broken links fail the build) and publishes the studio
 with its documentation on GitHub Pages: https://bytebang.github.io/iCOMpadre-studio/demo/ is the studio as online demo,
@@ -257,7 +257,7 @@ it starts empty and *Save* points to *Download*.
 
 ## Updating blockly
 
-The files in `runtime/studio/blockly/` come unchanged from the npm packages `blockly` and `@blockly/field-multilineinput` (same version), only the `//# sourceMappingURL` line is removed:
+The files in `sdcard/studio/blockly/` come unchanged from the npm packages `blockly` and `@blockly/field-multilineinput` (same version), only the `//# sourceMappingURL` line is removed:
 
 | File | From the package |
 | --- | --- |

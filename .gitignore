@@ -3,4 +3,4 @@ icompadre.json
 __pycache__/
 
 # the documentation, built for the local studio (see DEVELOPING.md)
-runtime/documentation/
+sdcard/docs/

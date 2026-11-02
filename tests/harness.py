@@ -1,4 +1,4 @@
-"""Test harness: serves a copy of runtime/ like iCOMpadre does and drives a headless browser.
+"""Test harness: serves a copy of sdcard/ like iCOMpadre does and drives a headless browser.
 
 Only the python standard library is used here. The browser is controlled with the Chrome DevTools Protocol,
 so any Chromium based browser works (Chrome, Chromium, Edge). Set STUDIO_BROWSER to its path if it is not found.
@@ -18,7 +18,7 @@ import threading
 import time
 import urllib.request
 
-RUNTIME = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "runtime")
+RUNTIME = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "sdcard")
 
 BROWSERS = [
     os.environ.get("STUDIO_BROWSER", ""),
@@ -72,7 +72,7 @@ class StudioRequestHandler(http.server.SimpleHTTPRequestHandler):
 
 
 class Server:
-    """A copy of runtime/ in a temporary directory, served on a free port"""
+    """A copy of sdcard/ in a temporary directory, served on a free port"""
 
     def __init__(self):
         self.dir = tempfile.mkdtemp(prefix="studio-test-")

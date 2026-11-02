@@ -10,7 +10,7 @@ from harness import STUDIO_READY, Browser, Checks, Server, open_studio
 ON_STARTUP_WITH_PRINT = {"type": "onstartup", "x": 40, "y": 40,
                          "inputs": {"actions": {"block": {"type": "text_print",
                                                           "inputs": {"TEXT": {"block": {"type": "text", "fields": {"TEXT": "hello"}}}}}}}}
-DOCUMENTATION = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "documentation")
+DOCUMENTATION = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "docs")
 
 
 def main():
@@ -182,7 +182,7 @@ def main():
         check("the online demo doesn't save on a device", open(server.file("main.lua"), encoding="utf-8").read() == before)
         help_url = page.eval("new Blockly.Workspace().newBlock('ic705_set_frequency').helpUrl")
         check("the online demo links to the documentation next to it, like on the SD card",
-              help_url == "../documentation/radio/ic705.html#ic705_set_frequency", help_url)
+              help_url == "../docs/radio/ic705.html#ic705_set_frequency", help_url)
 
         # every block links to a heading of the documentation of the studio, also the standard blocks of blockly (#if, ...)
         types = set(re.findall(r'"type":"([^"]+)"', page.eval("JSON.stringify(toolbox)")))
@@ -192,7 +192,7 @@ def main():
                          % json.dumps(sorted(types)))
         wrong = []
         for blocktype, url in json.loads(urls).items():
-            match = re.match(r"\.\./documentation/(.+)\.html#(.+)$", url or "")
+            match = re.match(r"\.\./docs/(.+)\.html#(.+)$", url or "")
             source = os.path.join(DOCUMENTATION, match.group(1) + ".md") if match else None
             if url.startswith("https://www.lua.org/"):
                 continue   # the lua block links to the lua manual on purpose

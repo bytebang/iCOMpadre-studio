@@ -1,8 +1,8 @@
 # For the preview of the documentation (mkdocs serve) and for the online version (.github/workflows/docs.yml).
-# On the SD card the CI of the iCOMpadre repository builds documentation/ with the settings of the iCOMpadre documentation:
+# On the SD card the CI of the iCOMpadre repository builds docs/ with the settings of the iCOMpadre documentation:
 # it only takes the title from here.
 site_name: iCOMpadre Studio
-docs_dir: documentation
+docs_dir: docs
 use_directory_urls: false   # like on the SD card: the pages are files (radio/ic705.html), the help links of the blocks point to them
 
 markdown_extensions:
