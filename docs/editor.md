@@ -15,6 +15,7 @@ The dashed buttons at the top right:
 | ![Open](button-open.png)    | The **open** button replaces the current sketch with one that you select from your computer. You can also drop the file onto the button. `ctrl+z` brings the previous sketch back. |
 | ![Share](button-share.png)    | The **share** button shows the current sketch as text, so it can be shared via mail, pastebin or other techniques. Paste the text of someone else's sketch there and press **Import** to open it. |
 | ![Lua](button-lua.png)    | The **lua** button shows the lua code which is generated from the sketch, next to the workspace. It is updated while you work. From there it can be copied or downloaded as `main.lua`. |
+| ![Help](button-help.png) | The **help** button opens this user guide in a new tab. |
 
 ## Unsaved changes
 
