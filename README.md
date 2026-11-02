@@ -5,8 +5,8 @@ This is a blockly based IDE for iCOMpadre.
 ## Deployment
 
 Download the `sdcard-studio` artifact from the latest successful
-[Applications workflow run](https://github.com/bytebang/iCOMpadre/actions/workflows/build-applications.yml)
-and extract its contents to the root of the SD card. The artifact includes the Studio app and its built-in help.
+[Studio SD card package workflow run](https://github.com/bytebang/iCOMpadre-studio/actions/workflows/sdcard.yml)
+and extract its contents to the root of the SD card. The artifact contains a `studio/` folder with the Studio app and its built-in help.
 
 Try the [latest version of iCOMpadre Studio](https://bytebang.github.io/iCOMpadre-studio/demo/) online, or read the [user guide](https://bytebang.github.io/iCOMpadre-studio/documentation/).
 

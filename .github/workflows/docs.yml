@@ -1,4 +1,4 @@
-name: Documentation
+name: Publish Studio demo and documentation
 
 # Builds the documentation of the studio (on every push and pull request, so broken links show up before a merge)
 # and publishes the studio with its documentation on GitHub Pages:

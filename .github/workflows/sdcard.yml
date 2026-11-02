@@ -1,0 +1,38 @@
+name: Build SD card package
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install MkDocs
+        run: pip install mkdocs mkdocs-awesome-pages-plugin pymdown-extensions
+
+      - name: Assemble the Studio files and build its help
+        run: |
+          mkdir -p package/studio
+          cp -R sdcard/. package/studio/
+          mkdocs build --strict --site-dir "$PWD/package/studio/docs"
+          test -f package/studio/index.html
+          test -f package/studio/studio/index.html
+          test -f package/studio/docs/index.html
+
+      - name: Upload the SD card package
+        uses: actions/upload-artifact@v4
+        with:
+          name: sdcard-studio
+          path: package/
+          if-no-files-found: error
